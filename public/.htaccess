@@ -1,0 +1,17 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # REQUIRED for production: proxy /api and /uploads to your cPanel Node app.
+  # In Setup Node.js App, copy the port shown for openear/server and replace 3001 below.
+  # These rules MUST stay above the SPA fallback rules.
+  RewriteCond %{REQUEST_URI} ^/api [OR]
+  RewriteCond %{REQUEST_URI} ^/uploads
+  RewriteRule ^(.*)$ http://127.0.0.1:3001/$1 [P,L]
+
+  # React Router — serve index.html for client routes
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>
