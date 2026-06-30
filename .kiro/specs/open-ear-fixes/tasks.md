@@ -1,0 +1,159 @@
+# Implementation Plan
+
+- [x] 1. Write bug condition exploration test
+  - **Property 1: Bug Condition** - Missing Pages and Navigation Issues
+  - **CRITICAL**: This test MUST FAIL on unfixed code - failure confirms the bugs exist
+  - **DO NOT attempt to fix the test or the code when it fails**
+  - **NOTE**: This test encodes the expected behavior - it will validate the fixes when it passes after implementation
+  - **GOAL**: Surface counterexamples that demonstrate the 6 bugs exist
+  - **Scoped PBT Approach**: Test concrete failing cases for each bug scenario
+  - Test implementation details from Bug Condition in design:
+    - Navigate to /about route (expect 404 on unfixed code)
+    - Navigate to /contact route (expect 404 on unfixed code)
+    - Click Privacy/Terms footer links and check scroll position (expect no scroll to top on unfixed code)
+    - Assess Sign In page navigation options (expect limited options on unfixed code)
+    - Complete registration and check message display (expect error messages on unfixed code)
+    - Check footer copyright year (expect 2024 on unfixed code)
+  - The test assertions should match the Expected Behavior Properties from design
+  - Run test on UNFIXED code
+  - **EXPECTED OUTCOME**: Test FAILS (this is correct - it proves the bugs exist)
+  - Document counterexamples found to understand root causes
+  - Mark task complete when test is written, run, and failures are documented
+  - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6_
+
+- [x] 2. Write preservation property tests (BEFORE implementing fixes)
+  - **Property 2: Preservation** - Existing Functionality
+  - **IMPORTANT**: Follow observation-first methodology
+  - Observe behavior on UNFIXED code for non-buggy inputs (existing working features)
+  - Write property-based tests capturing observed behavior patterns from Preservation Requirements:
+    - All existing pages (Home, Pricing, Dashboard, Call, How It Works, Admin pages, Sign In, Get Started) load correctly
+    - Existing navigation menu and working links function as expected
+    - Sign-in process (not registration) works correctly without error messages
+    - Footer social media links and other working footer elements function correctly
+    - Main app functionality (calls, pricing, dashboard features) works as designed
+    - React Router navigation and lazy loading functions correctly for all existing routes
+  - Property-based testing generates many test cases for stronger guarantees
+  - Run tests on UNFIXED code
+  - **EXPECTED OUTCOME**: Tests PASS (this confirms baseline behavior to preserve)
+  - Mark task complete when tests are written, run, and passing on unfixed code
+  - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6_
+
+- [x] 3. Fix for missing pages and navigation issues
+
+  - [x] 3.1 Create About page component
+    - Create `src/pages/about/page.tsx` with complete About page
+    - Include company mission and values, team information, service description
+    - Use consistent styling with existing pages
+    - Add proper SEO metadata and page structure
+    - _Bug_Condition: isBugCondition(input) where input.action == "navigate_to_about" AND aboutPageNotExists()_
+    - _Expected_Behavior: Display proper About page with company information_
+    - _Preservation: Existing page components and styling patterns_
+    - _Requirements: 2.1_
+
+  - [x] 3.2 Create Contact page component
+    - Create `src/pages/contact/page.tsx` with complete Contact page
+    - Include contact form, support information, office address and hours
+    - Provide multiple contact methods
+    - Use consistent styling with existing pages
+    - Add proper SEO metadata and page structure
+    - _Bug_Condition: isBugCondition(input) where input.action == "navigate_to_contact" AND contactPageNotExists()_
+    - _Expected_Behavior: Display proper Contact page with contact options_
+    - _Preservation: Existing page components and styling patterns_
+    - _Requirements: 2.2_
+
+  - [x] 3.3 Add routes for new pages
+    - Update `src/router/config.tsx` to include About and Contact routes
+    - Add lazy-loaded imports: `const AboutPage = lazy(() => import('../pages/about/page'));`
+    - Add lazy-loaded imports: `const ContactPage = lazy(() => import('../pages/contact/page'));`
+    - Add route definitions: `{ path: '/about', element: <AboutPage /> }`
+    - Add route definitions: `{ path: '/contact', element: <ContactPage /> }`
+    - _Bug_Condition: Routes missing for About and Contact pages_
+    - _Expected_Behavior: Routes properly configured for new pages_
+    - _Preservation: All existing routes continue to work_
+    - _Requirements: 2.1, 2.2_
+
+  - [x] 3.4 Update navigation menu
+    - Update `src/components/feature/Navbar.tsx` to include About and Contact links
+    - Add to `navLinks` array: `{ path: '/about', label: 'About' }`
+    - Add to `navLinks` array: `{ path: '/contact', label: 'Contact' }`
+    - Ensure proper navigation styling and behavior
+    - _Bug_Condition: Navigation menu missing About and Contact links_
+    - _Expected_Behavior: Navigation menu includes all page links_
+    - _Preservation: Existing navigation links continue to work_
+    - _Requirements: 2.1, 2.2_
+
+  - [x] 3.5 Fix footer link navigation behavior
+    - Update footer links in `src/pages/home/page.tsx` to scroll to top
+    - Add scroll-to-top functionality for Privacy and Terms links
+    - Use `onClick` handler to scroll to top after navigation
+    - Ensure smooth user experience when navigating from footer
+    - _Bug_Condition: isBugCondition(input) where input.action == "click_footer_link" AND NOT scrollsToTop()_
+    - _Expected_Behavior: Footer links navigate and scroll to top of target pages_
+    - _Preservation: Other footer elements continue to function correctly_
+    - _Requirements: 2.3_
+
+  - [x] 3.6 Improve Sign In page navigation
+    - Update `src/pages/signin/page.tsx` to enhance navigation back to homepage
+    - Make "Back to Home" link more prominent
+    - Improve visual hierarchy for better UX
+    - Consider adding header navigation or larger button
+    - _Bug_Condition: isBugCondition(input) where input.action == "on_signin_page" AND poorNavigationOptions()_
+    - _Expected_Behavior: Clear navigation options to return to homepage_
+    - _Preservation: Sign-in functionality continues to work correctly_
+    - _Requirements: 2.4_
+
+  - [x] 3.7 Fix registration success messaging
+    - Update registration handling in `src/pages/signin/page.tsx`
+    - Ensure error messages only show for actual errors
+    - Clear error state when showing success message
+    - Improve message clarity and user guidance
+    - _Bug_Condition: isBugCondition(input) where input.action == "complete_registration" AND showsErrorMessage()_
+    - _Expected_Behavior: Appropriate success messaging without error messages_
+    - _Preservation: Sign-in process continues to work without issues_
+    - _Requirements: 2.5_
+
+  - [x] 3.8 Update copyright year
+    - Update footer in `src/pages/home/page.tsx` to display correct year
+    - Change hardcoded "© 2024 Open Ear" to "© 2026 Open Ear"
+    - Ensure consistent footer display across all pages
+    - _Bug_Condition: isBugCondition(input) where input.action == "view_footer" AND copyrightYear != 2026_
+    - _Expected_Behavior: Footer displays correct copyright year of 2026_
+    - _Preservation: Other footer content remains unchanged_
+    - _Requirements: 2.6_
+
+  - [x] 3.9 Verify bug condition exploration test now passes
+    - **Property 1: Expected Behavior** - Missing Pages and Navigation Issues Fixed
+    - **IMPORTANT**: Re-run the SAME test from task 1 - do NOT write a new test
+    - The test from task 1 encodes the expected behavior
+    - When this test passes, it confirms the expected behavior is satisfied
+    - Run bug condition exploration test from step 1
+    - **EXPECTED OUTCOME**: Test PASSES (confirms bugs are fixed)
+    - Verify all 6 bug scenarios now work correctly:
+      - About page loads properly
+      - Contact page loads properly
+      - Footer links scroll to top of target pages
+      - Sign In page has improved navigation
+      - Registration shows appropriate success messages
+      - Footer displays correct copyright year
+    - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6_
+
+  - [x] 3.10 Verify preservation tests still pass
+    - **Property 2: Preservation** - Existing Functionality Preserved
+    - **IMPORTANT**: Re-run the SAME tests from task 2 - do NOT write new tests
+    - Run preservation property tests from step 2
+    - **EXPECTED OUTCOME**: Tests PASS (confirms no regressions)
+    - Confirm all existing functionality still works after fixes:
+      - All existing pages continue to load correctly
+      - Existing navigation menu and links continue to function
+      - Sign-in process continues to work without issues
+      - Footer social media links continue to function
+      - Main app functionality continues to work as designed
+      - React Router navigation continues to function correctly
+
+- [x] 4. Checkpoint - Ensure all tests pass
+  - Verify all bug condition tests pass (bugs are fixed)
+  - Verify all preservation tests pass (no regressions)
+  - Test new About and Contact pages load correctly
+  - Test improved navigation and messaging work as expected
+  - Test footer updates display correctly
+  - Ask the user if questions arise about the implementation
