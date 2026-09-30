@@ -1,52 +1,68 @@
-import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/feature/Navbar';
 import { useCart } from '../../contexts/CartContext';
-
-interface Ebook {
-  id: string;
-  title: string;
-  author: string;
-  description: string;
-  short_description: string;
-  price: number;
-  category: string;
-  cover_image_url: string;
-  file_format: 'PDF' | 'EPUB';
-  file_size: number;
-  publication_date: string;
-  isbn?: string;
-  sample_pages_url?: string;
-}
+import { useAuth } from '../../contexts/AuthContext';
+import { apiFetch, ApiError, formatMoney, type Ebook } from '../../lib/api';
 
 export default function EbookDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [ebook, setEbook] = useState<Ebook | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [isOwned, setIsOwned] = useState(false);
   const { addItem, items } = useCart();
 
-  useEffect(() => {
-    const loadEbookFromStorage = () => {
-      const savedEbooks = localStorage.getItem('admin-ebooks');
-      if (savedEbooks) {
-        const allEbooks = JSON.parse(savedEbooks);
-        const foundEbook = allEbooks.find((ebook: Ebook) => ebook.id === id);
-        if (foundEbook) {
-          setEbook(foundEbook);
-          setLoading(false);
-          return;
-        }
-      }
+  const loadEbook = useCallback(async (signal?: AbortSignal) => {
+    if (!id) {
       setEbook(null);
       setLoading(false);
-    };
-
-    loadEbookFromStorage();
+      return;
+    }
+    setLoading(true);
+    setError('');
+    try {
+      const data = await apiFetch<{ ebook: Ebook }>(`/api/ebooks/${encodeURIComponent(id)}`, { signal });
+      setEbook(data.ebook ?? null);
+    } catch (err) {
+      if (signal?.aborted) return;
+      setEbook(null);
+      // 404 -> "not found" state; anything else -> error state
+      if (!(err instanceof ApiError && err.status === 404)) {
+        setError(err instanceof Error ? err.message : 'Failed to load ebook.');
+      }
+    } finally {
+      if (!signal?.aborted) setLoading(false);
+    }
   }, [id]);
 
+  useEffect(() => {
+    const controller = new AbortController();
+    void loadEbook(controller.signal);
+    return () => controller.abort();
+  }, [loadEbook]);
+
+  // Check ownership for signed-in users
+  useEffect(() => {
+    if (!user || !id) {
+      setIsOwned(false);
+      return;
+    }
+    const controller = new AbortController();
+    apiFetch<{ library: { ebook: { id: string } }[] }>('/api/user/library', { signal: controller.signal })
+      .then((data) => {
+        setIsOwned((data.library || []).some((entry) => entry.ebook?.id === id));
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setIsOwned(false);
+      });
+    return () => controller.abort();
+  }, [user, id]);
+
   const formatFileSize = (bytes: number) => {
-    const mb = bytes / (1024 * 1024);
+    const mb = (bytes || 0) / (1024 * 1024);
     return `${mb.toFixed(1)} MB`;
   };
 
@@ -64,6 +80,13 @@ export default function EbookDetailPage() {
     }
   };
 
+  const handleBuyNow = () => {
+    if (ebook) {
+      addItem(ebook);
+      navigate('/checkout');
+    }
+  };
+
   const isInCart = () => {
     return ebook ? items.some(item => item.ebook.id === ebook.id) : false;
   };
@@ -77,6 +100,39 @@ export default function EbookDetailPage() {
             <div className="text-center py-16">
               <div className="w-16 h-16 border-4 border-[#0096FF] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
               <p className="text-[#6B6B6B]">Loading ebook details...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]">
+        <Navbar />
+        <div className="pt-24 pb-16">
+          <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20">
+            <div className="text-center py-16">
+              <i className="ri-error-warning-line text-6xl text-red-500 mb-4"></i>
+              <h3 className="text-xl font-semibold text-[#2A2A2A] mb-2">Couldn&apos;t load this ebook</h3>
+              <p className="text-[#6B6B6B] mb-6">{error}</p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <button
+                  onClick={() => void loadEbook()}
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#0096FF] text-white rounded-lg hover:bg-[#0077CC] transition-colors"
+                >
+                  <i className="ri-refresh-line"></i>
+                  Try Again
+                </button>
+                <Link
+                  to="/ebook-store"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-[#0096FF] text-[#0096FF] rounded-lg hover:bg-[#E6F5FF] transition-colors"
+                >
+                  <i className="ri-arrow-left-line"></i>
+                  Back to Store
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -131,18 +187,24 @@ export default function EbookDetailPage() {
               <div className="sticky top-24">
                 <div className="bg-white rounded-xl shadow-sm p-6">
                   {/* Cover Image */}
-                  <div className="aspect-[3/4] bg-gray-100 rounded-lg mb-6 flex items-center justify-center">
-                    <i className="ri-book-line text-6xl text-[#6B6B6B]"></i>
+                  <div className="aspect-[3/4] bg-gray-100 rounded-lg mb-6 flex items-center justify-center overflow-hidden">
+                    {ebook.cover_image_url ? (
+                      <img src={ebook.cover_image_url} alt={ebook.title} className="w-full h-full object-cover" />
+                    ) : (
+                      <i className="ri-book-line text-6xl text-[#6B6B6B]"></i>
+                    )}
                   </div>
 
                   {/* Price and Format */}
                   <div className="flex items-center justify-between mb-6">
                     <span className="text-2xl font-bold text-[#0096FF]">
-                      ${ebook.price}
+                      {ebook.price > 0 ? formatMoney(ebook.price, ebook.currency) : 'Free'}
                     </span>
-                    <span className="bg-[#E6F5FF] text-[#0096FF] px-3 py-1 rounded-full text-sm font-medium">
-                      {ebook.file_format}
-                    </span>
+                    {ebook.file_format && (
+                      <span className="bg-[#E6F5FF] text-[#0096FF] px-3 py-1 rounded-full text-sm font-medium">
+                        {ebook.file_format}
+                      </span>
+                    )}
                   </div>
 
                   {/* Action Buttons */}
@@ -173,20 +235,13 @@ export default function EbookDetailPage() {
                         >
                           {isInCart() ? 'In Cart' : 'Add to Cart'}
                         </button>
-                        <Link
-                          to="/checkout"
+                        <button
+                          onClick={handleBuyNow}
                           className="block w-full px-4 py-3 border border-[#0096FF] text-[#0096FF] rounded-lg hover:bg-[#E6F5FF] transition-colors font-medium text-center"
                         >
                           Buy Now
-                        </Link>
+                        </button>
                       </>
-                    )}
-                    
-                    {ebook.sample_pages_url && (
-                      <button className="w-full px-4 py-3 border border-gray-300 text-[#6B6B6B] rounded-lg hover:bg-gray-50 transition-colors font-medium">
-                        <i className="ri-eye-line mr-2"></i>
-                        Preview Sample
-                      </button>
                     )}
                   </div>
 
@@ -196,18 +251,16 @@ export default function EbookDetailPage() {
                       <span className="text-[#6B6B6B]">File Size:</span>
                       <span className="text-[#2A2A2A]">{formatFileSize(ebook.file_size)}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-[#6B6B6B]">Format:</span>
-                      <span className="text-[#2A2A2A]">{ebook.file_format}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-[#6B6B6B]">Published:</span>
-                      <span className="text-[#2A2A2A]">{formatDate(ebook.publication_date)}</span>
-                    </div>
-                    {ebook.isbn && (
+                    {ebook.file_format && (
                       <div className="flex justify-between">
-                        <span className="text-[#6B6B6B]">ISBN:</span>
-                        <span className="text-[#2A2A2A]">{ebook.isbn}</span>
+                        <span className="text-[#6B6B6B]">Format:</span>
+                        <span className="text-[#2A2A2A]">{ebook.file_format}</span>
+                      </div>
+                    )}
+                    {ebook.publication_date && (
+                      <div className="flex justify-between">
+                        <span className="text-[#6B6B6B]">Published:</span>
+                        <span className="text-[#2A2A2A]">{formatDate(ebook.publication_date)}</span>
                       </div>
                     )}
                   </div>
@@ -223,15 +276,17 @@ export default function EbookDetailPage() {
                   <h1 className="text-3xl md:text-4xl font-bold text-[#2A2A2A] mb-2">
                     {ebook.title}
                   </h1>
-                  <p className="text-lg text-[#6B6B6B]">
-                    by <span className="font-medium text-[#2A2A2A]">{ebook.author}</span>
-                  </p>
+                  {ebook.author && (
+                    <p className="text-lg text-[#6B6B6B]">
+                      by <span className="font-medium text-[#2A2A2A]">{ebook.author}</span>
+                    </p>
+                  )}
                 </div>
 
                 {/* Category */}
                 <div className="mb-6">
                   <span className="inline-block bg-[#E6F5FF] text-[#0096FF] px-3 py-1 rounded-full text-sm font-medium capitalize">
-                    {ebook.category.replace('-', ' ')}
+                    {(ebook.category || '').replace('-', ' ')}
                   </span>
                 </div>
 
@@ -239,20 +294,12 @@ export default function EbookDetailPage() {
                 <div className="mb-8">
                   <h2 className="text-xl font-semibold text-[#2A2A2A] mb-4">About This Book</h2>
                   <div className="prose prose-gray max-w-none">
-                    {ebook.description.split('\n').map((paragraph, index) => (
+                    {(ebook.description || ebook.short_description || '').split('\n').map((paragraph, index) => (
                       <p key={index} className="text-[#6B6B6B] leading-relaxed mb-4">
                         {paragraph}
                       </p>
                     ))}
                   </div>
-                </div>
-
-                {/* Author Bio */}
-                <div className="mb-8">
-                  <h2 className="text-xl font-semibold text-[#2A2A2A] mb-4">About the Author</h2>
-                  <p className="text-[#6B6B6B] leading-relaxed">
-                    Dr. Sarah Johnson is a licensed clinical psychologist and mindfulness expert with over 15 years of experience helping individuals develop sustainable meditation practices. She holds a Ph.D. in Clinical Psychology from Stanford University and has published numerous research papers on the therapeutic benefits of mindfulness meditation.
-                  </p>
                 </div>
 
                 {/* Reviews Section (Placeholder) */}

@@ -1,9 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import Navbar from '../../components/feature/Navbar';
 import { useSEO, generateOrganizationSchema, generateServiceSchema } from '../../utils/seo';
-import { useAuth } from '../../contexts/AuthContext';
-import { apiFetch } from '../../lib/api';
 
 export default function HomePage() {
   // SEO Configuration
@@ -40,37 +37,6 @@ export default function HomePage() {
     },
   });
 
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const navigate = useNavigate();
-  const { user } = useAuth();
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  useEffect(() => {
-    checkAdminStatus();
-  }, []);
-
-  const checkAdminStatus = async () => {
-    const adminSession = localStorage.getItem('admin_session');
-    if (!adminSession || !user) {
-      setIsAdmin(false);
-      return;
-    }
-    try {
-      await apiFetch('/api/admin/check');
-      setIsAdmin(true);
-    } catch {
-      setIsAdmin(false);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-white">

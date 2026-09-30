@@ -1,25 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/feature/Navbar';
 import { useCart } from '../../contexts/CartContext';
-
-interface Ebook {
-  id: string;
-  title: string;
-  author: string;
-  description: string;
-  short_description: string;
-  price: number;
-  category: string;
-  cover_image_url: string;
-  file_format: 'PDF' | 'EPUB';
-  publication_date: string;
-  is_active?: boolean;
-}
+import { apiFetch, formatMoney, type Ebook } from '../../lib/api';
 
 export default function EbookStorePage() {
   const [ebooks, setEbooks] = useState<Ebook[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const { addItem, items } = useCart();
@@ -30,38 +18,33 @@ export default function EbookStorePage() {
     { id: 'ebooks', name: 'Ebooks' }
   ];
 
-  // Load ebooks from admin management system
-  useEffect(() => {
-    const loadEbooksFromStorage = () => {
-      const savedEbooks = localStorage.getItem('admin-ebooks');
-      if (savedEbooks) {
-        const allEbooks = JSON.parse(savedEbooks) as Ebook[];
-        // Only show active ebooks in the store
-        const activeEbooks = allEbooks.filter((ebook) => ebook.is_active !== false);
-        setEbooks(activeEbooks);
-      } else {
-        setEbooks([]);
-      }
-      setLoading(false);
-    };
-
-    loadEbooksFromStorage();
-
-    // Listen for storage changes to update the store when admin adds/edits ebooks
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'admin-ebooks') {
-        loadEbooksFromStorage();
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+  const loadEbooks = useCallback(async (signal?: AbortSignal) => {
+    setLoading(true);
+    setError('');
+    try {
+      const data = await apiFetch<{ ebooks: Ebook[] }>('/api/ebooks', { signal });
+      setEbooks(Array.isArray(data.ebooks) ? data.ebooks : []);
+    } catch (err) {
+      if (signal?.aborted) return;
+      setEbooks([]);
+      setError(err instanceof Error ? err.message : 'Failed to load ebooks.');
+    } finally {
+      if (!signal?.aborted) setLoading(false);
+    }
   }, []);
 
+  useEffect(() => {
+    const controller = new AbortController();
+    void loadEbooks(controller.signal);
+    return () => controller.abort();
+  }, [loadEbooks]);
+
+  const query = searchQuery.trim().toLowerCase();
   const filteredEbooks = ebooks.filter(ebook => {
-    const matchesSearch = ebook.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         ebook.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         ebook.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = !query ||
+                         ebook.title.toLowerCase().includes(query) ||
+                         (ebook.author || '').toLowerCase().includes(query) ||
+                         (ebook.description || '').toLowerCase().includes(query);
     const matchesCategory = selectedCategory === 'all' || ebook.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -127,22 +110,44 @@ export default function EbookStorePage() {
             </div>
           )}
 
+          {/* Error State */}
+          {!loading && error && (
+            <div className="text-center py-16">
+              <i className="ri-error-warning-line text-6xl text-red-500 mb-4"></i>
+              <h3 className="text-xl font-semibold text-[#2A2A2A] mb-2">Couldn't load the store</h3>
+              <p className="text-[#6B6B6B] mb-6">{error}</p>
+              <button
+                onClick={() => void loadEbooks()}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-[#0096FF] text-white rounded-lg hover:bg-[#0077CC] transition-colors"
+              >
+                <i className="ri-refresh-line"></i>
+                Try Again
+              </button>
+            </div>
+          )}
+
           {/* Ebooks Grid */}
-          {!loading && (
+          {!loading && !error && (
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3 md:gap-4">
               {filteredEbooks.map(ebook => (
                 <div key={ebook.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-2.5 sm:p-3 md:p-4">
-                  <div className="aspect-[3/2.8] bg-gray-100 rounded-md mb-2 sm:mb-2.5 flex items-center justify-center">
-                    <i className="ri-book-line text-2xl sm:text-3xl text-[#6B6B6B]"></i>
+                  <div className="aspect-[3/2.8] bg-gray-100 rounded-md mb-2 sm:mb-2.5 flex items-center justify-center overflow-hidden">
+                    {ebook.cover_image_url ? (
+                      <img src={ebook.cover_image_url} alt={ebook.title} className="w-full h-full object-cover" loading="lazy" />
+                    ) : (
+                      <i className="ri-book-line text-2xl sm:text-3xl text-[#6B6B6B]"></i>
+                    )}
                   </div>
                   
                   <h3 className="font-semibold text-[#2A2A2A] text-xs sm:text-sm mb-1 line-clamp-2 leading-snug">
                     {ebook.title}
                   </h3>
                   
-                  <p className="text-[11px] sm:text-xs text-[#6B6B6B] mb-1">
-                    by {ebook.author}
-                  </p>
+                  {ebook.author && (
+                    <p className="text-[11px] sm:text-xs text-[#6B6B6B] mb-1">
+                      by {ebook.author}
+                    </p>
+                  )}
                   
                   <p className="text-[11px] sm:text-xs text-[#6B6B6B] mb-2 line-clamp-2">
                     {ebook.short_description}
@@ -150,11 +155,13 @@ export default function EbookStorePage() {
                   
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm sm:text-base font-bold text-[#0096FF]">
-                      ${ebook.price}
+                      {ebook.price > 0 ? formatMoney(ebook.price, ebook.currency) : 'Free'}
                     </span>
-                    <span className="text-[10px] bg-[#E6F5FF] text-[#0096FF] px-1.5 py-0.5 rounded-full">
-                      {ebook.file_format}
-                    </span>
+                    {ebook.file_format && (
+                      <span className="text-[10px] bg-[#E6F5FF] text-[#0096FF] px-1.5 py-0.5 rounded-full">
+                        {ebook.file_format}
+                      </span>
+                    )}
                   </div>
                   
                   <div className="space-y-1.5">
@@ -182,11 +189,15 @@ export default function EbookStorePage() {
           )}
 
           {/* No Results */}
-          {!loading && filteredEbooks.length === 0 && (
+          {!loading && !error && filteredEbooks.length === 0 && (
             <div className="text-center py-16">
               <i className="ri-search-line text-6xl text-[#6B6B6B] mb-4"></i>
               <h3 className="text-xl font-semibold text-[#2A2A2A] mb-2">No products found</h3>
-              <p className="text-[#6B6B6B]">Try adjusting your search or filter criteria.</p>
+              <p className="text-[#6B6B6B]">
+                {ebooks.length === 0
+                  ? 'The store is empty right now. Please check back soon.'
+                  : 'Try adjusting your search or filter criteria.'}
+              </p>
             </div>
           )}
         </div>

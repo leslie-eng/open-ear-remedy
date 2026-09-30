@@ -1,27 +1,123 @@
 import { Router } from 'express';
-import crypto from 'node:crypto';
-import { query } from '../db.js';
 import { config } from '../config.js';
 import { asyncHandler, requireAuth } from '../middleware.js';
+import { addCredits, withTransaction } from '../services/credits.js';
+import {
+  CREDIT_PACKAGES,
+  findPackage,
+  initializeTransaction,
+  newReference,
+  paystackConfigured,
+  toMinor,
+  verifyWebhookSignature,
+} from '../services/paystack.js';
+import { rateLimit } from '../util.js';
 
 const router = Router();
 
-function subunitAmount(price) {
-  const rounded = Math.round(price * 100);
-  if (!Number.isFinite(rounded) || rounded <= 0) throw new Error('Invalid price amount');
-  return rounded;
+router.get('/packages', (_req, res) => {
+  res.json({
+    packages: CREDIT_PACKAGES.map((p) => ({ ...p, currency: config.paystackCurrency })),
+  });
+});
+
+router.post(
+  '/checkout',
+  requireAuth,
+  rateLimit({ windowMs: 15 * 60 * 1000, max: 20, key: (req) => req.user.id }),
+  asyncHandler(async (req, res) => {
+    if (!paystackConfigured()) {
+      return res.status(503).json({ error: 'Payment service is not configured.' });
+    }
+    // Accept a package id (or, for older clients, its credit count). Any client-sent price is ignored.
+    const pkg = findPackage(req.body.packageId ?? req.body.credits);
+    if (!pkg) {
+      return res.status(400).json({ error: 'Unknown credit package.' });
+    }
+
+    const reference = newReference('oe', req.user.id);
+    const result = await initializeTransaction({
+      email: req.user.email,
+      amountMinor: toMinor(pkg.price),
+      reference,
+      callbackUrl: `${config.clientUrl}/profile?purchase=success`,
+      metadata: {
+        kind: 'credits',
+        user_id: req.user.id,
+        package_id: pkg.id,
+        credits: String(pkg.credits),
+        package_name: `${pkg.name} - ${pkg.credits} Credits`,
+        cancel_action: `${config.clientUrl}/pricing?purchase=cancelled`,
+      },
+    });
+
+    res.json(result);
+  }),
+);
+
+async function handleCreditPurchase(data, meta) {
+  const pkg = findPackage(meta.package_id ?? Number(meta.credits));
+  const userId = meta.user_id;
+  if (!pkg || !userId) return { status: 400, body: { error: 'Invalid webhook payload metadata' } };
+
+  const amountPaid = Number(data.amount) || 0;
+  const currency = String(data.currency || '').toUpperCase();
+  if (amountPaid < toMinor(pkg.price) || (currency && currency !== config.paystackCurrency)) {
+    console.error('Paystack amount/currency mismatch', { reference: data.reference, amountPaid, currency, pkg });
+    return { status: 200, body: { received: true, ignored: 'amount_mismatch' } };
+  }
+
+  return withTransaction(async (client) => {
+    // The unique index on reference makes retried webhooks a no-op.
+    const { rows } = await client.query(
+      `INSERT INTO credit_transactions (user_id, type, credits, amount, description, status, reference)
+       VALUES ($1, 'purchase', $2, $3, $4, 'completed', $5)
+       ON CONFLICT (reference) WHERE reference IS NOT NULL DO NOTHING
+       RETURNING id`,
+      [userId, pkg.credits, amountPaid, `Purchased ${pkg.name} - ${pkg.credits} Credits`, data.reference],
+    );
+    if (!rows[0]) return { status: 200, body: { success: true, duplicate: true } };
+    await addCredits(client, userId, pkg.credits);
+    return { status: 200, body: { success: true, credits_added: pkg.credits } };
+  });
 }
 
-function hmacSha512Hex(secret, message) {
-  return crypto.createHmac('sha512', secret).update(message).digest('hex');
-}
-
-function timingSafeEqualHex(a, b) {
-  if (a.length !== b.length) return false;
-  return crypto.timingSafeEqual(Buffer.from(a, 'utf8'), Buffer.from(b, 'utf8'));
+async function handleEbookPurchase(data) {
+  const amountPaid = Number(data.amount) || 0;
+  return withTransaction(async (client) => {
+    const { rows } = await client.query(
+      `SELECT * FROM ebook_orders WHERE reference = $1 FOR UPDATE`,
+      [data.reference],
+    );
+    const order = rows[0];
+    if (!order) return { status: 200, body: { received: true, ignored: 'unknown_order' } };
+    if (order.status === 'completed') return { status: 200, body: { success: true, duplicate: true } };
+    if (amountPaid < order.total_amount) {
+      console.error('Paystack ebook amount mismatch', { reference: data.reference, amountPaid, expected: order.total_amount });
+      return { status: 200, body: { received: true, ignored: 'amount_mismatch' } };
+    }
+    await client.query(
+      `UPDATE ebook_orders SET status = 'completed', completed_at = NOW() WHERE id = $1`,
+      [order.id],
+    );
+    await client.query(
+      `INSERT INTO user_library (user_id, product_id, order_id)
+       SELECT $1, product_id, order_id FROM ebook_order_items WHERE order_id = $2
+       ON CONFLICT (user_id, product_id) DO NOTHING`,
+      [order.user_id, order.id],
+    );
+    return { status: 200, body: { success: true } };
+  });
 }
 
 function parseMetadata(meta) {
+  if (typeof meta === 'string') {
+    try {
+      meta = JSON.parse(meta);
+    } catch {
+      return {};
+    }
+  }
   if (!meta || typeof meta !== 'object') return {};
   const out = {};
   for (const [k, v] of Object.entries(meta)) {
@@ -30,188 +126,53 @@ function parseMetadata(meta) {
   return out;
 }
 
-router.post(
-  '/checkout',
-  requireAuth,
-  asyncHandler(async (req, res) => {
-    if (!config.paystackSecretKey?.startsWith('sk_')) {
-      return res.status(503).json({ error: 'Payment service is not configured.' });
-    }
-
-    const {
-      userId: requestedUserId,
-      userEmail,
-      packageName,
-      credits,
-      price,
-      successUrl,
-      cancelUrl,
-    } = req.body;
-
-    const userId = req.user.id;
-    const verifiedEmail = req.user.email || userEmail;
-
-    if (!verifiedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(verifiedEmail)) {
-      return res.status(400).json({ error: 'A valid account email is required for checkout.' });
-    }
-    if (credits == null || price == null) {
-      return res.status(400).json({ error: 'Missing required fields: credits or price' });
-    }
-
-    const creditsNum = Number(credits);
-    const priceNum = Number(price);
-    if (!Number.isFinite(creditsNum) || creditsNum <= 0 || creditsNum !== Math.floor(creditsNum)) {
-      return res.status(400).json({ error: 'Invalid credits value.' });
-    }
-    if (!Number.isFinite(priceNum) || priceNum <= 0) {
-      return res.status(400).json({ error: 'Invalid price value.' });
-    }
-    if (requestedUserId && requestedUserId !== userId) {
-      return res.status(403).json({ error: 'User mismatch in checkout request.' });
-    }
-
-    const amountSubunits = subunitAmount(priceNum);
-    const reference = `oe_${userId.slice(0, 12)}_${crypto.randomUUID().replace(/-/g, '').slice(0, 24)}`;
-    const origin = req.headers.origin;
-    const callbackUrl = successUrl || (origin ? `${origin}/profile?purchase=success` : null);
-    if (!callbackUrl) {
-      return res.status(400).json({ error: 'successUrl is required when Origin header is missing.' });
-    }
-
-    const initRes = await fetch('https://api.paystack.co/transaction/initialize', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${config.paystackSecretKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        email: verifiedEmail,
-        amount: amountSubunits,
-        currency: config.paystackCurrency,
-        reference,
-        callback_url: callbackUrl,
-        metadata: {
-          user_id: userId,
-          credits: String(creditsNum),
-          package_name: packageName || `${creditsNum} Credits`,
-          cancel_url: cancelUrl || '',
-        },
-      }),
-    });
-
-    const initJson = await initRes.json();
-    if (!initRes.ok || !initJson.status || !initJson.data?.authorization_url) {
-      return res.status(502).json({
-        error: initJson.message || 'Failed to start checkout.',
-      });
-    }
-
-    res.json({
-      url: initJson.data.authorization_url,
-      reference: initJson.data.reference ?? reference,
-    });
-  }),
-);
-
 export function paystackWebhookHandler() {
   return asyncHandler(async (req, res) => {
-    const signingSecrets = [config.paystackWebhookSecret, config.paystackSecretKey].filter(
-      (s) => s && s.length >= 8,
-    );
-    if (signingSecrets.length === 0) {
+    if (!paystackConfigured() && !config.paystackWebhookSecret) {
       return res.status(503).json({ error: 'Paystack webhook configuration missing' });
     }
-
-    const body = req.rawBody || JSON.stringify(req.body);
-    const signature = (req.headers['x-paystack-signature'] || '').trim().toLowerCase();
-    if (!signature) {
-      return res.status(400).json({ error: 'Missing x-paystack-signature header' });
-    }
-
-    const parsed = typeof req.body === 'object' ? req.body : JSON.parse(body);
-    const canonicalPayload = JSON.stringify(parsed);
-    let verified = false;
-    for (const secret of signingSecrets) {
-      const hashRaw = hmacSha512Hex(secret, body).toLowerCase();
-      const hashCanonical = hmacSha512Hex(secret, canonicalPayload).toLowerCase();
-      if (timingSafeEqualHex(hashRaw, signature) || timingSafeEqualHex(hashCanonical, signature)) {
-        verified = true;
-        break;
-      }
-    }
-    if (!verified) {
+    if (!verifyWebhookSignature(req.rawBody || '', req.body, req.headers['x-paystack-signature'])) {
       return res.status(400).json({ error: 'Invalid signature' });
     }
 
-    const eventType = parsed.event;
-    if (eventType === 'charge.success') {
-      const data = parsed.data ?? {};
-      const meta = parseMetadata(data.metadata);
-      const userId = meta.user_id;
-      const credits = parseInt(meta.credits || '0', 10);
-      const packageName = meta.package_name || 'Credit Package';
-      const reference = typeof data.reference === 'string' ? data.reference : '';
-      const amountPaid = typeof data.amount === 'number' ? data.amount : parseInt(String(data.amount ?? '0'), 10);
+    const event = req.body || {};
+    const data = event.data ?? {};
+    const meta = parseMetadata(data.metadata);
+    const reference = typeof data.reference === 'string' ? data.reference : '';
 
-      if (!userId || credits <= 0 || !reference) {
-        return res.status(400).json({ error: 'Invalid webhook payload metadata' });
-      }
-
-      const refTail = `paystack_ref:${reference}`;
-      const { rows: existingTx } = await query(
-        `SELECT id FROM credit_transactions WHERE user_id = $1 AND description LIKE $2 LIMIT 1`,
-        [userId, `%${refTail}%`],
-      );
-      if (existingTx[0]) {
-        return res.json({ success: true, duplicate: true, reference });
-      }
-
-      const { rows: existingCredits } = await query(
-        `SELECT id, credits FROM user_credits WHERE user_id = $1`,
-        [userId],
-      );
-
-      if (existingCredits[0]) {
-        await query(
-          `UPDATE user_credits SET credits = $1, updated_at = NOW() WHERE user_id = $2`,
-          [existingCredits[0].credits + credits, userId],
-        );
-      } else {
-        await query(
-          `INSERT INTO user_credits (user_id, credits) VALUES ($1, $2)`,
-          [userId, credits],
-        );
-      }
-
-      await query(
-        `INSERT INTO credit_transactions (user_id, type, credits, amount, description, status)
-         VALUES ($1, 'purchase', $2, $3, $4, 'completed')`,
-        [userId, credits, amountPaid, `Purchased ${packageName} ${refTail}`],
-      );
-
-      return res.json({ success: true, user_id: userId, credits_added: credits });
+    if (event.event === 'charge.success') {
+      if (!reference) return res.status(400).json({ error: 'Missing reference' });
+      const result =
+        meta.kind === 'ebook_order' ? await handleEbookPurchase(data) : await handleCreditPurchase(data, meta);
+      return res.status(result.status).json(result.body);
     }
 
-    if (eventType === 'charge.failed') {
-      const data = parsed.data ?? {};
-      const meta = parseMetadata(data.metadata);
-      const userId = meta.user_id;
-      if (userId) {
-        await query(
-          `INSERT INTO credit_transactions (user_id, type, credits, amount, description, status)
-           VALUES ($1, 'purchase', $2, $3, $4, 'failed')`,
-          [
-            userId,
-            parseInt(meta.credits || '0', 10),
-            typeof data.amount === 'number' ? data.amount : 0,
-            `Failed purchase: ${meta.package_name || 'Credit Package'}`,
-          ],
+    if (event.event === 'charge.failed') {
+      if (meta.kind === 'ebook_order' && reference) {
+        await withTransaction((client) =>
+          client.query(
+            `UPDATE ebook_orders SET status = 'failed' WHERE reference = $1 AND status = 'pending'`,
+            [reference],
+          ),
+        );
+      } else if (meta.user_id) {
+        await withTransaction((client) =>
+          client.query(
+            `INSERT INTO credit_transactions (user_id, type, credits, amount, description, status)
+             VALUES ($1, 'purchase', $2, $3, $4, 'failed')`,
+            [
+              meta.user_id,
+              parseInt(meta.credits || '0', 10) || 0,
+              Number(data.amount) || 0,
+              `Failed purchase: ${meta.package_name || 'Credit Package'}`,
+            ],
+          ),
         );
       }
       return res.json({ success: true, message: 'Charge failure recorded' });
     }
 
-    res.json({ received: true, event_type: eventType });
+    res.json({ received: true, event_type: event.event });
   });
 }
 

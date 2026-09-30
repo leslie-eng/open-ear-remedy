@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { apiFetch } from '../../lib/api';
@@ -100,7 +100,6 @@ function formatMoney(dollars: number) {
 }
 
 export default function AdminDashboardPage() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeView, setActiveView] = useState<'overview' | 'sessions' | 'clients' | 'revenue' | 'appointments' | 'transactions'>('overview');
   const [metrics, setMetrics] = useState<MetricData>({
     activeClients: 0,
@@ -152,30 +151,23 @@ export default function AdminDashboardPage() {
   const [transactionFilter, setTransactionFilter] = useState<'all' | 'purchase' | 'usage' | 'refund'>('all');
 
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user, loading: authLoading, signOut } = useAuth();
 
+  // Access is decided by the server (/api/admin/check); admin APIs are protected server-side too.
   useEffect(() => {
-    checkAdminAuth();
-  }, [user]);
-
-  useEffect(() => {
-    if (user) {
-      void fetchOverviewAnalytics();
-      void fetchCallHistory();
+    if (authLoading) return;
+    if (!user) {
+      navigate('/admin-login');
+      return;
     }
-  }, [user, timeRange]);
-
-  useEffect(() => {
-    if (activeView === 'appointments') fetchAppointments();
-    if (activeView === 'sessions') fetchCallHistory();
-    if (activeView === 'transactions') fetchTransactions();
-    if (activeView === 'clients') fetchUsers();
-    if (activeView === 'revenue') fetchRevenueAnalytics();
-  }, [activeView]);
-
-  useEffect(() => {
-    if (activeView === 'revenue') fetchRevenueAnalytics();
-  }, [revenueTimeframe, timeRange]);
+    let cancelled = false;
+    apiFetch('/api/admin/check').catch(() => {
+      if (!cancelled) navigate('/admin-login');
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [authLoading, user, navigate]);
 
   useEffect(() => {
     const mappedSessions: SessionData[] = callHistory.slice(0, 20).map((c) => ({
@@ -194,7 +186,7 @@ export default function AdminDashboardPage() {
     setSessions(mappedSessions);
   }, [callHistory]);
 
-  const fetchOverviewAnalytics = async () => {
+  const fetchOverviewAnalytics = useCallback(async () => {
     setAnalyticsLoading(true);
     try {
       const { overview } = await apiFetch<{
@@ -237,9 +229,9 @@ export default function AdminDashboardPage() {
     } finally {
       setAnalyticsLoading(false);
     }
-  };
+  }, [timeRange]);
 
-  const fetchRevenueAnalytics = async () => {
+  const fetchRevenueAnalytics = useCallback(async () => {
     setRevenueLoading(true);
     try {
       const data = await apiFetch<{
@@ -272,7 +264,7 @@ export default function AdminDashboardPage() {
     } finally {
       setRevenueLoading(false);
     }
-  };
+  }, [revenueTimeframe, timeRange]);
 
   const fetchUsers = async () => {
     setUsersLoading(true);
@@ -287,26 +279,24 @@ export default function AdminDashboardPage() {
     }
   };
 
-  const checkAdminAuth = async () => {
-    const adminSession = localStorage.getItem('admin_session');
-    if (!adminSession) {
-      navigate('/admin-login');
-      return;
+  useEffect(() => {
+    if (user) {
+      void fetchOverviewAnalytics();
+      void fetchCallHistory();
     }
+  }, [user, fetchOverviewAnalytics]);
 
-    if (!user) {
-      localStorage.removeItem('admin_session');
-      navigate('/admin-login');
-      return;
-    }
+  useEffect(() => {
+    if (activeView === 'appointments') fetchAppointments();
+    if (activeView === 'sessions') fetchCallHistory();
+    if (activeView === 'transactions') fetchTransactions();
+    if (activeView === 'clients') fetchUsers();
+  }, [activeView]);
 
-    try {
-      await apiFetch('/api/admin/check');
-    } catch {
-      localStorage.removeItem('admin_session');
-      navigate('/admin-login');
-    }
-  };
+  // Refetches when the view switches to revenue or the timeframe/range changes.
+  useEffect(() => {
+    if (activeView === 'revenue') void fetchRevenueAnalytics();
+  }, [activeView, fetchRevenueAnalytics]);
 
   const handleSignOut = () => {
     signOut();

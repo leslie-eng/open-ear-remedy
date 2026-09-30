@@ -28,7 +28,7 @@ interface AuthContextValue {
   signOut: () => void;
   forgotPassword: (email: string) => Promise<void>;
   resetPassword: (token: string, password: string) => Promise<void>;
-  updatePassword: (password: string) => Promise<void>;
+  updatePassword: (currentPassword: string, password: string) => Promise<void>;
   getSession: () => { access_token: string } | null;
 }
 
@@ -119,11 +119,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const updatePassword = useCallback(async (password: string) => {
-    await apiFetch('/api/auth/password', {
+  const updatePassword = useCallback(async (currentPassword: string, password: string) => {
+    const data = await apiFetch<{ message?: string; access_token?: string }>('/api/auth/password', {
       method: 'PATCH',
-      body: JSON.stringify({ password }),
+      body: JSON.stringify({ currentPassword, password }),
     });
+    // The server invalidates the old token; keep the session alive with the new one.
+    if (data.access_token) setAccessToken(data.access_token);
   }, []);
 
   const getSession = useCallback(() => {
@@ -165,6 +167,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
+// Hook colocated with its provider by design; only affects fast-refresh granularity.
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');

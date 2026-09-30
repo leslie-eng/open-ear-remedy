@@ -62,6 +62,7 @@ export async function getOverviewAnalytics(range = '30d') {
     params,
   );
 
+  const sessionSince = since ? 'AND started_at >= $1' : '';
   const purchaseFilter = since ? "AND created_at >= $1 AND type = 'purchase' AND status = 'completed'" : "AND type = 'purchase' AND status = 'completed'";
   const { rows: revenueRows } = await query(
     `SELECT COALESCE(SUM(amount), 0) AS total_minor FROM credit_transactions WHERE 1=1 ${purchaseFilter}`,
@@ -88,13 +89,13 @@ export async function getOverviewAnalytics(range = '30d') {
   const { rows: sessionRows } = await query(
     `SELECT COUNT(*) AS total_sessions,
             COUNT(*) FILTER (WHERE status = 'completed') AS completed_sessions
-     FROM call_history WHERE 1=1 ${activeSince}`,
+     FROM call_history WHERE 1=1 ${sessionSince}`,
     params,
   );
 
   const { rows: durationRows } = await query(
     `SELECT COALESCE(AVG(NULLIF(duration_seconds, 0)), 0) AS avg_seconds
-     FROM call_history WHERE status = 'completed' ${activeSince}`,
+     FROM call_history WHERE status = 'completed' ${sessionSince}`,
     params,
   );
 

@@ -19,7 +19,6 @@ export default function AdminLoginPage() {
     try {
       await signIn(email.trim().toLowerCase(), password);
       await apiFetch('/api/admin/check');
-      localStorage.setItem('admin_session', 'true');
       navigate('/admin-dashboard');
     } catch (err: unknown) {
       signOut();

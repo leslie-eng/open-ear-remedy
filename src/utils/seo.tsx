@@ -19,7 +19,7 @@ export const useSEO = ({
   schema,
 }: SEOProps) => {
   const location = useLocation();
-  const siteUrl = import.meta.env.VITE_SITE_URL || 'https://openear.com';
+  const siteUrl = import.meta.env.VITE_SITE_URL || 'https://openearemedy.com';
   const fullUrl = canonical || `${siteUrl}${location.pathname}`;
 
   useEffect(() => {
@@ -92,7 +92,7 @@ export const useSEO = ({
 };
 
 export const generateWebPageSchema = (name: string, description: string, url: string) => {
-  const siteUrl = import.meta.env.VITE_SITE_URL || 'https://openear.com';
+  const siteUrl = import.meta.env.VITE_SITE_URL || 'https://openearemedy.com';
   
   return {
     '@context': 'https://schema.org',
@@ -109,14 +109,14 @@ export const generateWebPageSchema = (name: string, description: string, url: st
 };
 
 export const generateOrganizationSchema = () => {
-  const siteUrl = import.meta.env.VITE_SITE_URL || 'https://openear.com';
+  const siteUrl = import.meta.env.VITE_SITE_URL || 'https://openearemedy.com';
   
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'Open Ear',
     url: siteUrl,
-    logo: `${siteUrl}/vite.svg`,
+    logo: `${siteUrl}/favicon.svg`,
     description: 'Open Ear provides a safe, judgment-free space for emotional support. Connect through call or chat anytime.',
     address: {
       '@type': 'PostalAddress',
@@ -143,7 +143,7 @@ export const generateOrganizationSchema = () => {
 };
 
 export const generateServiceSchema = () => {
-  const siteUrl = import.meta.env.VITE_SITE_URL || 'https://openear.com';
+  const siteUrl = import.meta.env.VITE_SITE_URL || 'https://openearemedy.com';
   
   return {
     '@context': 'https://schema.org',
@@ -199,7 +199,7 @@ export const generateFAQSchema = (faqs: Array<{ question: string; answer: string
 };
 
 export const generateProductSchema = (name: string, description: string, price: number) => {
-  const siteUrl = import.meta.env.VITE_SITE_URL || 'https://openear.com';
+  const siteUrl = import.meta.env.VITE_SITE_URL || 'https://openearemedy.com';
   
   return {
     '@context': 'https://schema.org',

@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import Navbar from '../../components/feature/Navbar';
 import { useSEO, generateWebPageSchema, generateFAQSchema } from '../../utils/seo';
 
@@ -46,8 +45,6 @@ export default function HowItWorksPage() {
       ],
     },
   });
-
-  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-white">

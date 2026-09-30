@@ -4,6 +4,7 @@ import Navbar from '../../components/feature/Navbar';
 import { useSEO } from '../../utils/seo';
 import { useAuth } from '../../contexts/AuthContext';
 import { apiFetch } from '../../lib/api';
+import { packageIdForCredits } from '../../lib/packages';
 
 interface MinutePackage {
   id: number;
@@ -184,11 +185,22 @@ export default function DashboardPage() {
   ];
 
   const navigate = useNavigate();
-  const { user: authUser, signOut: authSignOut } = useAuth();
+  const { user: authUser } = useAuth();
 
   useEffect(() => {
-    void checkUserAndFetchData();
-  }, [authUser?.id]);
+    let cancelled = false;
+    void (async () => {
+      setLoading(true);
+      setUser(authUser);
+      if (authUser) {
+        await Promise.all([fetchCredits(), fetchCallHistory()]);
+      }
+      if (!cancelled) setLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [authUser]);
 
   // Check for purchase status from URL params
   useEffect(() => {
@@ -206,15 +218,6 @@ export default function DashboardPage() {
       return () => clearTimeout(timer);
     }
   }, [notification]);
-
-  const checkUserAndFetchData = async () => {
-    setLoading(true);
-    setUser(authUser);
-    if (authUser) {
-      await Promise.all([fetchCredits(), fetchCallHistory()]);
-    }
-    setLoading(false);
-  };
 
   const fetchCredits = async () => {
     try {
@@ -254,23 +257,16 @@ export default function DashboardPage() {
     return date.toLocaleDateString();
   };
 
-  const handleSignOut = () => {
-    authSignOut();
-    setUser(null);
-    setCredits(0);
-    navigate('/');
-  };
-
   const handleBuyMinutes = async (pkg: MinutePackage) => {
     if (!authUser) {
       setSelectedPkg(pkg);
       setShowAuthModal(true);
       return;
     }
-    await initiatePaystackCheckout(pkg, authUser.id, authUser.email || undefined);
+    await initiatePaystackCheckout(pkg);
   };
 
-  const initiatePaystackCheckout = async (pkg: MinutePackage, userId: string, userEmail?: string) => {
+  const initiatePaystackCheckout = async (pkg: MinutePackage) => {
     setLoadingPkg(pkg.id);
 
     try {
@@ -278,15 +274,7 @@ export default function DashboardPage() {
         '/api/payments/checkout',
         {
           method: 'POST',
-          body: JSON.stringify({
-            userId,
-            userEmail,
-            packageName: `${pkg.minutes} Minutes - ${pkg.credits} Credits`,
-            credits: pkg.credits,
-            price: pkg.price,
-            successUrl: `${window.location.origin}/profile?purchase=success`,
-            cancelUrl: `${window.location.origin}/dashboard?purchase=cancelled`,
-          }),
+          body: JSON.stringify({ packageId: packageIdForCredits(pkg.credits) }),
         },
       );
 

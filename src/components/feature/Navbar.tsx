@@ -3,6 +3,21 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { apiFetch } from '../../lib/api';
+
+// Cache the admin check per user id so navigating between pages doesn't refetch it.
+const adminCheckCache = new Map<string, Promise<boolean>>();
+
+function checkIsAdmin(userId: string): Promise<boolean> {
+  let pending = adminCheckCache.get(userId);
+  if (!pending) {
+    pending = apiFetch('/api/admin/check')
+      .then(() => true)
+      .catch(() => false);
+    adminCheckCache.set(userId, pending);
+  }
+  return pending;
+}
 
 interface NavbarProps {
   transparent?: boolean;
@@ -11,9 +26,7 @@ interface NavbarProps {
 export default function Navbar({ transparent = false }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
-  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
-  const [userEmail, setUserEmail] = useState('');
+  const [adminUserId, setAdminUserId] = useState<string | null>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const { totalItems } = useCart();
   const { user, signOut } = useAuth();
@@ -28,16 +41,22 @@ export default function Navbar({ transparent = false }: NavbarProps) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  useEffect(() => {
-    const adminSession = localStorage.getItem('admin_session');
-    setIsAdminLoggedIn(!!adminSession);
-    checkUserAuth();
-  }, [location]);
+  const userId = user?.id ?? null;
+  const isUserLoggedIn = !!user;
+  const userEmail = user?.email || '';
+  // Only trust the server's answer, and only for the currently signed-in user.
+  const isAdminLoggedIn = !!userId && adminUserId === userId;
 
-  const checkUserAuth = () => {
-    setIsUserLoggedIn(!!user);
-    setUserEmail(user?.email || '');
-  };
+  useEffect(() => {
+    if (!userId) return;
+    let cancelled = false;
+    void checkIsAdmin(userId).then((isAdmin) => {
+      if (!cancelled) setAdminUserId(isAdmin ? userId : null);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
 
   const handleSignOut = () => {
     signOut();

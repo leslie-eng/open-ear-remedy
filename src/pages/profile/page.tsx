@@ -53,6 +53,9 @@ export default function ProfilePage() {
   const [successMessage, setSuccessMessage] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteError, setDeleteError] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<CreditTransaction | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
 
@@ -131,6 +134,11 @@ export default function ProfilePage() {
   const handleChangePassword = async () => {
     setPasswordError('');
 
+    if (!currentPassword) {
+      setPasswordError('Please enter your current password');
+      return;
+    }
+
     if (newPassword.length < 6) {
       setPasswordError('Password must be at least 6 characters');
       return;
@@ -143,7 +151,7 @@ export default function ProfilePage() {
 
     setIsSaving(true);
     try {
-      await updatePassword(newPassword);
+      await updatePassword(currentPassword, newPassword);
       showSuccess('Password changed successfully!');
       setCurrentPassword('');
       setNewPassword('');
@@ -160,12 +168,30 @@ export default function ProfilePage() {
   };
 
   const handleDeleteAccount = async () => {
-    if (deleteConfirmText !== 'DELETE') return;
+    if (deleteConfirmText !== 'DELETE' || !deletePassword) return;
 
-    // Note: Full account deletion requires admin privileges
-    signOut();
-    localStorage.clear();
-    navigate('/');
+    setIsDeleting(true);
+    setDeleteError('');
+    try {
+      await apiFetch('/api/user/account', {
+        method: 'DELETE',
+        body: JSON.stringify({ password: deletePassword }),
+      });
+      setShowDeleteModal(false);
+      signOut();
+      navigate('/');
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'Failed to delete account');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const closeDeleteModal = () => {
+    setShowDeleteModal(false);
+    setDeleteConfirmText('');
+    setDeletePassword('');
+    setDeleteError('');
   };
 
   const showSuccess = (message: string) => {
@@ -898,6 +924,17 @@ export default function ProfilePage() {
                     <h3 className="text-lg font-semibold text-[#2A2A2A] mb-4">Change Password</h3>
                     <div className="space-y-4">
                       <div>
+                        <label className="block text-sm font-medium text-[#2A2A2A] mb-2">Current Password</label>
+                        <input
+                          type="password"
+                          value={currentPassword}
+                          onChange={(e) => setCurrentPassword(e.target.value)}
+                          placeholder="Enter current password"
+                          autoComplete="current-password"
+                          className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-[#2A2A2A] focus:outline-none focus:border-[#0096FF] focus:ring-2 focus:ring-[#0096FF]/20 transition-all"
+                        />
+                      </div>
+                      <div>
                         <label className="block text-sm font-medium text-[#2A2A2A] mb-2">New Password</label>
                         <input
                           type="password"
@@ -925,7 +962,7 @@ export default function ProfilePage() {
                       )}
                       <button
                         onClick={handleChangePassword}
-                        disabled={isSaving || !newPassword || !confirmPassword}
+                        disabled={isSaving || !currentPassword || !newPassword || !confirmPassword}
                         className="px-6 py-3 bg-[#0096FF] text-white rounded-xl text-sm font-semibold hover:bg-[#0077CC] transition-colors disabled:opacity-50 cursor-pointer whitespace-nowrap"
                       >
                         {isSaving ? 'Updating...' : 'Update Password'}
@@ -969,7 +1006,7 @@ export default function ProfilePage() {
       {/* Delete Account Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setShowDeleteModal(false)}></div>
+          <div className="absolute inset-0 bg-black/50" onClick={closeDeleteModal}></div>
           <div className="relative bg-white rounded-2xl p-6 md:p-8 max-w-md w-full shadow-2xl">
             <div className="text-center mb-6">
               <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -992,22 +1029,38 @@ export default function ProfilePage() {
                 className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-[#2A2A2A] focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all"
               />
             </div>
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
+                Enter your password
+              </label>
+              <input
+                type="password"
+                value={deletePassword}
+                onChange={(e) => setDeletePassword(e.target.value)}
+                placeholder="Your password"
+                autoComplete="current-password"
+                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-[#2A2A2A] focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all"
+              />
+              {deleteError && (
+                <p className="mt-2 text-sm text-red-500 flex items-center gap-2">
+                  <i className="ri-error-warning-line"></i>
+                  {deleteError}
+                </p>
+              )}
+            </div>
             <div className="flex gap-3">
               <button
-                onClick={() => {
-                  setShowDeleteModal(false);
-                  setDeleteConfirmText('');
-                }}
+                onClick={closeDeleteModal}
                 className="flex-1 px-6 py-3 bg-gray-100 text-[#2A2A2A] rounded-xl text-sm font-semibold hover:bg-gray-200 transition-colors cursor-pointer whitespace-nowrap"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteAccount}
-                disabled={deleteConfirmText !== 'DELETE'}
+                disabled={deleteConfirmText !== 'DELETE' || !deletePassword || isDeleting}
                 className="flex-1 px-6 py-3 bg-red-600 text-white rounded-xl text-sm font-semibold hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer whitespace-nowrap"
               >
-                Delete Account
+                {isDeleting ? 'Deleting...' : 'Delete Account'}
               </button>
             </div>
           </div>

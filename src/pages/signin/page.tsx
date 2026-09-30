@@ -54,15 +54,14 @@ export default function SignInPage() {
     }
   }, [searchParams]);
 
+  // Intentionally mount-only: redirect users who arrive here already signed in. Re-running on
+  // `user` changes would race with the sign-up/verify flow, which navigates on its own.
   useEffect(() => {
-    checkUser();
-  }, []);
-
-  const checkUser = async () => {
     if (user) {
       navigate(safeReturnPath(location.state) ?? '/dashboard', { replace: true });
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
