@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { query } from '../db.js';
 import { config } from '../config.js';
 import {
+  bearerToken,
   comparePassword,
   ensureUserCredits,
   findUserByEmail,
@@ -10,51 +11,69 @@ import {
   hashPassword,
   publicUser,
   signToken,
-  verifyToken,
+  userFromToken,
 } from '../auth.js';
 import { sendPasswordResetEmail, sendVerificationEmail } from '../email.js';
 import { asyncHandler } from '../middleware.js';
+import { isValidEmail, rateLimit } from '../util.js';
 
 const router = Router();
+
+const MAX_OTP_ATTEMPTS = 5;
+const MIN_PASSWORD = 6;
+const MAX_PASSWORD = 128;
 
 function normalizeEmail(email) {
   return String(email || '').trim().toLowerCase();
 }
 
+function passwordError(password) {
+  if (typeof password !== 'string' || password.length < MIN_PASSWORD) {
+    return `Password must be at least ${MIN_PASSWORD} characters`;
+  }
+  if (password.length > MAX_PASSWORD) return `Password must be at most ${MAX_PASSWORD} characters`;
+  return null;
+}
+
+const MINUTE = 60 * 1000;
+const byIp = (req) => req.ip;
+const byEmail = (req) => normalizeEmail(req.body?.email) || req.ip;
+// Anything that sends email: stops mail-bombing and email-provider quota abuse.
+const emailSendIpLimit = rateLimit({ windowMs: 60 * MINUTE, max: 20, key: byIp });
+const emailSendAddrLimit = rateLimit({ windowMs: 60 * MINUTE, max: 5, key: byEmail });
+const signinIpLimit = rateLimit({ windowMs: 15 * MINUTE, max: 50, key: byIp });
+const signinAddrLimit = rateLimit({ windowMs: 15 * MINUTE, max: 10, key: byEmail });
+const verifyLimit = rateLimit({ windowMs: 15 * MINUTE, max: 20, key: byIp });
+const resetLimit = rateLimit({ windowMs: 15 * MINUTE, max: 20, key: byIp });
+
 router.get(
   '/me',
   asyncHandler(async (req, res) => {
-    const header = req.headers.authorization || '';
-    const token = header.startsWith('Bearer ') ? header.slice(7) : null;
+    const token = bearerToken(req);
     if (!token) return res.status(401).json({ error: 'Unauthorized' });
-    try {
-      const payload = verifyToken(token);
-      const { rows } = await query(
-        `SELECT id, email, full_name, email_verified_at, created_at FROM users WHERE id = $1`,
-        [payload.sub],
-      );
-      const user = rows[0];
-      if (!user) return res.status(401).json({ error: 'Unauthorized' });
-      return res.json({ user: publicUser(user) });
-    } catch {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
+    const user = await userFromToken(token);
+    if (!user) return res.status(401).json({ error: 'Unauthorized' });
+    return res.json({ user: publicUser(user) });
   }),
 );
 
 router.post(
   '/signup',
+  emailSendIpLimit,
+  emailSendAddrLimit,
   asyncHandler(async (req, res) => {
     const email = normalizeEmail(req.body.email);
     const password = req.body.password;
-    const fullName = String(req.body.fullName || req.body.full_name || '').trim();
+    const fullName = String(req.body.fullName || req.body.full_name || '').trim().slice(0, 100);
 
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password are required' });
     }
-    if (password.length < 6) {
-      return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    if (!isValidEmail(email)) {
+      return res.status(400).json({ error: 'Invalid email address' });
     }
+    const pwErr = passwordError(password);
+    if (pwErr) return res.status(400).json({ error: pwErr });
 
     const existing = await findUserByEmail(email);
     if (existing?.email_verified_at) {
@@ -65,6 +84,7 @@ router.post(
     let userId;
 
     if (existing) {
+      // Unverified account: the new password only takes effect once the emailed code is entered.
       userId = existing.id;
       await query(
         `UPDATE users SET password_hash = $1, full_name = $2, updated_at = NOW() WHERE id = $3`,
@@ -80,7 +100,7 @@ router.post(
     }
 
     const code = generateOtp();
-    await query(`DELETE FROM verification_tokens WHERE email = $1 AND type = 'signup'`, [email]);
+    await query(`DELETE FROM verification_tokens WHERE email = $1`, [email]);
     await query(
       `INSERT INTO verification_tokens (email, token, type, expires_at) VALUES ($1, $2, 'signup', NOW() + INTERVAL '15 minutes')`,
       [email, code],
@@ -93,10 +113,12 @@ router.post(
 
 router.post(
   '/signin',
+  signinIpLimit,
+  signinAddrLimit,
   asyncHandler(async (req, res) => {
     const email = normalizeEmail(req.body.email);
     const password = req.body.password;
-    const user = await findUserByEmail(email);
+    const user = email ? await findUserByEmail(email) : null;
     if (!user || !(await comparePassword(password, user.password_hash))) {
       return res.status(401).json({ error: 'Invalid login credentials' });
     }
@@ -114,19 +136,34 @@ router.post(
 
 router.post(
   '/verify-otp',
+  verifyLimit,
   asyncHandler(async (req, res) => {
     const email = normalizeEmail(req.body.email);
     const token = String(req.body.token || req.body.code || '').replace(/\s+/g, '');
-    const type = req.body.type === 'signup' ? 'signup' : 'email';
 
+    // Only one live code exists per email (older ones are deleted whenever a new one is sent),
+    // so wrong guesses are counted against it and it is burned after MAX_OTP_ATTEMPTS.
     const { rows } = await query(
       `SELECT * FROM verification_tokens
-       WHERE email = $1 AND token = $2 AND type = $3 AND expires_at > NOW()
+       WHERE email = $1 AND expires_at > NOW()
        ORDER BY created_at DESC LIMIT 1`,
-      [email, token, type],
+      [email],
     );
-    if (!rows[0]) {
-      return res.status(400).json({ error: 'Invalid or expired verification code' });
+    const live = rows[0];
+    if (!live || live.attempts >= MAX_OTP_ATTEMPTS) {
+      return res
+        .status(400)
+        .json({ error: 'Invalid or expired verification code. Please request a new one.' });
+    }
+    if (live.token !== token) {
+      await query(`UPDATE verification_tokens SET attempts = attempts + 1 WHERE id = $1`, [live.id]);
+      const left = MAX_OTP_ATTEMPTS - live.attempts - 1;
+      return res.status(400).json({
+        error:
+          left > 0
+            ? `Invalid verification code. ${left} attempt${left === 1 ? '' : 's'} left.`
+            : 'Too many wrong attempts. Please request a new code.',
+      });
     }
 
     const user = await findUserByEmail(email);
@@ -150,10 +187,12 @@ router.post(
 
 router.post(
   '/resend-otp',
+  emailSendIpLimit,
+  emailSendAddrLimit,
   asyncHandler(async (req, res) => {
     const email = normalizeEmail(req.body.email);
     const user = await findUserByEmail(email);
-    if (!user) {
+    if (!user || user.email_verified_at) {
       return res.json({ message: 'If the account exists, a code was sent' });
     }
     const code = generateOtp();
@@ -169,6 +208,8 @@ router.post(
 
 router.post(
   '/forgot-password',
+  emailSendIpLimit,
+  emailSendAddrLimit,
   asyncHandler(async (req, res) => {
     const email = normalizeEmail(req.body.email);
     const user = await findUserByEmail(email);
@@ -190,10 +231,11 @@ router.post(
 
 router.get(
   '/reset-password/validate',
+  resetLimit,
   asyncHandler(async (req, res) => {
     const token = String(req.query.token || '');
     const { rows } = await query(
-      `SELECT * FROM password_reset_tokens WHERE token = $1 AND expires_at > NOW() AND used_at IS NULL`,
+      `SELECT id FROM password_reset_tokens WHERE token = $1 AND expires_at > NOW() AND used_at IS NULL`,
       [token],
     );
     res.json({ valid: Boolean(rows[0]) });
@@ -202,50 +244,58 @@ router.get(
 
 router.post(
   '/reset-password',
+  resetLimit,
   asyncHandler(async (req, res) => {
     const token = String(req.body.token || '');
     const password = req.body.password;
-    if (!password || password.length < 6) {
-      return res.status(400).json({ error: 'Password must be at least 6 characters' });
-    }
+    const pwErr = passwordError(password);
+    if (pwErr) return res.status(400).json({ error: pwErr });
+
+    // Claim the token atomically so it can't be redeemed twice concurrently.
     const { rows } = await query(
-      `SELECT * FROM password_reset_tokens WHERE token = $1 AND expires_at > NOW() AND used_at IS NULL`,
+      `UPDATE password_reset_tokens SET used_at = NOW()
+       WHERE token = $1 AND expires_at > NOW() AND used_at IS NULL
+       RETURNING user_id`,
       [token],
     );
     if (!rows[0]) {
       return res.status(400).json({ error: 'Invalid or expired reset link' });
     }
     const passwordHash = await hashPassword(password);
-    await query(`UPDATE users SET password_hash = $1, updated_at = NOW() WHERE id = $2`, [
-      passwordHash,
-      rows[0].user_id,
-    ]);
-    await query(`UPDATE password_reset_tokens SET used_at = NOW() WHERE id = $1`, [rows[0].id]);
+    // Bumping token_version signs out every existing session.
+    await query(
+      `UPDATE users SET password_hash = $1, token_version = token_version + 1, updated_at = NOW() WHERE id = $2`,
+      [passwordHash, rows[0].user_id],
+    );
     res.json({ message: 'Password updated' });
   }),
 );
 
 router.patch(
   '/password',
-  asyncHandler(async (req, res, next) => {
-    const header = req.headers.authorization || '';
-    const bearer = header.startsWith('Bearer ') ? header.slice(7) : null;
-    if (!bearer) return res.status(401).json({ error: 'Unauthorized' });
-    try {
-      const payload = verifyToken(bearer);
-      const password = req.body.password;
-      if (!password || password.length < 6) {
-        return res.status(400).json({ error: 'Password must be at least 6 characters' });
-      }
-      const passwordHash = await hashPassword(password);
-      await query(`UPDATE users SET password_hash = $1, updated_at = NOW() WHERE id = $2`, [
-        passwordHash,
-        payload.sub,
-      ]);
-      res.json({ message: 'Password updated' });
-    } catch (e) {
-      next(e);
+  signinIpLimit,
+  asyncHandler(async (req, res) => {
+    const bearer = bearerToken(req);
+    const sessionUser = bearer ? await userFromToken(bearer) : null;
+    if (!sessionUser) return res.status(401).json({ error: 'Unauthorized' });
+
+    const { currentPassword, password } = req.body;
+    const pwErr = passwordError(password);
+    if (pwErr) return res.status(400).json({ error: pwErr });
+
+    const user = await findUserByEmail(sessionUser.email);
+    if (!(await comparePassword(currentPassword, user.password_hash))) {
+      return res.status(400).json({ error: 'Current password is incorrect' });
     }
+
+    const passwordHash = await hashPassword(password);
+    const { rows } = await query(
+      `UPDATE users SET password_hash = $1, token_version = token_version + 1, updated_at = NOW()
+       WHERE id = $2 RETURNING id, email, token_version`,
+      [passwordHash, user.id],
+    );
+    // Other sessions are now invalid; hand this one a fresh token.
+    res.json({ message: 'Password updated', access_token: signToken(rows[0]) });
   }),
 );
 

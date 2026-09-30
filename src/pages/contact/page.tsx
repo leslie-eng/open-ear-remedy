@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Navbar from '../../components/feature/Navbar';
+import { apiFetch } from '../../lib/api';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -10,6 +11,7 @@ export default function ContactPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({
@@ -21,13 +23,29 @@ export default function ContactPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setSubmitError('');
 
-    // Simulate form submission
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      await apiFetch('/api/contact', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          subject: formData.subject,
+          message: formData.message.trim(),
+        }),
+      });
       setIsSubmitted(true);
       setFormData({ name: '', email: '', subject: '', message: '' });
-    }, 1000);
+    } catch (err) {
+      setSubmitError(
+        err instanceof Error && err.message
+          ? err.message
+          : 'We could not send your message. Please try again or email us directly.',
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -206,6 +224,13 @@ export default function ContactPage() {
                           placeholder="Please describe your question or issue in detail..."
                         />
                       </div>
+
+                      {submitError && (
+                        <div className="px-4 py-3 rounded-xl text-sm bg-red-50 border border-red-200 text-red-700 flex items-start gap-2" role="alert">
+                          <i className="ri-error-warning-fill mt-0.5"></i>
+                          <span>{submitError}</span>
+                        </div>
+                      )}
 
                       <button
                         type="submit"

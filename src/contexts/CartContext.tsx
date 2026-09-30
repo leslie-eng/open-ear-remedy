@@ -1,16 +1,18 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useCallback, useContext, useMemo, useState, useEffect, type ReactNode } from 'react';
 
-interface Ebook {
+/** Display-only snapshot of an ebook. The server re-prices everything at checkout. */
+export interface CartEbook {
   id: string;
   title: string;
-  author: string;
+  author: string | null;
   price: number;
-  file_format: 'PDF' | 'EPUB';
-  cover_image_url: string;
+  currency: string;
+  file_format: 'PDF' | 'EPUB' | null;
+  cover_image_url: string | null;
 }
 
-interface CartItem {
-  ebook: Ebook;
+export interface CartItem {
+  ebook: CartEbook;
   quantity: number;
   addedAt: string;
 }
@@ -20,87 +22,112 @@ interface CartContextType {
   totalItems: number;
   totalPrice: number;
   isOpen: boolean;
-  addItem: (ebook: Ebook) => void;
+  addItem: (ebook: Omit<CartEbook, 'currency'> & { currency?: string }) => void;
   removeItem: (ebookId: string) => void;
   clearCart: () => void;
   toggleCart: () => void;
 }
 
+const CART_KEY = 'ebook-cart';
+
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-export function CartProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([]);
-  const [isOpen, setIsOpen] = useState(false);
+function toCartEbook(raw: unknown): CartEbook | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const e = raw as Record<string, unknown>;
+  if (typeof e.id !== 'string' || !e.id) return null;
+  const price = Number(e.price);
+  return {
+    id: e.id,
+    title: typeof e.title === 'string' ? e.title : 'Untitled',
+    author: typeof e.author === 'string' ? e.author : null,
+    price: Number.isFinite(price) ? price : 0,
+    currency: typeof e.currency === 'string' && e.currency ? e.currency : 'USD',
+    file_format: e.file_format === 'PDF' || e.file_format === 'EPUB' ? e.file_format : null,
+    cover_image_url: typeof e.cover_image_url === 'string' ? e.cover_image_url : null,
+  };
+}
 
-  // Load cart from localStorage on mount
-  useEffect(() => {
-    const savedCart = localStorage.getItem('ebook-cart');
-    if (savedCart) {
-      try {
-        setItems(JSON.parse(savedCart));
-      } catch (error) {
-        console.error('Error loading cart from localStorage:', error);
-      }
+function loadCart(): CartItem[] {
+  try {
+    const saved = localStorage.getItem(CART_KEY);
+    if (!saved) return [];
+    const parsed: unknown = JSON.parse(saved);
+    if (!Array.isArray(parsed)) return [];
+    const seen = new Set<string>();
+    const result: CartItem[] = [];
+    for (const entry of parsed) {
+      const ebook = toCartEbook((entry as { ebook?: unknown })?.ebook);
+      if (!ebook || seen.has(ebook.id)) continue;
+      seen.add(ebook.id);
+      const addedAt = (entry as { addedAt?: unknown }).addedAt;
+      result.push({
+        ebook,
+        quantity: 1,
+        addedAt: typeof addedAt === 'string' ? addedAt : new Date().toISOString(),
+      });
     }
-  }, []);
+    return result;
+  } catch (error) {
+    console.error('Error loading cart from localStorage:', error);
+    return [];
+  }
+}
+
+export function CartProvider({ children }: { children: ReactNode }) {
+  const [items, setItems] = useState<CartItem[]>(loadCart);
+  const [isOpen, setIsOpen] = useState(false);
 
   // Save cart to localStorage whenever items change
   useEffect(() => {
-    localStorage.setItem('ebook-cart', JSON.stringify(items));
+    try {
+      localStorage.setItem(CART_KEY, JSON.stringify(items));
+    } catch {
+      /* storage unavailable; cart stays in memory */
+    }
   }, [items]);
 
-  const addItem = (ebook: Ebook) => {
-    setItems(currentItems => {
-      // Check if item already exists
-      const existingItem = currentItems.find(item => item.ebook.id === ebook.id);
-      
-      if (existingItem) {
-        // For digital products, we don't increase quantity, just show it's already in cart
-        return currentItems;
-      }
-      
-      // Add new item
-      return [...currentItems, {
-        ebook,
-        quantity: 1,
-        addedAt: new Date().toISOString()
-      }];
+  const addItem = useCallback<CartContextType['addItem']>((input) => {
+    const ebook = toCartEbook(input);
+    if (!ebook) return;
+    setItems((currentItems) => {
+      // Digital products: never more than one of each
+      if (currentItems.some((item) => item.ebook.id === ebook.id)) return currentItems;
+      return [...currentItems, { ebook, quantity: 1, addedAt: new Date().toISOString() }];
     });
-  };
+  }, []);
 
-  const removeItem = (ebookId: string) => {
-    setItems(currentItems => currentItems.filter(item => item.ebook.id !== ebookId));
-  };
+  const removeItem = useCallback((ebookId: string) => {
+    setItems((currentItems) => currentItems.filter((item) => item.ebook.id !== ebookId));
+  }, []);
 
-  const clearCart = () => {
-    setItems([]);
-  };
+  const clearCart = useCallback(() => {
+    setItems((currentItems) => (currentItems.length === 0 ? currentItems : []));
+  }, []);
 
-  const toggleCart = () => {
-    setIsOpen(!isOpen);
-  };
+  const toggleCart = useCallback(() => {
+    setIsOpen((open) => !open);
+  }, []);
 
-  const totalItems = items.reduce((total, item) => total + item.quantity, 0);
-  const totalPrice = items.reduce((total, item) => total + (item.ebook.price * item.quantity), 0);
+  const value = useMemo<CartContextType>(() => {
+    const totalItems = items.reduce((total, item) => total + item.quantity, 0);
+    const totalPrice = items.reduce((total, item) => total + item.ebook.price * item.quantity, 0);
+    return {
+      items,
+      totalItems,
+      totalPrice,
+      isOpen,
+      addItem,
+      removeItem,
+      clearCart,
+      toggleCart,
+    };
+  }, [items, isOpen, addItem, removeItem, clearCart, toggleCart]);
 
-  const value: CartContextType = {
-    items,
-    totalItems,
-    totalPrice,
-    isOpen,
-    addItem,
-    removeItem,
-    clearCart,
-    toggleCart
-  };
-
-  return (
-    <CartContext.Provider value={value}>
-      {children}
-    </CartContext.Provider>
-  );
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useCart() {
   const context = useContext(CartContext);
   if (context === undefined) {

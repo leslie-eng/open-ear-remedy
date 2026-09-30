@@ -131,3 +131,78 @@ CREATE TABLE IF NOT EXISTS products (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- ---------------------------------------------------------------------------
+-- Security / integrity upgrades (safe to re-run)
+-- ---------------------------------------------------------------------------
+
+-- Bumped on password change/reset to invalidate existing JWTs.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS token_version INTEGER NOT NULL DEFAULT 0;
+
+-- Failed OTP attempts; a code is burned after too many wrong guesses.
+ALTER TABLE verification_tokens ADD COLUMN IF NOT EXISTS attempts INTEGER NOT NULL DEFAULT 0;
+
+-- One-time free trial credits.
+ALTER TABLE user_credits ADD COLUMN IF NOT EXISTS free_credits_claimed_at TIMESTAMPTZ;
+
+-- Payment reference for idempotent webhook processing.
+ALTER TABLE credit_transactions ADD COLUMN IF NOT EXISTS reference TEXT;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_credit_transactions_reference
+  ON credit_transactions(reference) WHERE reference IS NOT NULL;
+
+-- Billing cap for a call, derived from credits at call start.
+ALTER TABLE call_history ADD COLUMN IF NOT EXISTS max_duration_seconds INTEGER;
+ALTER TABLE call_history ADD COLUMN IF NOT EXISTS to_number TEXT;
+
+-- ---------------------------------------------------------------------------
+-- Ebook store
+-- ---------------------------------------------------------------------------
+ALTER TABLE products ALTER COLUMN id SET DEFAULT gen_random_uuid()::text;
+
+CREATE TABLE IF NOT EXISTS ebook_orders (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  reference TEXT NOT NULL UNIQUE,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'completed', 'failed')),
+  total_amount INTEGER NOT NULL DEFAULT 0, -- minor units
+  currency TEXT NOT NULL DEFAULT 'USD',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  completed_at TIMESTAMPTZ
+);
+
+CREATE INDEX IF NOT EXISTS idx_ebook_orders_user ON ebook_orders(user_id);
+
+CREATE TABLE IF NOT EXISTS ebook_order_items (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id UUID NOT NULL REFERENCES ebook_orders(id) ON DELETE CASCADE,
+  product_id TEXT NOT NULL REFERENCES products(id),
+  title TEXT NOT NULL,
+  price_amount INTEGER NOT NULL -- minor units
+);
+
+CREATE TABLE IF NOT EXISTS user_library (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  product_id TEXT NOT NULL REFERENCES products(id),
+  order_id UUID REFERENCES ebook_orders(id) ON DELETE SET NULL,
+  purchased_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (user_id, product_id)
+);
+
+-- ---------------------------------------------------------------------------
+-- Contact form & newsletter
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS contact_messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  subject TEXT,
+  message TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email TEXT NOT NULL UNIQUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

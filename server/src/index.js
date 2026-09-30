@@ -14,10 +14,17 @@ import appointmentsRoutes from './routes/appointments.js';
 import adminRoutes from './routes/admin.js';
 import notificationsRoutes from './routes/notifications.js';
 import uploadsRoutes from './routes/uploads.js';
+import ebooksRoutes from './routes/ebooks.js';
+import publicRoutes from './routes/public.js';
+import { securityHeaders } from './util.js';
 
 fs.mkdirSync(config.uploadDir, { recursive: true });
 
 const app = express();
+app.disable('x-powered-by');
+// Behind LiteSpeed/Apache (cPanel) or Render's load balancer: use the real client IP for rate limits.
+app.set('trust proxy', config.trustProxy);
+app.use(securityHeaders);
 
 app.use(
   cors({
@@ -50,7 +57,7 @@ app.post(
   paystackWebhookHandler(),
 );
 
-app.use(express.json({ limit: '2mb' }));
+app.use(express.json({ limit: '200kb' }));
 
 app.get('/api/health', (_req, res) => {
   res.json({
@@ -59,7 +66,11 @@ app.get('/api/health', (_req, res) => {
   });
 });
 
-app.use('/uploads', express.static(config.uploadDir));
+// Only cover images are public. Ebook files are served by /api/ebooks/:id/download to owners.
+app.use(
+  '/uploads/covers',
+  express.static(path.join(config.uploadDir, 'covers'), { dotfiles: 'deny', index: false, fallthrough: false }),
+);
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/calls', callsRoutes);
@@ -69,6 +80,10 @@ app.use('/api/appointments', appointmentsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/notifications', notificationsRoutes);
 app.use('/api/uploads', uploadsRoutes);
+app.use('/api/ebooks', ebooksRoutes);
+app.use('/api', publicRoutes);
+
+app.use('/api', (_req, res) => res.status(404).json({ error: 'Not found' }));
 
 app.use(errorHandler);
 

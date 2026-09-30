@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import Navbar from '../../components/feature/Navbar';
 import { useAuth } from '../../contexts/AuthContext';
 import { apiFetch } from '../../lib/api';
+import { packageIdForCredits } from '../../lib/packages';
 import { useSEO, generateWebPageSchema, generateProductSchema, generateFAQSchema } from '../../utils/seo';
 
 export default function PricingPage() {
@@ -134,10 +135,10 @@ export default function PricingPage() {
       return;
     }
 
-    await initiatePaystackCheckout(plan, user.id, user.email || undefined);
+    await initiatePaystackCheckout(plan);
   };
 
-  const initiatePaystackCheckout = async (plan: typeof plans[0], userId: string, userEmail?: string) => {
+  const initiatePaystackCheckout = async (plan: typeof plans[0]) => {
     setIsLoading(true);
     setLoadingPlan(plan.name);
 
@@ -146,25 +147,15 @@ export default function PricingPage() {
         '/api/payments/checkout',
         {
           method: 'POST',
-          body: JSON.stringify({
-            userId,
-            userEmail,
-            packageName: `${plan.name} - ${plan.credits} Credits`,
-            credits: plan.credits,
-            price: plan.price,
-            successUrl: `${window.location.origin}/profile?purchase=success`,
-            cancelUrl: `${window.location.origin}/pricing?purchase=cancelled`,
-          }),
+          body: JSON.stringify({ packageId: packageIdForCredits(plan.credits) }),
         },
       );
 
       const payUrl = data.url ?? data.authorization_url;
       if (payUrl) {
-        console.log('Redirecting to Paystack:', payUrl);
         // Use window.location.assign for better compatibility
         window.location.assign(payUrl);
       } else {
-        console.error('No checkout URL in response:', data);
         throw new Error('No payment authorization URL returned from Paystack.');
       }
     } catch (error) {

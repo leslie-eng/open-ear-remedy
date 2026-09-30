@@ -3,6 +3,7 @@ import { query } from '../db.js';
 import { config } from '../config.js';
 import { asyncHandler, requireAuth } from '../middleware.js';
 import { sendRawEmail } from '../email.js';
+import { getCredits } from '../services/credits.js';
 
 const THRESHOLDS = { critical: 10, low: 25, warning: 50 };
 
@@ -12,7 +13,8 @@ router.post(
   '/low-credit',
   requireAuth,
   asyncHandler(async (req, res) => {
-    const credits = parseInt(req.body.credits, 10);
+    // Use the real balance; the client's value is only a hint that it may be low.
+    const credits = await getCredits(req.user.id);
     const userEmail = req.user.email;
     if (!userEmail) {
       return res.status(400).json({ error: 'User email not found' });

@@ -1,9 +1,24 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/feature/Navbar';
 import { useAuth } from '../../contexts/AuthContext';
 import { apiFetch } from '../../lib/api';
 import { useSEO, generateWebPageSchema } from '../../utils/seo';
+
+const E164_REGEX = /^\+[1-9]\d{7,14}$/;
+
+async function sendLowCreditNotification(currentCredits: number) {
+  if (currentCredits > 50) return;
+
+  try {
+    await apiFetch('/api/notifications/low-credit', {
+      method: 'POST',
+      body: JSON.stringify({ credits: currentCredits }),
+    });
+  } catch (error) {
+    console.error('Error sending low credit notification:', error);
+  }
+}
 
 export default function CallPage() {
   // SEO Configuration
@@ -56,25 +71,67 @@ export default function CallPage() {
   const [isAuthLoading, setIsAuthLoading] = useState(false);
   const [authError, setAuthError] = useState('');
   const [callId, setCallId] = useState<string | null>(null);
-  const [callSid, setCallSid] = useState<string | null>(null);
   const [isInitiating, setIsInitiating] = useState(false);
   const [callError, setCallError] = useState('');
-  const [demoMode, setDemoMode] = useState(false);
-  const [addingTestCredits, setAddingTestCredits] = useState(false);
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
   const [claimingFreeCredits, setClaimingFreeCredits] = useState(false);
-  // Duplicate declaration removed – the state is now defined only once
   const [lowCreditWarning, setLowCreditWarning] = useState<string | null>(null);
   const navigate = useNavigate();
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastWarningRef = useRef<number>(0);
+  const autoEndingRef = useRef(false);
+
+  const fetchCredits = useCallback(async () => {
+    try {
+      const data = await apiFetch<{ credits: number; free_credits_available?: boolean }>(
+        '/api/user/credits',
+      );
+      setCredits(data.credits);
+      setIsFirstTimeUser(Boolean(data.free_credits_available));
+    } catch (error) {
+      console.error('Error fetching credits:', error);
+    }
+  }, []);
+
+  const endCall = useCallback(async () => {
+    if (!callId) {
+      setIsCallActive(false);
+      return;
+    }
+
+    try {
+      const data = await apiFetch<{
+        success: boolean;
+        creditsUsed: number;
+        remainingCredits: number;
+        durationSeconds: number;
+      }>('/api/calls/end', {
+        method: 'POST',
+        body: JSON.stringify({ callId }),
+      });
+
+      setCredits(data.remainingCredits);
+      setCallError(
+        `✓ Call ended. ${data.creditsUsed} credits used, ${data.remainingCredits} remaining.`,
+      );
+      setTimeout(() => setCallError(''), 5000);
+      await sendLowCreditNotification(data.remainingCredits);
+    } catch (error) {
+      console.error('Error ending call:', error);
+      setCallError(error instanceof Error ? error.message : 'Failed to end call');
+    } finally {
+      setIsCallActive(false);
+      setCallId(null);
+      autoEndingRef.current = false;
+      await fetchCredits();
+    }
+  }, [callId, fetchCredits]);
 
   useEffect(() => {
     if (user) {
       void fetchCredits();
-      void checkFirstTimeUser();
     }
-  }, [user]);
+  }, [user, fetchCredits]);
 
   useEffect(() => {
     if (isCallActive) {
@@ -138,12 +195,13 @@ export default function CallPage() {
       }
 
       // Auto‑end call if credits depleted
-      if (remainingCredits <= 0) {
+      if (remainingCredits <= 0 && !autoEndingRef.current) {
+        autoEndingRef.current = true;
         setLowCreditWarning('❌ Credits depleted! Ending call...');
-        setTimeout(() => endCall(), 2000);
+        setTimeout(() => void endCall(), 2000);
       }
     }
-  }, [callDuration, isCallActive, credits, user]);
+  }, [callDuration, isCallActive, credits, user, endCall]);
 
   // Reset warning when call ends
   useEffect(() => {
@@ -153,43 +211,26 @@ export default function CallPage() {
     }
   }, [isCallActive]);
 
-  const checkFirstTimeUser = async () => {
-    try {
-      const data = await apiFetch<{ credits: number }>('/api/user/credits');
-      setIsFirstTimeUser(data.credits === 0);
-    } catch (error) {
-      console.error('Error checking first time user:', error);
-    }
-  };
-
   const claimFreeCredits = async () => {
     if (!user) return;
 
     setClaimingFreeCredits(true);
-    setCallError('Free credit grants require a backend endpoint. Please purchase credits on the pricing page.');
-    setIsFirstTimeUser(false);
-    setClaimingFreeCredits(false);
-  };
-
-  const fetchCredits = async () => {
+    setCallError('');
     try {
-      const data = await apiFetch<{ credits: number }>('/api/user/credits');
-      setCredits(data.credits);
-    } catch (error) {
-      console.error('Error fetching credits:', error);
-    }
-  };
-
-  const sendLowCreditNotification = async (currentCredits: number) => {
-    if (currentCredits > 50) return;
-
-    try {
-      await apiFetch('/api/notifications/low-credit', {
+      const data = await apiFetch<{ credits: number }>('/api/user/claim-free-credits', {
         method: 'POST',
-        body: JSON.stringify({ credits: currentCredits }),
       });
+      setCredits(data.credits);
+      setIsFirstTimeUser(false);
+      setCallError('✓ 50 free credits added to your account!');
+      setTimeout(() => setCallError(''), 5000);
     } catch (error) {
-      console.error('Error sending low credit notification:', error);
+      setCallError(
+        error instanceof Error ? error.message : 'Unable to claim free credits. Please try again.',
+      );
+      await fetchCredits();
+    } finally {
+      setClaimingFreeCredits(false);
     }
   };
 
@@ -220,20 +261,16 @@ export default function CallPage() {
     setShowPhoneModal(true);
   };
 
-  const addTestCredits = async () => {
-    if (!user) {
-      setCallError('Please sign in first');
+  const initiateCall = async () => {
+    const toNumber = phoneNumber.replace(/[\s()-]/g, '');
+    if (!toNumber) {
+      setCallError('Please enter a phone number');
       return;
     }
-
-    setAddingTestCredits(true);
-    setCallError('Test credit grants are not available via the API.');
-    setAddingTestCredits(false);
-  };
-
-  const initiateCall = async () => {
-    if (!phoneNumber.trim()) {
-      setCallError('Please enter a phone number');
+    if (!E164_REGEX.test(toNumber)) {
+      setCallError(
+        'Please enter your number in international format: a + followed by your country code and number, with no leading 0 (e.g. +233201234567).',
+      );
       return;
     }
 
@@ -241,87 +278,25 @@ export default function CallPage() {
     setCallError('');
 
     try {
-      if (demoMode) {
-        // Demo mode – simulate call without Twilio
-        setCallId('demo-' + Date.now());
-        setCallSid('demo-sid-' + Date.now());
-        setIsCallActive(true);
-        setCallDuration(0);
-        setShowPhoneModal(false);
-        setPhoneNumber('');
-        setCallError('🎭 Demo Mode: Simulated call started (no real call made)');
-        setTimeout(() => setCallError(''), 5000);
-        return;
-      }
-
       const data = await apiFetch<{
+        success: boolean;
         callId: string;
         callSid: string;
-        success: boolean;
+        maxDurationSeconds: number;
       }>('/api/calls/initiate', {
         method: 'POST',
-        body: JSON.stringify({ toNumber: phoneNumber }),
+        body: JSON.stringify({ toNumber }),
       });
 
       setCallId(data.callId);
-      setCallSid(data.callSid);
       setIsCallActive(true);
       setCallDuration(0);
       setShowPhoneModal(false);
       setPhoneNumber('');
-    } catch (error: any) {
-      setCallError(error.message || 'Failed to start call');
+    } catch (error) {
+      setCallError(error instanceof Error ? error.message : 'Failed to start call');
     } finally {
       setIsInitiating(false);
-    }
-  };
-
-  const endCall = async () => {
-    if (!callId) {
-      setIsCallActive(false);
-      return;
-    }
-
-    try {
-      if (demoMode || callId.startsWith('demo-')) {
-        // Demo mode – simulate credit deduction (10 credits per minute)
-        const creditsUsed = Math.ceil(callDuration / 60) * 10;
-        const newCredits = Math.max(0, credits - creditsUsed);
-        setCredits(newCredits);
-        setIsCallActive(false);
-        setCallId(null);
-        setCallSid(null);
-        setCallError(
-          `🎭 Demo call ended. Would have used ${creditsUsed} credits (${Math.ceil(
-            callDuration / 60
-          )} minutes)`
-        );
-        // Send email notification if credits are low
-        await sendLowCreditNotification(newCredits);
-        setTimeout(() => setCallError(''), 5000);
-        return;
-      }
-
-      const data = await apiFetch<{
-        remainingCredits: number;
-        creditsUsed: number;
-      }>('/api/calls/end', {
-        method: 'POST',
-        body: JSON.stringify({
-          callId,
-          durationSeconds: callDuration,
-        }),
-      });
-
-      setCredits(data.remainingCredits);
-      await sendLowCreditNotification(data.remainingCredits);
-    } catch (error) {
-      console.error('Error ending call:', error);
-    } finally {
-      setIsCallActive(false);
-      setCallId(null);
-      setCallSid(null);
-      await fetchCredits();
     }
   };
 
@@ -350,13 +325,11 @@ export default function CallPage() {
         } else {
           setShowAuthModal(false);
           await fetchCredits();
-          await checkFirstTimeUser();
         }
       } else {
         await signIn(email, password);
         setShowAuthModal(false);
         await fetchCredits();
-        await checkFirstTimeUser();
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Authentication failed';
@@ -488,14 +461,6 @@ export default function CallPage() {
                       : 'Claim 50 Free Credits!'}
                   </button>
                 )}
-                <button
-                  onClick={addTestCredits}
-                  disabled={addingTestCredits}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-[#0096FF] text-white rounded-full shadow-md hover:bg-[#0077CC] transition-all disabled:opacity-50 whitespace-nowrap cursor-pointer text-sm font-medium"
-                >
-                  <i className="ri-add-circle-fill"></i>
-                  {addingTestCredits ? 'Adding...' : 'Add 200 Test Credits'}
-                </button>
               </div>
             )}
             {!user && (
@@ -508,56 +473,25 @@ export default function CallPage() {
             )}
           </div>
 
-          {/* Demo Mode Toggle */}
-          {user && (
-            <div className="max-w-2xl mx-auto mb-6 p-4 bg-yellow-50 border-2 border-yellow-200 rounded-2xl">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <i className="ri-flask-fill text-2xl text-yellow-600"></i>
-                  <div>
-                    <p className="font-semibold text-yellow-900 text-sm">
-                      Demo Mode
-                    </p>
-                    <p className="text-xs text-yellow-700">
-                      Test without making real calls
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setDemoMode(!demoMode)}
-                  className={`relative w-14 h-7 rounded-full transition-all cursor-pointer ${
-                    demoMode ? 'bg-yellow-500' : 'bg-gray-300'
-                  }`}
-                >
-                  <div
-                    className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${
-                      demoMode ? 'translate-x-7' : 'translate-x-0'
-                    }`}
-                  />
-                </button>
-              </div>
-            </div>
-          )}
-
           {/* Error Message */}
           {callError && (
             <div
               className={`max-w-2xl mx-auto mb-6 p-4 border rounded-2xl flex items-start gap-3 ${
-                callError.includes('✓') || callError.includes('🎭')
+                callError.includes('✓')
                   ? 'bg-green-50 border-green-200'
                   : 'bg-red-50 border-red-200'
               }`}
             >
               <i
                 className={`text-xl mt-0.5 ${
-                  callError.includes('✓') || callError.includes('🎭')
+                  callError.includes('✓')
                     ? 'ri-checkbox-circle-fill text-green-500'
                     : 'ri-error-warning-fill text-red-500'
                 }`}
               ></i>
               <p
                 className={`text-sm ${
-                  callError.includes('✓') || callError.includes('🎭')
+                  callError.includes('✓')
                     ? 'text-green-700'
                     : 'text-red-700'
                 }`}
@@ -799,11 +733,11 @@ export default function CallPage() {
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
                   className="w-full px-4 py-3 border-2 border-[#E5E5E5] rounded-xl focus:border-[#0096FF] focus:outline-none text-sm md:text-base"
-                  placeholder="+1234567890"
+                  placeholder="+233201234567"
                   required
                 />
                 <p className="text-xs text-[#6B6B6B] mt-2">
-                  Include country code (e.g., +1 for US)
+                  International format with country code, no leading 0 (e.g., +233201234567)
                 </p>
               </div>
 
@@ -1091,7 +1025,7 @@ export default function CallPage() {
                   value={bookingPhoneNumber}
                   onChange={(e) => setBookingPhoneNumber(e.target.value)}
                   className="w-full px-4 py-3 border-2 border-[#E5E5E5] rounded-xl focus:border-[#0096FF] focus:outline-none text-sm md:text-base"
-                  placeholder="+1234567890"
+                  placeholder="+233201234567"
                   required
                 />
                 <p className="text-xs text-[#6B6B6B] mt-1">

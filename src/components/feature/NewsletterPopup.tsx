@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import { apiFetch } from '../../lib/api';
 
 export default function NewsletterPopup() {
   const [isVisible, setIsVisible] = useState(false);
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     // Check if user has already seen the popup
@@ -29,39 +31,35 @@ export default function NewsletterPopup() {
     e.preventDefault();
     
     if (!email || !email.includes('@')) {
+      setErrorMessage('Please enter a valid email address.');
       setSubmitStatus('error');
       return;
     }
 
     setIsSubmitting(true);
     setSubmitStatus('idle');
+    setErrorMessage('');
 
     try {
-      const formData = new URLSearchParams();
-      formData.append('email', email);
-
-      const response = await fetch('https://readdy.ai/api/form/d5flh7aeekkptfh8l100', {
+      await apiFetch('/api/newsletter', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: formData.toString(),
+        body: JSON.stringify({ email: email.trim() }),
       });
 
-      if (response.ok) {
-        setSubmitStatus('success');
-        setEmail('');
-        localStorage.setItem('newsletter_popup_seen', 'true');
-        
-        // Close popup after 2 seconds
-        setTimeout(() => {
-          setIsVisible(false);
-        }, 2000);
-      } else {
-        setSubmitStatus('error');
-      }
+      setSubmitStatus('success');
+      setEmail('');
+      localStorage.setItem('newsletter_popup_seen', 'true');
+
+      // Close popup after 2 seconds
+      setTimeout(() => {
+        setIsVisible(false);
+      }, 2000);
     } catch (error) {
-      console.error('Subscription error:', error);
+      setErrorMessage(
+        error instanceof Error && error.message
+          ? error.message
+          : 'Subscription failed. Please try again.',
+      );
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);
@@ -107,7 +105,7 @@ export default function NewsletterPopup() {
           </p>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} data-readdy-form id="newsletter-popup-form">
+          <form onSubmit={handleSubmit} id="newsletter-popup-form">
             <div className="mb-4">
               <input
                 type="email"
@@ -132,7 +130,7 @@ export default function NewsletterPopup() {
             {submitStatus === 'error' && (
               <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2">
                 <i className="ri-error-warning-fill text-red-600"></i>
-                <span className="text-sm text-red-800">Please enter a valid email address.</span>
+                <span className="text-sm text-red-800">{errorMessage || 'Please enter a valid email address.'}</span>
               </div>
             )}
 
