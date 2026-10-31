@@ -4,4 +4,4 @@ node_modules
 server/.env
 server/uploads
 *.zip
-out/**/*.map
+out/

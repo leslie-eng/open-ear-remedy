@@ -5,7 +5,6 @@
   "version": "1.0.0",
   "scripts": {
     "start": "node src/index.js",
-    "start:cpanel": "node app.cjs",
     "dev": "node --watch src/index.js",
     "db:migrate": "node src/migrate.js"
   },
