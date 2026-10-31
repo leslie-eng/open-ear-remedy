@@ -4,7 +4,11 @@ import { asyncHandler, requireAuth } from '../middleware.js';
 import * as billing from '../services/billing.js';
 import { rateLimit } from '../util.js';
 
-const SYSTEM_PROMPT = `You are a warm, friendly AI companion for Open Ear. Be supportive, conversational, and brief (2-4 sentences). If someone mentions self-harm, gently suggest 988 Suicide & Crisis Lifeline.`;
+// The AI is a companion, not a counsellor: it never diagnoses, and anyone in danger is sent to
+// real people (emergency services, helplines on the crisis page) rather than kept in the chat.
+const SYSTEM_PROMPT = `You are Open Ear's AI companion: warm, calm and non-judgemental. Listen first, reflect back what you hear, and keep replies brief (2-4 sentences) and conversational.
+You are not a therapist or doctor. Do not diagnose, give medical or medication advice, or claim to be human.
+If someone mentions suicide, self-harm, harming others, abuse, or being in danger, respond with care, encourage them to contact local emergency services or a crisis helpline right now, and share https://openearemedy.com/crisis-help where they can find numbers. They can also talk to a real person through an Open Ear call.`;
 
 const MAX_MESSAGE_CHARS = 2000;
 const MAX_HISTORY_MESSAGES = 20;
@@ -16,7 +20,7 @@ router.post(
   requireAuth,
   rateLimit({ windowMs: 60 * 1000, max: 15, key: (req) => req.user.id }),
   asyncHandler(async (req, res) => {
-    if (!config.groqApiKey) {
+    if (!config.openRouterApiKey) {
       return res.status(503).json({ error: 'Chat service is not configured' });
     }
 
@@ -46,21 +50,25 @@ router.post(
 
     let aiResponse;
     try {
-      const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      const aiRes = await fetch(`${config.openRouterBaseUrl}/chat/completions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${config.groqApiKey}`,
+          Authorization: `Bearer ${config.openRouterApiKey}`,
+          // Optional OpenRouter attribution headers.
+          'HTTP-Referer': config.clientUrl,
+          'X-Title': 'Open Ear',
         },
         body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
+          model: config.openRouterModel,
           messages,
           max_tokens: 500,
           temperature: 0.7,
         }),
+        signal: AbortSignal.timeout(30_000),
       });
-      if (!groqRes.ok) throw new Error(`Groq error: ${await groqRes.text()}`);
-      const data = await groqRes.json();
+      if (!aiRes.ok) throw new Error(`OpenRouter error (${aiRes.status}): ${await aiRes.text()}`);
+      const data = await aiRes.json();
       aiResponse = data.choices?.[0]?.message?.content;
     } catch (err) {
       console.error(err);

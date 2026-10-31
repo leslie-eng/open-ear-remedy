@@ -52,7 +52,10 @@ export const config = {
   emailFrom: process.env.EMAIL_FROM || 'Open Ear <noreply@openearemedy.com>',
   paystackSecretKey: process.env.PAYSTACK_SECRET_KEY || '',
   paystackWebhookSecret: process.env.PAYSTACK_WEBHOOK_SECRET || '',
-  groqApiKey: process.env.GROQ_API_KEY || '',
+  // AI chat through OpenRouter (OpenAI-compatible API). OPENROUTER_MODEL switches models without a code change.
+  openRouterApiKey: process.env.OPENROUTER_API_KEY || '',
+  openRouterModel: process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.3-70b-instruct',
+  openRouterBaseUrl: (process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1').replace(/\/$/, ''),
   // Cloudflare TURN relay for calls (Dashboard → Realtime → TURN). Required in production.
   turnKeyId: process.env.CLOUDFLARE_TURN_KEY_ID || '',
   turnApiToken: process.env.CLOUDFLARE_TURN_API_TOKEN || '',
