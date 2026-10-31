@@ -23,9 +23,9 @@ services:
         value: https://openearemedy.com,https://www.openearemedy.com
       - key: JWT_SECRET
         generateValue: true
-      # Set to this service's URL (e.g. https://openear-api.onrender.com) so cover image links resolve.
+      # This service's public URL: cover image links and the website's API calls use it.
       - key: PUBLIC_API_URL
-        sync: false
+        value: https://api.openearemedy.com
       # Neon: pooled connection string for the app, direct one for migrations (sslmode=verify-full).
       - key: DATABASE_URL
         sync: false
@@ -47,6 +47,21 @@ services:
         sync: false
       - key: S3_BUCKET
         sync: false
+      # Email, payments, AI chat
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        value: Open Ear <noreply@openearemedy.com>
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: PAYSTACK_SECRET_KEY
+        sync: false
+      - key: PAYSTACK_WEBHOOK_SECRET
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: OPENROUTER_MODEL
+        value: meta-llama/llama-3.3-70b-instruct
 
   # Daily at 06:00 Nairobi (03:00 UTC): email Monthly Pass holders whose pass ends within 3 days.
   - type: cron
