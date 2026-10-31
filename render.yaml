@@ -6,7 +6,9 @@ services:
   - type: web
     name: openear-api
     runtime: node
-    plan: free
+    # Starter, not free: free services sleep after 15 idle minutes, which drops every
+    # listener's call connection. Calls need an always-on instance.
+    plan: starter
     # npm workspaces: install from the repo root so @openear/shared is linked and built (root postinstall).
     buildCommand: npm ci
     preDeployCommand: npm run db:migrate -w @openear/api
@@ -28,6 +30,11 @@ services:
       - key: DATABASE_URL
         sync: false
       - key: DATABASE_URL_UNPOOLED
+        sync: false
+      # Cloudflare TURN relay for calls (required: calls are refused without it in production)
+      - key: CLOUDFLARE_TURN_KEY_ID
+        sync: false
+      - key: CLOUDFLARE_TURN_API_TOKEN
         sync: false
       # Cloudflare R2 (covers public bucket, ebooks private bucket)
       - key: R2_ACCOUNT_ID

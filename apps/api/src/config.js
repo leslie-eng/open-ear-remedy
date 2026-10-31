@@ -51,15 +51,10 @@ export const config = {
   paystackSecretKey: process.env.PAYSTACK_SECRET_KEY || '',
   paystackWebhookSecret: process.env.PAYSTACK_WEBHOOK_SECRET || '',
   groqApiKey: process.env.GROQ_API_KEY || '',
-  twilioAccountSid: process.env.TWILIO_ACCOUNT_SID || '',
-  twilioAuthToken: process.env.TWILIO_AUTH_TOKEN || '',
-  twilioPhoneNumber: process.env.TWILIO_PHONE_NUMBER || '',
+  // Cloudflare TURN relay for calls (Dashboard → Realtime → TURN). Required in production.
+  turnKeyId: process.env.CLOUDFLARE_TURN_KEY_ID || '',
+  turnApiToken: process.env.CLOUDFLARE_TURN_API_TOKEN || '',
   adminEmail: process.env.ADMIN_EMAIL || '',
-  // Optional comma list of allowed dialing prefixes for outbound calls, e.g. "+233,+234,+1".
-  callAllowedPrefixes: (process.env.CALL_ALLOWED_PREFIXES || '')
-    .split(',')
-    .map((s) => s.trim())
-    .filter(Boolean),
   // Number of reverse proxies in front of the app (LiteSpeed/Apache on cPanel, Render's LB).
   trustProxy: parseInt(process.env.TRUST_PROXY || '1', 10),
   // Local-disk storage for development; production uses Cloudflare R2 when R2_* vars are set.

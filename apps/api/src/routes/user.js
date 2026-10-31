@@ -40,6 +40,7 @@ router.get(
     const row = await getOrCreateCredits(req.user.id);
     res.json({
       email: req.user.email,
+      display_name: req.user.display_name ?? null,
       phone_number: row.phone_number,
       credits: row.credits,
       created_at: row.created_at || req.user.created_at,
@@ -178,6 +179,21 @@ router.get(
       [req.user.id],
     );
     res.json({ orders: await mapOrders(rows) });
+  }),
+);
+
+/** The only thing a listener sees about a caller. Empty clears it (shown as "Anonymous"). */
+router.put(
+  '/display-name',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const raw = typeof req.body?.displayName === 'string' ? req.body.displayName.trim() : '';
+    if (raw.length > 40) return res.status(400).json({ error: 'Display name must be 40 characters or fewer.' });
+    const { rows } = await query(
+      `UPDATE users SET display_name = $2, updated_at = NOW() WHERE id = $1 RETURNING display_name`,
+      [req.user.id, raw || null],
+    );
+    res.json({ display_name: rows[0].display_name });
   }),
 );
 

@@ -4,8 +4,15 @@ import { config } from '../config.js';
 import { asyncHandler } from '../middleware.js';
 import { sendRawEmail } from '../email.js';
 import { escapeHtml, isValidEmail, rateLimit } from '../util.js';
+import { coordinator } from '../calls/service.js';
 
 const router = Router();
+
+/** Whether a listener could answer right now. A yes/no only: no counts are exposed. */
+router.get('/public/availability', (_req, res) => {
+  res.set('Cache-Control', 'no-store');
+  res.json({ listenersAvailable: coordinator.listenersAvailable() });
+});
 
 const formLimit = rateLimit({ windowMs: 60 * 60 * 1000, max: 5 });
 

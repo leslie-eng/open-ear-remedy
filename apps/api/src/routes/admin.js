@@ -5,6 +5,7 @@ import { asyncHandler, requireAdmin } from '../middleware.js';
 import { sendRawEmail } from '../email.js';
 import { mapAdminEbook } from '../services/ebooks.js';
 import * as billing from '../services/billing.js';
+import { coordinator } from '../calls/service.js';
 import { escapeHtml } from '../util.js';
 import {
   getMonthlyRevenueInRange,
@@ -303,6 +304,78 @@ router.get(
   requireAdmin,
   asyncHandler(async (req, res) => {
     res.json({ adjustments: await billing.listAdjustments(req.params.id) });
+  }),
+);
+
+/** Listeners with their call minutes since `since` (default: start of this month, UTC). */
+router.get(
+  '/listeners',
+  requireAdmin,
+  asyncHandler(async (req, res) => {
+    const now = new Date();
+    const since = req.query.since ? new Date(String(req.query.since)) : new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+    if (Number.isNaN(since.getTime())) return res.status(400).json({ error: 'Invalid since date' });
+    const { rows } = await query(
+      `SELECT l.user_id, l.active, l.created_at, u.email, u.full_name,
+              COALESCE(SUM(c.duration_seconds), 0)::int AS seconds,
+              COUNT(c.id) FILTER (WHERE c.connected_at IS NOT NULL)::int AS calls
+       FROM listeners l
+       JOIN users u ON u.id = l.user_id
+       LEFT JOIN call_history c ON c.listener_user_id = l.user_id AND c.started_at >= $1
+       GROUP BY l.user_id, u.email, u.full_name
+       ORDER BY u.email`,
+      [since],
+    );
+    res.json({
+      since,
+      listeners: rows.map((r) => ({
+        userId: r.user_id,
+        email: r.email,
+        name: r.full_name,
+        active: r.active,
+        calls: r.calls,
+        minutes: Math.round(r.seconds / 60),
+      })),
+    });
+  }),
+);
+
+/** Makes an existing account (by email) a listener, or reactivates one. */
+router.post(
+  '/listeners',
+  requireAdmin,
+  asyncHandler(async (req, res) => {
+    const email = String(req.body?.email || '').trim().toLowerCase();
+    const { rows } = await query(`SELECT id FROM users WHERE email = $1`, [email]);
+    if (!rows[0]) return res.status(404).json({ error: 'No account with that email. Ask them to sign up first.' });
+    await query(
+      `INSERT INTO listeners (user_id, created_by) VALUES ($1, $2)
+       ON CONFLICT (user_id) DO UPDATE SET active = TRUE`,
+      [rows[0].id, req.user.id],
+    );
+    res.status(201).json({ userId: rows[0].id, active: true });
+  }),
+);
+
+router.patch(
+  '/listeners/:userId',
+  requireAdmin,
+  asyncHandler(async (req, res) => {
+    if (typeof req.body?.active !== 'boolean') return res.status(400).json({ error: 'active must be true or false' });
+    const { rowCount } = await query(`UPDATE listeners SET active = $2 WHERE user_id = $1`, [req.params.userId, req.body.active]);
+    if (!rowCount) return res.status(404).json({ error: 'Listener not found' });
+    // Take a deactivated listener offline at once (they are never rung again).
+    if (!req.body.active) await coordinator.listenerOffline(req.params.userId);
+    res.json({ userId: req.params.userId, active: req.body.active });
+  }),
+);
+
+/** Reports listeners made about callers, newest first. */
+router.get(
+  '/call-reports',
+  requireAdmin,
+  asyncHandler(async (_req, res) => {
+    res.json({ reports: await coordinator.listReports() });
   }),
 );
 

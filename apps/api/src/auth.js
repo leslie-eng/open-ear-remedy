@@ -53,7 +53,7 @@ export function generateToken(bytes = 32) {
 
 export async function findUserById(id) {
   const { rows } = await query(
-    `SELECT id, email, full_name, email_verified_at, token_version, created_at FROM users WHERE id = $1`,
+    `SELECT id, email, full_name, display_name, email_verified_at, token_version, created_at FROM users WHERE id = $1`,
     [id],
   );
   return rows[0] || null;
