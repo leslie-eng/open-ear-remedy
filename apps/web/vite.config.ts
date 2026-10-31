@@ -11,6 +11,8 @@ export default defineConfig({
     __IS_PREVIEW__: JSON.stringify(isPreview),
   },
   plugins: [react()],
+  // One .env at the repo root serves both apps (only VITE_* vars reach the browser).
+  envDir: resolve(__dirname, "../.."),
   base,
   build: {
     sourcemap: false,

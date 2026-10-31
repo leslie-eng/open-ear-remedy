@@ -1,28 +1,32 @@
--- Open Ear API schema (PostgreSQL)
--- Requires PostgreSQL 13+ (gen_random_uuid is built-in; no extension needed on cPanel).
+-- 0001: initial Open Ear schema (Neon / PostgreSQL 13+; gen_random_uuid is built in).
+-- Consolidates the pre-migration schema.sql, including its later ALTER patches.
 
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email TEXT NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
   full_name TEXT,
   email_verified_at TIMESTAMPTZ,
+  -- Bumped on password change/reset to invalidate existing JWTs.
+  token_version INTEGER NOT NULL DEFAULT 0,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS verification_tokens (
+CREATE TABLE verification_tokens (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email TEXT NOT NULL,
   token TEXT NOT NULL,
   type TEXT NOT NULL CHECK (type IN ('signup', 'email')),
   expires_at TIMESTAMPTZ NOT NULL,
+  -- Failed OTP attempts; a code is burned after too many wrong guesses.
+  attempts INTEGER NOT NULL DEFAULT 0,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_verification_tokens_email ON verification_tokens(email);
+CREATE INDEX idx_verification_tokens_email ON verification_tokens(email);
 
-CREATE TABLE IF NOT EXISTS password_reset_tokens (
+CREATE TABLE password_reset_tokens (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   token TEXT NOT NULL UNIQUE,
@@ -31,16 +35,17 @@ CREATE TABLE IF NOT EXISTS password_reset_tokens (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS user_credits (
+CREATE TABLE user_credits (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
   credits INTEGER NOT NULL DEFAULT 0 CHECK (credits >= 0),
   phone_number TEXT,
+  free_credits_claimed_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS credit_transactions (
+CREATE TABLE credit_transactions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   type TEXT NOT NULL,
@@ -49,26 +54,33 @@ CREATE TABLE IF NOT EXISTS credit_transactions (
   description TEXT,
   status TEXT NOT NULL DEFAULT 'completed',
   call_id UUID,
+  -- Payment reference for idempotent webhook processing.
+  reference TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_credit_transactions_user ON credit_transactions(user_id);
+CREATE INDEX idx_credit_transactions_user ON credit_transactions(user_id);
+CREATE UNIQUE INDEX idx_credit_transactions_reference
+  ON credit_transactions(reference) WHERE reference IS NOT NULL;
 
-CREATE TABLE IF NOT EXISTS call_history (
+CREATE TABLE call_history (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   call_sid TEXT,
   status TEXT NOT NULL DEFAULT 'in-progress',
   duration_seconds INTEGER NOT NULL DEFAULT 0,
   credits_used INTEGER NOT NULL DEFAULT 0,
+  -- Billing cap for a call, derived from credits at call start.
+  max_duration_seconds INTEGER,
+  to_number TEXT,
   started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   ended_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_call_history_user ON call_history(user_id);
+CREATE INDEX idx_call_history_user ON call_history(user_id);
 
-CREATE TABLE IF NOT EXISTS mood_logs (
+CREATE TABLE mood_logs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   mood TEXT NOT NULL,
@@ -77,9 +89,9 @@ CREATE TABLE IF NOT EXISTS mood_logs (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_mood_logs_user ON mood_logs(user_id);
+CREATE INDEX idx_mood_logs_user ON mood_logs(user_id);
 
-CREATE TABLE IF NOT EXISTS appointments (
+CREATE TABLE appointments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   user_name TEXT NOT NULL,
@@ -94,14 +106,14 @@ CREATE TABLE IF NOT EXISTS appointments (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS admin_users (
+CREATE TABLE admin_users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
   role TEXT NOT NULL DEFAULT 'admin',
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS credit_notifications (
+CREATE TABLE credit_notifications (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   email TEXT NOT NULL,
@@ -111,8 +123,8 @@ CREATE TABLE IF NOT EXISTS credit_notifications (
   UNIQUE (user_id, threshold_level)
 );
 
-CREATE TABLE IF NOT EXISTS products (
-  id TEXT PRIMARY KEY,
+CREATE TABLE products (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
   title TEXT NOT NULL,
   slug TEXT UNIQUE,
   author TEXT,
@@ -133,33 +145,9 @@ CREATE TABLE IF NOT EXISTS products (
 );
 
 -- ---------------------------------------------------------------------------
--- Security / integrity upgrades (safe to re-run)
--- ---------------------------------------------------------------------------
-
--- Bumped on password change/reset to invalidate existing JWTs.
-ALTER TABLE users ADD COLUMN IF NOT EXISTS token_version INTEGER NOT NULL DEFAULT 0;
-
--- Failed OTP attempts; a code is burned after too many wrong guesses.
-ALTER TABLE verification_tokens ADD COLUMN IF NOT EXISTS attempts INTEGER NOT NULL DEFAULT 0;
-
--- One-time free trial credits.
-ALTER TABLE user_credits ADD COLUMN IF NOT EXISTS free_credits_claimed_at TIMESTAMPTZ;
-
--- Payment reference for idempotent webhook processing.
-ALTER TABLE credit_transactions ADD COLUMN IF NOT EXISTS reference TEXT;
-CREATE UNIQUE INDEX IF NOT EXISTS idx_credit_transactions_reference
-  ON credit_transactions(reference) WHERE reference IS NOT NULL;
-
--- Billing cap for a call, derived from credits at call start.
-ALTER TABLE call_history ADD COLUMN IF NOT EXISTS max_duration_seconds INTEGER;
-ALTER TABLE call_history ADD COLUMN IF NOT EXISTS to_number TEXT;
-
--- ---------------------------------------------------------------------------
 -- Ebook store
 -- ---------------------------------------------------------------------------
-ALTER TABLE products ALTER COLUMN id SET DEFAULT gen_random_uuid()::text;
-
-CREATE TABLE IF NOT EXISTS ebook_orders (
+CREATE TABLE ebook_orders (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   reference TEXT NOT NULL UNIQUE,
@@ -170,9 +158,9 @@ CREATE TABLE IF NOT EXISTS ebook_orders (
   completed_at TIMESTAMPTZ
 );
 
-CREATE INDEX IF NOT EXISTS idx_ebook_orders_user ON ebook_orders(user_id);
+CREATE INDEX idx_ebook_orders_user ON ebook_orders(user_id);
 
-CREATE TABLE IF NOT EXISTS ebook_order_items (
+CREATE TABLE ebook_order_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   order_id UUID NOT NULL REFERENCES ebook_orders(id) ON DELETE CASCADE,
   product_id TEXT NOT NULL REFERENCES products(id),
@@ -180,7 +168,7 @@ CREATE TABLE IF NOT EXISTS ebook_order_items (
   price_amount INTEGER NOT NULL -- minor units
 );
 
-CREATE TABLE IF NOT EXISTS user_library (
+CREATE TABLE user_library (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   product_id TEXT NOT NULL REFERENCES products(id),
@@ -192,7 +180,7 @@ CREATE TABLE IF NOT EXISTS user_library (
 -- ---------------------------------------------------------------------------
 -- Contact form & newsletter
 -- ---------------------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS contact_messages (
+CREATE TABLE contact_messages (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   email TEXT NOT NULL,
@@ -201,7 +189,7 @@ CREATE TABLE IF NOT EXISTS contact_messages (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+CREATE TABLE newsletter_subscribers (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email TEXT NOT NULL UNIQUE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
