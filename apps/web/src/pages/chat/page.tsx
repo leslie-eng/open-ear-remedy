@@ -6,6 +6,9 @@ import { apiFetch } from '../../lib/api';
 import { useSEO, generateWebPageSchema } from '../../utils/seo';
 import TypingIndicator from '../../components/ui/TypingIndicator';
 import { CREDITS_PER_CHAT_MESSAGE } from '@openear/shared/pricing';
+import { canSendChatMessage, type Balance } from '../../hooks/useBalance';
+
+const PER_MESSAGE = `${CREDITS_PER_CHAT_MESSAGE} credit${CREDITS_PER_CHAT_MESSAGE === 1 ? '' : 's'}`;
 
 interface Message {
   id: string;
@@ -17,7 +20,7 @@ interface Message {
 export default function ChatPage() {
   useSEO({
     title: 'AI Chat Support - 24/7 Emotional Support | Open Ear',
-    description: `Chat with our AI assistant anytime for emotional support. Available 24/7, private and confidential. ${CREDITS_PER_CHAT_MESSAGE} credits per message.`,
+    description: `Chat with our AI assistant anytime for emotional support. Available 24/7, private and confidential. ${PER_MESSAGE} per message.`,
     keywords: 'AI chat support, emotional support chat, mental health chatbot, 24/7 support, online counseling',
     canonical: '/chat',
     ogType: 'website',
@@ -41,7 +44,8 @@ export default function ChatPage() {
     resendOtp,
     forgotPassword: sendForgotPassword,
   } = useAuth();
-  const [credits, setCredits] = useState(0);
+  const [balance, setBalance] = useState<Balance>({ credits: 0, pass: null, queuedPass: null });
+  const credits = balance.credits;
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [forgotPassword, setForgotPassword] = useState(false);
@@ -79,8 +83,7 @@ export default function ChatPage() {
 
   const fetchCredits = async () => {
     try {
-      const data = await apiFetch<{ credits: number }>('/api/user/credits');
-      setCredits(data.credits);
+      setBalance(await apiFetch<Balance>('/api/user/credits'));
     } catch (error) {
       console.error('Error fetching credits:', error);
     }
@@ -124,7 +127,7 @@ export default function ChatPage() {
   const generateAIResponse = async (
     userMessage: string,
     conversationHistory: Message[],
-  ): Promise<{ response: string; credits: number }> => {
+  ): Promise<{ response: string; balance: Balance }> => {
     const historyForAPI = conversationHistory
       .slice(-10)
       .map((msg) => ({
@@ -132,7 +135,7 @@ export default function ChatPage() {
         content: msg.content,
       }));
 
-    const data = await apiFetch<{ response: string; credits: number }>('/api/chat', {
+    const data = await apiFetch<{ response: string; balance: Balance }>('/api/chat', {
       method: 'POST',
       body: JSON.stringify({
         message: userMessage,
@@ -151,9 +154,9 @@ export default function ChatPage() {
       return;
     }
 
-    // Check if user has enough credits
-    if (credits < CREDITS_PER_CHAT_MESSAGE) {
-      setCreditError(`Insufficient credits. You need ${CREDITS_PER_CHAT_MESSAGE} credits per message.`);
+    // Today's Monthly Pass allowance is used first, then credits.
+    if (!canSendChatMessage(balance)) {
+      setCreditError(`You have no messages left. Top up credits (${PER_MESSAGE} per message) or get a Monthly Pass.`);
       setTimeout(() => setCreditError(''), 5000);
       return;
     }
@@ -173,14 +176,17 @@ export default function ChatPage() {
     setAiError('');
 
     try {
-      const { response: aiResponseText, credits: newCredits } = await generateAIResponse(
+      const { response: aiResponseText, balance: newBalance } = await generateAIResponse(
         userMsg.content,
         messages,
       );
 
-      setCredits(newCredits);
-      checkLowCreditWarning(newCredits);
-      await sendLowCreditNotification(newCredits);
+      setBalance(newBalance);
+      // Low-credit warnings only matter once the pass allowance for today is used up.
+      if (!newBalance.pass?.aiMessagesLeftToday) {
+        checkLowCreditWarning(newBalance.credits);
+        await sendLowCreditNotification(newBalance.credits);
+      }
 
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
@@ -289,13 +295,17 @@ export default function ChatPage() {
             Chat with Our AI Assistant
           </h1>
           <p className="text-sm text-[#6B6B6B]">
-            Available 24/7 • {CREDITS_PER_CHAT_MESSAGE} credits per message
+            Available 24/7 • {PER_MESSAGE} per message
           </p>
           {user && (
             <div className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-md">
               <i className="ri-copper-coin-fill text-[#0096FF]"></i>
               <span className="font-semibold text-[#2A2A2A]">{credits} Credits</span>
-              <span className="text-xs text-[#6B6B6B]">({Math.floor(credits / CREDITS_PER_CHAT_MESSAGE)} messages)</span>
+              <span className="text-xs text-[#6B6B6B]">
+                {balance.pass
+                  ? `(+ ${balance.pass.aiMessagesLeftToday} Monthly Pass messages left today)`
+                  : `(${Math.floor(credits / CREDITS_PER_CHAT_MESSAGE)} messages)`}
+              </span>
             </div>
           )}
         </div>
@@ -385,7 +395,7 @@ export default function ChatPage() {
               <h3 className="font-semibold text-[#2A2A2A] text-sm md:text-base">Open Ear Assistant</h3>
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                <span className="text-xs text-[#6B6B6B]">Online • {CREDITS_PER_CHAT_MESSAGE} credits/msg</span>
+                <span className="text-xs text-[#6B6B6B]">Online • {PER_MESSAGE}/msg</span>
               </div>
             </div>
             <button
@@ -445,7 +455,7 @@ export default function ChatPage() {
           {/* Suggestions */}
           {showSuggestions && messages.length <= 1 && (
             <div className="px-4 md:px-6 pb-3">
-              <p className="text-xs text-[#6B6B6B] mb-2">Suggested topics ({CREDITS_PER_CHAT_MESSAGE} credits each):</p>
+              <p className="text-xs text-[#6B6B6B] mb-2">Suggested topics ({PER_MESSAGE} each):</p>
               <div className="flex flex-wrap gap-2">
                 {suggestions.map((suggestion, index) => (
                   <button
@@ -469,7 +479,7 @@ export default function ChatPage() {
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder={user ? `Type your message (${CREDITS_PER_CHAT_MESSAGE} credits)...` : "Sign in to start chatting..."}
+                  placeholder={user ? `Type your message (${PER_MESSAGE})...` : "Sign in to start chatting..."}
                   rows={1}
                   maxLength={500}
                   className="w-full px-4 py-3 bg-[#F5F5F5] rounded-2xl resize-none focus:outline-none focus:ring-2 focus:ring-[#0096FF]/30 text-sm"
@@ -478,14 +488,14 @@ export default function ChatPage() {
               </div>
               <button
                 onClick={handleSendMessage}
-                disabled={!inputMessage.trim() || isTyping || (user && credits < CREDITS_PER_CHAT_MESSAGE)}
+                disabled={!inputMessage.trim() || isTyping || (user && !canSendChatMessage(balance))}
                 className="w-11 h-11 bg-[#0096FF] text-white rounded-full flex items-center justify-center hover:bg-[#0077CC] transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex-shrink-0"
               >
                 <i className="ri-send-plane-fill text-lg"></i>
               </button>
             </div>
             <p className="text-xs text-[#6B6B6B] mt-2 text-center">
-              Press Enter to send • {CREDITS_PER_CHAT_MESSAGE} credits per message
+              Press Enter to send • {PER_MESSAGE} per message
             </p>
           </div>
         </div>

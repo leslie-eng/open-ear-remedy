@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { apiFetch } from '../../lib/api';
 import Skeleton from '../../components/ui/Skeleton';
 import { CREDIT_PACKS, callMinutesFor, formatPrice, type CreditPackId } from '@openear/shared/pricing';
+import type { Balance } from '../../hooks/useBalance';
 
 interface MinutePackage {
   id: number;
@@ -169,6 +170,7 @@ export default function DashboardPage() {
   });
 
   const [credits, setCredits] = useState<number | null>(null);
+  const [pass, setPass] = useState<Balance['pass']>(null);
   const [totalSessions, setTotalSessions] = useState(0);
   const [totalMinutesUsed, setTotalMinutesUsed] = useState(0);
   const [callHistory, setCallHistory] = useState<CallHistoryItem[]>([]);
@@ -230,8 +232,9 @@ export default function DashboardPage() {
 
   const fetchCredits = async () => {
     try {
-      const data = await apiFetch<{ credits: number }>('/api/user/credits');
+      const data = await apiFetch<Balance>('/api/user/credits');
       setCredits(data.credits ?? 0);
+      setPass(data.pass);
     } catch {
       setCredits(0);
     }
@@ -247,11 +250,6 @@ export default function DashboardPage() {
     } catch (e) {
       console.error('Error fetching call history:', e);
     }
-  };
-
-  // Convert credits to minutes (20 credits = 1 minute)
-  const creditsToMinutes = (credits: number) => {
-    return Math.floor(credits / 20);
   };
 
   const formatTimeAgo = (dateString: string) => {
@@ -283,7 +281,7 @@ export default function DashboardPage() {
         '/api/payments/checkout',
         {
           method: 'POST',
-          body: JSON.stringify({ packageId: pkg.packId }),
+          body: JSON.stringify({ offerId: pkg.packId }),
         },
       );
 
@@ -307,7 +305,7 @@ export default function DashboardPage() {
     }
   };
 
-  const displayMinutes = credits !== null ? creditsToMinutes(credits) : 0;
+  const displayMinutes = credits !== null ? callMinutesFor(credits) : 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]">
@@ -385,6 +383,12 @@ export default function DashboardPage() {
                 <p className="text-3xl md:text-4xl font-bold text-[#2A2A2A] mb-2">{displayMinutes}</p>
                 <p className="text-sm md:text-base text-[#6B6B6B]">Minutes Remaining</p>
                 <p className="text-xs text-[#9CA3AF] mt-1">({credits} credits)</p>
+                {pass && (
+                  <p className="text-sm text-[#2A2A2A] mt-3">
+                    Monthly Pass: {Math.floor(pass.callSecondsLeft / 60)} call min and {pass.aiMessagesLeftToday} AI
+                    messages left today, until {new Date(pass.expiresAt).toLocaleDateString('en-KE', { day: 'numeric', month: 'short' })}
+                  </p>
+                )}
               </>
             )}
           </div>

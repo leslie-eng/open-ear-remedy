@@ -8,9 +8,10 @@ import ConnectingOverlay from '../../components/ui/ConnectingOverlay';
 import {
   CREDITS_PER_CALL_MINUTE,
   FREE_TRIAL_CREDITS,
-  callMinutesFor,
+  callSecondsAvailable,
   creditsForCall,
 } from '@openear/shared/pricing';
+import type { Balance } from '../../hooks/useBalance';
 
 const E164_REGEX = /^\+[1-9]\d{7,14}$/;
 
@@ -50,6 +51,8 @@ export default function CallPage() {
   const [isSpeakerOn, setIsSpeakerOn] = useState(true);
   const [callDuration, setCallDuration] = useState(0);
   const [credits, setCredits] = useState(0);
+  const [passSecondsLeft, setPassSecondsLeft] = useState(0);
+  const availableSeconds = callSecondsAvailable({ credits, passSecondsLeft });
   const {
     user,
     signUp,
@@ -90,10 +93,9 @@ export default function CallPage() {
 
   const fetchCredits = useCallback(async () => {
     try {
-      const data = await apiFetch<{ credits: number; free_credits_available?: boolean }>(
-        '/api/user/credits',
-      );
+      const data = await apiFetch<Balance>('/api/user/credits');
       setCredits(data.credits);
+      setPassSecondsLeft(data.pass?.callSecondsLeft ?? 0);
       setIsFirstTimeUser(Boolean(data.free_credits_available));
     } catch (error) {
       console.error('Error fetching credits:', error);
@@ -157,58 +159,32 @@ export default function CallPage() {
     };
   }, [isCallActive]);
 
-  // Check for low credits during call
+  // Warn as call time (Monthly Pass + credits) runs low, and end the call when it runs out.
   useEffect(() => {
     if (isCallActive && user) {
-      const creditsUsed = creditsForCall(callDuration);
-      const remainingCredits = credits - creditsUsed;
+      const secondsLeft = availableSeconds - callDuration;
+      const minutesLeft = Math.ceil(secondsLeft / 60);
 
-      // Warning thresholds: 50, 30, 20, 10 credits
-      const thresholds = [50, 30, 20, 10];
-
-      for (const threshold of thresholds) {
-        if (
-          remainingCredits <= threshold &&
-          remainingCredits > threshold - 10 &&
-          lastWarningRef.current !== threshold
-        ) {
+      for (const threshold of [5, 3, 2, 1]) {
+        if (minutesLeft === threshold && lastWarningRef.current !== threshold) {
           lastWarningRef.current = threshold;
-          const minutesLeft = callMinutesFor(remainingCredits);
-
-          if (threshold === 10) {
-            setLowCreditWarning(
-              `⚠️ Critical: Only ${remainingCredits} credits left (~${minutesLeft} min)! Call will end soon.`
-            );
-          } else if (threshold === 20) {
-            setLowCreditWarning(
-              `⚠️ Low credits: ${remainingCredits} credits remaining (~${minutesLeft} min)`
-            );
-          } else if (threshold === 30) {
-            setLowCreditWarning(
-              `Credits running low: ${remainingCredits} credits (~${minutesLeft} min left)`
-            );
-          } else {
-            setLowCreditWarning(
-              `Reminder: ${remainingCredits} credits remaining (~${minutesLeft} min)`
-            );
-          }
-
-          // Auto-dismiss after 5 seconds for non‑critical warnings
-          if (threshold > 10) {
-            setTimeout(() => setLowCreditWarning(null), 5000);
-          }
+          setLowCreditWarning(
+            threshold === 1
+              ? '⚠️ About 1 minute of call time left. The call will end soon.'
+              : `About ${threshold} minutes of call time left.`,
+          );
+          if (threshold > 1) setTimeout(() => setLowCreditWarning(null), 5000);
           break;
         }
       }
 
-      // Auto‑end call if credits depleted
-      if (remainingCredits <= 0 && !autoEndingRef.current) {
+      if (secondsLeft <= 0 && !autoEndingRef.current) {
         autoEndingRef.current = true;
-        setLowCreditWarning('❌ Credits depleted! Ending call...');
+        setLowCreditWarning('❌ Call time used up. Ending call...');
         setTimeout(() => void endCall(), 2000);
       }
     }
-  }, [callDuration, isCallActive, credits, user, endCall]);
+  }, [callDuration, isCallActive, availableSeconds, user, endCall]);
 
   // Reset warning when call ends
   useEffect(() => {
@@ -258,9 +234,9 @@ export default function CallPage() {
       setShowAuthModal(true);
       return;
     }
-    if (credits < CREDITS_PER_CALL_MINUTE) {
+    if (availableSeconds < 60) {
       setCallError(
-        `Insufficient credits. You need at least ${CREDITS_PER_CALL_MINUTE} credits to start a call (1 minute).`
+        `You need at least 1 minute of call time: ${CREDITS_PER_CALL_MINUTE} credits or Monthly Pass time.`
       );
       setTimeout(() => setCallError(''), 5000);
       return;
@@ -458,7 +434,7 @@ export default function CallPage() {
                     {credits} Credits
                   </span>
                   <span className="text-xs text-[#6B6B6B]">
-                    ({callMinutesFor(credits)} min)
+                    ({Math.floor(availableSeconds / 60)} min{passSecondsLeft > 0 ? ' incl. Monthly Pass' : ''})
                   </span>
                 </div>
                 {isFirstTimeUser && (

@@ -10,16 +10,20 @@ import {
   CREDITS_PER_CHAT_MESSAGE,
   FREE_TRIAL_CREDITS,
   callMinutesFor,
+  MONTHLY_PASS,
   formatPrice,
   type CreditPackId,
+  type Offer,
 } from '@openear/shared/pricing';
+
+type CheckoutOffer = Pick<Offer, 'id' | 'name' | 'price'>;
 
 export default function PricingPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<typeof plans[0] | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<CheckoutOffer | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [notification, setNotification] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
@@ -87,22 +91,10 @@ export default function PricingPage() {
   });
 
   // Prices, credits and rates come from @openear/shared/pricing; only the marketing copy lives here.
-  const PLAN_COPY: Record<CreditPackId, { description: string; features: string[]; popular: boolean }> = {
-    starter: {
-      description: 'Perfect for trying out our support',
-      features: ['Book appointments', 'Email support', 'Credits never expire'],
-      popular: false,
-    },
-    standard: {
-      description: 'Most popular for regular support',
-      features: ['Priority booking', 'Priority support', 'Progress tracking', 'Credits never expire'],
-      popular: true,
-    },
-    value: {
-      description: 'Best value for ongoing support',
-      features: ['VIP booking priority', '24/7 priority support', 'Detailed progress tracking', 'Credits never expire'],
-      popular: false,
-    },
+  const PLAN_COPY: Record<CreditPackId, { description: string; popular: boolean }> = {
+    starter: { description: 'A gentle way to try a call or a chat', popular: false },
+    standard: { description: 'For regular conversations', popular: true },
+    value: { description: 'The lowest price per minute', popular: false },
   };
 
   const plans = CREDIT_PACKS.map((pack) => ({
@@ -112,11 +104,11 @@ export default function PricingPage() {
     features: [
       `${pack.credits} credits`,
       `${callMinutesFor(pack.credits)} min voice calls OR ${Math.floor(pack.credits / CREDITS_PER_CHAT_MESSAGE)} chat messages`,
-      ...PLAN_COPY[pack.id].features,
+      'Credits never expire',
     ],
   }));
 
-  const handleSelectPlan = async (plan: typeof plans[0]) => {
+  const handleSelectPlan = async (plan: CheckoutOffer) => {
     if (!user) {
       setSelectedPlan(plan);
       setShowAuthModal(true);
@@ -126,7 +118,7 @@ export default function PricingPage() {
     await initiatePaystackCheckout(plan);
   };
 
-  const initiatePaystackCheckout = async (plan: typeof plans[0]) => {
+  const initiatePaystackCheckout = async (plan: CheckoutOffer) => {
     setIsLoading(true);
     setLoadingPlan(plan.name);
 
@@ -135,7 +127,7 @@ export default function PricingPage() {
         '/api/payments/checkout',
         {
           method: 'POST',
-          body: JSON.stringify({ packageId: plan.id }),
+          body: JSON.stringify({ offerId: plan.id }),
         },
       );
 
@@ -299,6 +291,29 @@ export default function PricingPage() {
           ))}
         </div>
 
+        {/* Monthly Pass */}
+        <div className="mt-10 bg-white rounded-2xl border-2 border-[#0096FF] p-6 md:p-8 flex flex-col md:flex-row md:items-center gap-6">
+          <div className="flex-1">
+            <h3 className="text-xl font-bold text-gray-900 mb-1">{MONTHLY_PASS.name}</h3>
+            <p className="text-gray-600 mb-4">
+              {formatPrice(MONTHLY_PASS.price)} for {MONTHLY_PASS.days} days. Bought when you want it; it never renews by itself.
+            </p>
+            <ul className="space-y-2 text-sm text-gray-700">
+              <li className="flex gap-2"><i className="ri-check-line text-[#0096FF]"></i>{MONTHLY_PASS.callSeconds / 60} minutes of calls</li>
+              <li className="flex gap-2"><i className="ri-check-line text-[#0096FF]"></i>{MONTHLY_PASS.aiMessagesPerDay} AI chat messages every day</li>
+              <li className="flex gap-2"><i className="ri-check-line text-[#0096FF]"></i>Used before your credits, so your credits last longer</li>
+              <li className="flex gap-2"><i className="ri-check-line text-[#0096FF]"></i>Renew early and the next pass starts when this one ends</li>
+            </ul>
+          </div>
+          <button
+            onClick={() => handleSelectPlan(MONTHLY_PASS)}
+            disabled={isLoading}
+            className="px-6 py-3 rounded-xl bg-[#0A6EB4] text-white font-semibold hover:bg-[#085A94] disabled:opacity-50 whitespace-nowrap cursor-pointer"
+          >
+            {loadingPlan === MONTHLY_PASS.name ? 'Opening checkout…' : `Get the pass for ${formatPrice(MONTHLY_PASS.price)}`}
+          </button>
+        </div>
+
         {/* Secure Payment Badge */}
         <div className="flex items-center justify-center gap-2 mt-6 text-gray-500">
           <i className="ri-shield-check-fill text-green-500"></i>
@@ -308,27 +323,14 @@ export default function PricingPage() {
         {/* Credit Usage Examples */}
         <div className="mt-10 bg-[#E6F5FF] rounded-2xl p-6 md:p-8">
           <h3 className="text-lg font-bold text-[#2A2A2A] mb-4 text-center">What Can You Do With Credits?</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-white rounded-xl p-4 text-center">
-              <p className="text-xl font-bold text-[#0096FF] mb-1">100</p>
-              <p className="text-xs text-gray-600">10 min call</p>
-              <p className="text-xs text-gray-400">or 20 messages</p>
-            </div>
-            <div className="bg-white rounded-xl p-4 text-center">
-              <p className="text-xl font-bold text-[#0096FF] mb-1">300</p>
-              <p className="text-xs text-gray-600">30 min call</p>
-              <p className="text-xs text-gray-400">or 60 messages</p>
-            </div>
-            <div className="bg-white rounded-xl p-4 text-center">
-              <p className="text-xl font-bold text-[#0096FF] mb-1">500</p>
-              <p className="text-xs text-gray-600">50 min call</p>
-              <p className="text-xs text-gray-400">or 100 messages</p>
-            </div>
-            <div className="bg-white rounded-xl p-4 text-center">
-              <p className="text-xl font-bold text-[#0096FF] mb-1">1000</p>
-              <p className="text-xs text-gray-600">100 min call</p>
-              <p className="text-xs text-gray-400">or 200 messages</p>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {CREDIT_PACKS.map((pack) => (
+              <div key={pack.id} className="bg-white rounded-xl p-4 text-center">
+                <p className="text-xl font-bold text-[#0096FF] mb-1">{pack.credits} credits</p>
+                <p className="text-sm text-gray-700">{callMinutesFor(pack.credits)} min of calls</p>
+                <p className="text-sm text-gray-500">or {Math.floor(pack.credits / CREDITS_PER_CHAT_MESSAGE)} AI messages</p>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -479,7 +481,7 @@ export default function PricingPage() {
                 Sign In to Continue
               </h3>
               <p className="text-gray-600 text-xs">
-                Sign in to purchase {selectedPlan?.credits} credits for {selectedPlan ? formatPrice(selectedPlan.price) : ''}
+                Sign in to buy {selectedPlan?.name} for {selectedPlan ? formatPrice(selectedPlan.price) : ''}
               </p>
             </div>
 
