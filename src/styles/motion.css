@@ -57,7 +57,7 @@
 }
 
 .oe-route {
-  animation: oe-fade-in var(--dur-base) var(--ease-out) both;
+  animation: oe-fade-in var(--dur-base) var(--ease-out) backwards;
 }
 
 /* ---------- Breathing availability dot ---------- */

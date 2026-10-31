@@ -4,6 +4,7 @@ import Navbar from '../../components/feature/Navbar';
 import { useAuth } from '../../contexts/AuthContext';
 import { apiFetch } from '../../lib/api';
 import { useSEO, generateWebPageSchema } from '../../utils/seo';
+import ConnectingOverlay from '../../components/ui/ConnectingOverlay';
 
 const E164_REGEX = /^\+[1-9]\d{7,14}$/;
 
@@ -417,6 +418,11 @@ export default function CallPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]">
       <Navbar />
+      <ConnectingOverlay
+        open={isInitiating}
+        title="Connecting your call…"
+        detail="Your phone should ring in a moment. Take a slow breath. There’s no rush."
+      />
 
       <div className="pt-20 md:pt-24 px-6 pb-12">
         <div className="max-w-5xl mx-auto">

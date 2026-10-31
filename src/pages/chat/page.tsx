@@ -4,6 +4,7 @@ import Navbar from '../../components/feature/Navbar';
 import { useAuth } from '../../contexts/AuthContext';
 import { apiFetch } from '../../lib/api';
 import { useSEO, generateWebPageSchema } from '../../utils/seo';
+import TypingIndicator from '../../components/ui/TypingIndicator';
 
 interface Message {
   id: string;
@@ -433,11 +434,7 @@ export default function ChatPage() {
                     <i className="ri-robot-fill text-white text-sm"></i>
                   </div>
                   <div className="bg-[#F5F5F5] px-4 py-3 rounded-2xl rounded-bl-md">
-                    <div className="flex items-center gap-1">
-                      <span className="w-2 h-2 bg-[#0096FF] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                      <span className="w-2 h-2 bg-[#0096FF] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                      <span className="w-2 h-2 bg-[#0096FF] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
-                    </div>
+                    <TypingIndicator label="Open Ear is typing" className="text-[#0096FF]" />
                   </div>
                 </div>
               </div>

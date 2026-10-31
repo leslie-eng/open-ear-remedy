@@ -5,6 +5,7 @@ import { useSEO } from '../../utils/seo';
 import { useAuth } from '../../contexts/AuthContext';
 import { apiFetch } from '../../lib/api';
 import { packageIdForCredits } from '../../lib/packages';
+import Skeleton from '../../components/ui/Skeleton';
 
 interface MinutePackage {
   id: number;
@@ -367,9 +368,9 @@ export default function DashboardPage() {
               </span>
             </div>
             {loading ? (
-              <div className="animate-pulse">
-                <div className="h-10 bg-gray-200 rounded w-16 mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-32"></div>
+              <div aria-busy="true" aria-label="Loading">
+                <Skeleton className="h-10 w-16 mb-2" />
+                <Skeleton className="h-4 w-32" />
               </div>
             ) : (
               <>
@@ -390,9 +391,9 @@ export default function DashboardPage() {
               </span>
             </div>
             {loading ? (
-              <div className="animate-pulse">
-                <div className="h-10 bg-gray-200 rounded w-16 mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-32"></div>
+              <div aria-busy="true" aria-label="Loading">
+                <Skeleton className="h-10 w-16 mb-2" />
+                <Skeleton className="h-4 w-32" />
               </div>
             ) : (
               <>
@@ -412,9 +413,9 @@ export default function DashboardPage() {
               </span>
             </div>
             {loading ? (
-              <div className="animate-pulse">
-                <div className="h-10 bg-gray-200 rounded w-16 mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-32"></div>
+              <div aria-busy="true" aria-label="Loading">
+                <Skeleton className="h-10 w-16 mb-2" />
+                <Skeleton className="h-4 w-32" />
               </div>
             ) : (
               <>
@@ -486,19 +487,19 @@ export default function DashboardPage() {
           <h2 className="text-2xl md:text-3xl font-bold text-[#2A2A2A] mb-6 md:mb-8">Recent Activity</h2>
           
           {loading ? (
-            <div className="space-y-4">
+            <div className="space-y-4" aria-busy="true" aria-label="Loading recent activity">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="animate-pulse flex items-center justify-between p-4 md:p-6 bg-[#FAFAFA] rounded-2xl">
+                <div key={i} className="flex items-center justify-between p-4 md:p-6 bg-[#FAFAFA] rounded-2xl">
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-200"></div>
+                    <Skeleton className="w-10 h-10 md:w-12 md:h-12 !rounded-full" />
                     <div>
-                      <div className="h-4 bg-gray-200 rounded w-32 mb-2"></div>
-                      <div className="h-3 bg-gray-200 rounded w-24"></div>
+                      <Skeleton className="h-4 w-32 mb-2" />
+                      <Skeleton className="h-3 w-24" />
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="h-4 bg-gray-200 rounded w-12 mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-16"></div>
+                  <div className="flex flex-col items-end">
+                    <Skeleton className="h-4 w-12 mb-2" />
+                    <Skeleton className="h-3 w-16" />
                   </div>
                 </div>
               ))}
