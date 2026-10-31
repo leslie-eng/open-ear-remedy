@@ -6,19 +6,21 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Local dev: apps/api/.env wins, then the repo-root .env. On Render, real env vars win over both.
 dotenv.config({ path: [path.join(__dirname, '..', '.env'), path.join(__dirname, '..', '..', '..', '.env')], quiet: true });
 
-function r2Config() {
-  const r2 = {
-    accountId: process.env.R2_ACCOUNT_ID,
-    accessKeyId: process.env.R2_ACCESS_KEY_ID,
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
-    publicBucket: process.env.R2_PUBLIC_BUCKET,
-    privateBucket: process.env.R2_PRIVATE_BUCKET,
-    publicUrl: (process.env.R2_PUBLIC_URL || '').replace(/\/$/, ''),
+function s3Config() {
+  const required = {
+    endpoint: (process.env.AWS_ENDPOINT_URL_S3 || '').replace(/\/$/, ''),
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    bucket: process.env.S3_BUCKET,
   };
-  const missing = Object.entries(r2).filter(([, v]) => !v).map(([k]) => k);
-  if (missing.length === Object.keys(r2).length) return null; // not configured: use local disk
-  if (missing.length) throw new Error(`Incomplete R2 config, missing: ${missing.join(', ')}`);
-  return r2;
+  const missing = Object.entries(required).filter(([, v]) => !v).map(([k]) => k);
+  if (missing.length === Object.keys(required).length) return null; // not configured: use local disk
+  if (missing.length) throw new Error(`Incomplete S3 storage config, missing: ${missing.join(', ')}`);
+  return {
+    ...required,
+    region: process.env.AWS_REGION || 'auto',
+    publicUrl: (process.env.S3_PUBLIC_URL || '').replace(/\/$/, ''),
+  };
 }
 
 const DEFAULT_JWT_SECRET = 'dev-secret-change-in-production';
@@ -57,7 +59,7 @@ export const config = {
   adminEmail: process.env.ADMIN_EMAIL || '',
   // Number of reverse proxies in front of the app (LiteSpeed/Apache on cPanel, Render's LB).
   trustProxy: parseInt(process.env.TRUST_PROXY || '1', 10),
-  // Local-disk storage for development; production uses Cloudflare R2 when R2_* vars are set.
+  // Local-disk storage for development; production uses S3-compatible storage (Neon) when configured.
   uploadDir: path.resolve(process.env.UPLOAD_DIR || path.join(__dirname, '..', 'uploads')),
-  r2: r2Config(),
+  s3: s3Config(),
 };

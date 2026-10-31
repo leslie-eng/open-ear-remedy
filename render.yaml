@@ -1,6 +1,6 @@
 # Render Blueprint: https://render.com/docs/blueprint-spec
 # Deploy from repo root → New → Blueprint → connect GitHub repo.
-# Database: Neon (not a Render database). Files: Cloudflare R2.
+# Database: Neon (not a Render database). Files: Neon S3-compatible storage.
 
 services:
   - type: web
@@ -36,18 +36,16 @@ services:
         sync: false
       - key: CLOUDFLARE_TURN_API_TOKEN
         sync: false
-      # Cloudflare R2 (covers public bucket, ebooks private bucket)
-      - key: R2_ACCOUNT_ID
+      # File storage: Neon S3-compatible storage (one private bucket: covers/ + ebooks/)
+      - key: AWS_ENDPOINT_URL_S3
         sync: false
-      - key: R2_ACCESS_KEY_ID
+      - key: AWS_ACCESS_KEY_ID
         sync: false
-      - key: R2_SECRET_ACCESS_KEY
+      - key: AWS_SECRET_ACCESS_KEY
         sync: false
-      - key: R2_PUBLIC_BUCKET
+      - key: AWS_REGION
         sync: false
-      - key: R2_PRIVATE_BUCKET
-        sync: false
-      - key: R2_PUBLIC_URL
+      - key: S3_BUCKET
         sync: false
 
   # Daily at 06:00 Nairobi (03:00 UTC): email Monthly Pass holders whose pass ends within 3 days.

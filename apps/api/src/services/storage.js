@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { AwsClient } from 'aws4fetch';
+import express from 'express';
 import { config } from '../config.js';
 
 /**
@@ -9,11 +10,13 @@ import { config } from '../config.js';
  *   cover  - public images, served from a stable public URL
  *   ebook  - private files, only reachable through short-lived signed download URLs
  *
- * Adapters: Cloudflare R2 in production (when R2_* env vars are set), local disk for development.
- * Callers only see: saveFile, publicUrl, downloadUrl, plus the local-only helpers used by index.js.
+ * Adapters: any S3-compatible store in production (when the S3 env vars are set), local disk for development.
+ * Callers only see: saveFile, publicUrl, downloadUrl, coverHandler, plus the local-only download helper used by app.js.
  */
 
 const DOWNLOAD_TTL_SECONDS = 5 * 60;
+// Signed cover links live an hour; browsers cache the redirect for slightly less.
+const COVER_LINK_TTL_SECONDS = 60 * 60;
 const FOLDERS = { cover: 'covers', ebook: 'ebooks' };
 
 /** Stored ebook file_url values are keys like "ebooks/abc.pdf" (legacy rows may hold a longer path). */
@@ -38,52 +41,67 @@ function contentDisposition(filename) {
 }
 
 // ---------------------------------------------------------------------------
-// Cloudflare R2 adapter (S3-compatible API)
+// S3-compatible adapter (Neon storage, Cloudflare R2, AWS S3). One private bucket,
+// with covers/ and ebooks/ folders. Covers are served from S3_PUBLIC_URL when the
+// store can expose them publicly; otherwise /uploads/covers/<name> on this API
+// redirects to a short-lived signed URL.
 // ---------------------------------------------------------------------------
-function createR2Storage(r2) {
+function createS3Storage(s3) {
   const client = new AwsClient({
-    accessKeyId: r2.accessKeyId,
-    secretAccessKey: r2.secretAccessKey,
+    accessKeyId: s3.accessKeyId,
+    secretAccessKey: s3.secretAccessKey,
     service: 's3',
-    region: 'auto',
+    region: s3.region,
   });
-  const endpoint = `https://${r2.accountId}.r2.cloudflarestorage.com`;
-  const bucketFor = (kind) => (kind === 'cover' ? r2.publicBucket : r2.privateBucket);
-  const objectUrl = (kind, key) => `${endpoint}/${bucketFor(kind)}/${key.split('/').map(encodeURIComponent).join('/')}`;
+  const objectUrl = (key) => `${s3.endpoint}/${s3.bucket}/${key.split('/').map(encodeURIComponent).join('/')}`;
+
+  async function signedGet(key, ttlSeconds, params = {}) {
+    const url = new URL(objectUrl(key));
+    url.searchParams.set('X-Amz-Expires', String(ttlSeconds));
+    for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
+    const signed = await client.sign(url.toString(), { method: 'GET', aws: { signQuery: true } });
+    return signed.url;
+  }
 
   return {
     servesLocalFiles: false,
 
     async saveFile(kind, buffer, { ext, contentType }) {
       const key = newKey(kind, ext);
-      const res = await client.fetch(objectUrl(kind, key), {
+      const res = await client.fetch(objectUrl(key), {
         method: 'PUT',
         body: buffer,
         headers: { 'Content-Type': contentType, 'Content-Length': String(buffer.length) },
       });
-      if (!res.ok) throw new Error(`R2 upload failed (${res.status}): ${await res.text()}`);
+      if (!res.ok) throw new Error(`Storage upload failed (${res.status}): ${await res.text()}`);
       return { key };
     },
 
     publicUrl(key) {
-      return `${r2.publicUrl}/${key}`;
+      return `${s3.publicUrl || `${config.publicApiUrl}/uploads`}/${key}`;
     },
 
     async downloadUrl(key, filename) {
-      const url = new URL(objectUrl('ebook', key));
-      const head = await client.fetch(url.toString(), { method: 'HEAD' });
+      const head = await client.fetch(objectUrl(key), { method: 'HEAD' });
       if (!head.ok) return null;
-      url.searchParams.set('X-Amz-Expires', String(DOWNLOAD_TTL_SECONDS));
-      url.searchParams.set('response-content-disposition', contentDisposition(filename));
-      const signed = await client.sign(url.toString(), { method: 'GET', aws: { signQuery: true } });
-      return signed.url;
+      return signedGet(key, DOWNLOAD_TTL_SECONDS, { 'response-content-disposition': contentDisposition(filename) });
     },
+
+    /** Express handler for /uploads/covers/:name when the bucket is private. */
+    coverHandler: s3.publicUrl
+      ? null
+      : async (req, res) => {
+          const name = req.path.replace(/^\//, '');
+          if (!/^[\w.-]+$/.test(name)) return res.status(404).end();
+          res.set('Cache-Control', `public, max-age=${COVER_LINK_TTL_SECONDS - 300}`);
+          res.redirect(302, await signedGet(`${FOLDERS.cover}/${name}`, COVER_LINK_TTL_SECONDS));
+        },
   };
 }
 
 // ---------------------------------------------------------------------------
 // Local disk adapter (development). Downloads use an HMAC-signed, expiring URL
-// to /api/files/download so behaviour matches R2's signed URLs.
+// to /api/files/download so behaviour matches S3 signed URLs.
 // ---------------------------------------------------------------------------
 function createLocalStorage(dir) {
   for (const folder of Object.values(FOLDERS)) fs.mkdirSync(path.join(dir, folder), { recursive: true });
@@ -92,7 +110,7 @@ function createLocalStorage(dir) {
 
   return {
     servesLocalFiles: true,
-    coversDir: path.join(dir, FOLDERS.cover),
+    coverHandler: express.static(path.join(dir, FOLDERS.cover), { dotfiles: 'deny', index: false, fallthrough: false }),
 
     async saveFile(kind, buffer, { ext }) {
       const key = newKey(kind, ext);
@@ -128,4 +146,4 @@ function createLocalStorage(dir) {
   };
 }
 
-export const storage = config.r2 ? createR2Storage(config.r2) : createLocalStorage(config.uploadDir);
+export const storage = config.s3 ? createS3Storage(config.s3) : createLocalStorage(config.uploadDir);

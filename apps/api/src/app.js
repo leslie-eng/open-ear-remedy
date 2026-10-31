@@ -63,10 +63,10 @@ app.get('/api/health', (_req, res) => {
   });
 });
 
-// Local-disk storage (development only): serve public covers and signed ebook downloads.
-// In production files live in Cloudflare R2 and these routes are not mounted.
+// Covers: from local disk in development, or a redirect to a signed URL on a private S3 bucket.
+if (storage.coverHandler) app.use('/uploads/covers', storage.coverHandler);
+// Signed ebook downloads from local disk (development only; S3 signs its own URLs).
 if (storage.servesLocalFiles) {
-  app.use('/uploads/covers', express.static(storage.coversDir, { dotfiles: 'deny', index: false, fallthrough: false }));
   app.get('/api/files/download', (req, res) => storage.serveSignedDownload(req, res));
 }
 app.use('/api/auth', authRoutes);
