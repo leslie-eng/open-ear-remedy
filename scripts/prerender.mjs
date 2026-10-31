@@ -14,6 +14,7 @@ const staticRoutes = [
   '/contact',
   '/privacy',
   '/terms',
+  '/crisis-help',
 ];
 
 async function prerender() {

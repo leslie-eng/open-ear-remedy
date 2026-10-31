@@ -26,6 +26,7 @@ const CheckoutPage = lazy(() => import('../pages/checkout/page'));
 const CheckoutSuccessPage = lazy(() => import('../pages/checkout/success'));
 const ContactPage = lazy(() => import('../pages/contact/page'));
 const AboutPage = lazy(() => import('../pages/about/page'));
+const CrisisHelpPage = lazy(() => import('../pages/crisis-help/page'));
 const EbookManagementPage = lazy(() => import('../pages/admin/ebook-management/page'));
 const NotFound = lazy(() => import('../pages/NotFound'));
 
@@ -129,6 +130,10 @@ const routes: RouteObject[] = [
   {
     path: '/about',
     element: <AboutPage />,
+  },
+  {
+    path: '/crisis-help',
+    element: <CrisisHelpPage />,
   },
   {
     path: '/admin/ebook-management',
