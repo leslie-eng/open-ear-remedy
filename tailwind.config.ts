@@ -15,6 +15,8 @@ export default {
             'blue-tint': 'var(--oe-blue-tint)',
             mist: 'var(--oe-mist)',
             sage: 'var(--oe-sage)',
+            'sage-hover': 'var(--oe-sage-hover)',
+            deep: 'var(--oe-deep)',
             'sage-soft': 'var(--oe-sage-soft)',
             sand: 'var(--oe-sand)',
             cream: 'var(--oe-cream)',

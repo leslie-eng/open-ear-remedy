@@ -10,8 +10,10 @@
   --oe-blue-hover: #085a94;
   --oe-blue-bright: #0096ff;   /* brand accent: decorative use only (3:1 on white) */
   --oe-blue-tint: #e8f3fb;
+  --oe-deep: #0b4a75;          /* footer / dark surfaces: 8.9:1 with white */
   --oe-mist: #d6e6f2;          /* muted blue */
   --oe-sage: #5f7f6b;          /* text-safe sage: 4.6:1 on white */
+  --oe-sage-hover: #4f6b5a;
   --oe-sage-soft: #dbe7dd;
   --oe-sand: #f3e7d6;
   --oe-cream: #fbf8f3;

@@ -1,6 +1,104 @@
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/feature/Navbar';
+import Hero from '../../components/home/Hero';
+import TrustBlock from '../../components/home/TrustBlock';
+import HowItWorksSteps from '../../components/home/HowItWorksSteps';
+import PricingEstimator from '../../components/home/PricingEstimator';
+import MobileActionBar, { MOBILE_BAR_PADDING } from '../../components/home/MobileActionBar';
+import { useReveal } from '../../hooks/useReveal';
+import { siteConfig } from '../../config/site';
 import { useSEO, generateOrganizationSchema, generateServiceSchema } from '../../utils/seo';
+
+const SUPPORT_STYLES = [
+  {
+    icon: 'ri-phone-line',
+    title: 'Voice Connection',
+    points: [
+      'Real-time emotional support',
+      'Secure Twilio-powered calls',
+      'Pay per minute - simple pricing',
+      'Connect instantly when you need it',
+    ],
+    cta: { to: '/call', label: 'Start a Call' },
+  },
+  {
+    icon: 'ri-calendar-check-line',
+    title: 'Book Appointment',
+    points: [
+      'Schedule at your convenience',
+      'Email & calendar reminders',
+      'Flexible rescheduling',
+      'Dedicated support time',
+    ],
+    cta: { to: '/call', label: 'Book Now' },
+  },
+  {
+    icon: 'ri-timer-line',
+    title: 'Flexible Minutes',
+    points: [
+      'Buy minutes in packages',
+      'Save more with larger packs',
+      'Minutes never expire',
+      'No long-term commitment',
+    ],
+    cta: { to: '/pricing', label: 'View Pricing' },
+  },
+];
+
+// TODO(testimonials): these came with the original site template. Confirm they are real,
+// consented quotes before launch, or remove them.
+const QUOTES = [
+  {
+    initial: 'S',
+    name: 'Sarah M.',
+    role: 'Student',
+    text: 'Open Ear has been a lifeline during stressful exam periods. Having someone to talk to without judgment makes all the difference.',
+  },
+  {
+    initial: 'M',
+    name: 'Michael T.',
+    role: 'Working Professional',
+    text: 'The pay-per-minute model is perfect. I can get support on my schedule without worrying about subscription fees.',
+  },
+  {
+    initial: 'J',
+    name: 'Jessica L.',
+    role: '',
+    text: 'A safe space when I needed it most.',
+  },
+  {
+    initial: 'D',
+    name: 'David R.',
+    role: 'Entrepreneur',
+    text: 'Running a business can be isolating. Open Ear gives me a place to process my thoughts and feelings without the pressure of formal therapy.',
+  },
+  {
+    initial: 'A',
+    name: 'Amanda K.',
+    role: 'Freelancer',
+    text: 'Being able to call whenever I need support has been life-changing. The booking system makes it easy to plan ahead.',
+  },
+  {
+    initial: 'R',
+    name: 'Robert P.',
+    role: 'Teacher',
+    text: 'I appreciate the pay-per-session model. I can use it when I need it without feeling locked into a subscription.',
+  },
+];
+
+const FOOTER_LINKS = [
+  { to: '/privacy', label: 'Privacy Policy' },
+  { to: '/terms', label: 'Terms' },
+  { to: '/contact', label: 'Contact' },
+];
+
+const SOCIAL_LINKS = [
+  { href: 'https://instagram.com', icon: 'ri-instagram-line', label: 'Instagram' },
+  { href: 'https://twitter.com', icon: 'ri-twitter-x-line', label: 'X (Twitter)' },
+  { href: 'https://facebook.com', icon: 'ri-facebook-fill', label: 'Facebook' },
+  { href: 'https://linkedin.com', icon: 'ri-linkedin-fill', label: 'LinkedIn' },
+];
 
 export default function HomePage() {
   // SEO Configuration
@@ -37,399 +135,209 @@ export default function HomePage() {
     },
   });
 
+  // The mobile action bar appears once the hero (and its CTAs) leave the viewport.
+  const heroRef = useRef<HTMLElement>(null);
+  const [heroVisible, setHeroVisible] = useState(true);
+  useEffect(() => {
+    const el = heroRef.current;
+    if (!el || !('IntersectionObserver' in window)) return;
+    const observer = new IntersectionObserver(([entry]) => setHeroVisible(entry.isIntersecting), { threshold: 0 });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const stylesHeadingRef = useReveal<HTMLDivElement>();
+  const stylesGridRef = useReveal<HTMLDivElement>();
+  const quotesHeadingRef = useReveal<HTMLDivElement>();
+  const quotesGridRef = useReveal<HTMLDivElement>();
+  const ctaRef = useReveal<HTMLDivElement>();
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className={`min-h-screen bg-oe-cream text-oe-ink ${MOBILE_BAR_PADDING}`}>
       <Navbar transparent={true} />
 
-      {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Full Page Background Image */}
-        <div className="fixed inset-0 z-0">
-          <img 
-            src="https://static.readdy.ai/image/7c6b8d1dcab40743d27d791ddb990d62/674013c1e6deb9f2c3f35efa3c57ea2d.jpeg"
-            alt="People sharing in discussion"
-            className="w-full h-full object-cover"
+      <main>
+        <Hero ref={heroRef} />
+        <TrustBlock />
+        <HowItWorksSteps />
+
+        {/* Support styles */}
+        <section aria-labelledby="styles-heading" className="bg-white px-5 md:px-8 py-20 md:py-28">
+          <div className="max-w-6xl mx-auto">
+            <div ref={stylesHeadingRef} data-reveal className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 mb-10 md:mb-12">
+              <h2 id="styles-heading" className="font-heading text-3xl md:text-4xl font-bold text-oe-ink">
+                Choose Your Support Style
+              </h2>
+              <p className="text-body text-oe-muted max-w-sm md:text-right">
+                Real voice support when you need it most, with flexible pricing by the minute
+              </p>
+            </div>
+
+            <div ref={stylesGridRef} data-reveal-group className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
+              {SUPPORT_STYLES.map((style) => (
+                <div key={style.title} className="oe-card flex flex-col bg-oe-cream rounded-oe-md border border-oe-line p-7 shadow-oe-sm">
+                  <span className="w-12 h-12 rounded-full bg-oe-blue-tint text-oe-blue flex items-center justify-center mb-5">
+                    <i className={`${style.icon} text-2xl`} aria-hidden="true" />
+                  </span>
+                  <h3 className="font-heading text-xl font-semibold text-oe-ink mb-4">{style.title}</h3>
+                  <ul className="space-y-2.5 mb-6 flex-1">
+                    {style.points.map((point) => (
+                      <li key={point} className="flex items-start gap-2.5 text-body text-oe-muted">
+                        <i className="ri-check-line text-oe-sage text-lg mt-0.5" aria-hidden="true" />
+                        <span>{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link to={style.cta.to} className="inline-flex items-center gap-2 font-semibold text-oe-blue">
+                    <span className="oe-link">{style.cta.label}</span>
+                    <i className="ri-arrow-right-line" aria-hidden="true" />
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <PricingEstimator />
+
+        {/* Testimonials */}
+        <section aria-labelledby="stories-heading" className="bg-oe-cream px-5 md:px-8 py-20 md:py-28">
+          <div className="max-w-6xl mx-auto">
+            <div ref={quotesHeadingRef} data-reveal className="text-center mb-10 md:mb-12">
+              <h2 id="stories-heading" className="font-heading text-3xl md:text-4xl font-bold text-oe-ink">
+                Real Stories, Real Support
+              </h2>
+            </div>
+
+            <div ref={quotesGridRef} data-reveal-group className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {QUOTES.map((quote) => (
+                <figure key={quote.name} className="oe-card bg-white rounded-oe-md border border-oe-line p-6 md:p-7 shadow-oe-sm">
+                  <i className="ri-double-quotes-l text-3xl text-oe-sage block mb-2" aria-hidden="true" />
+                  <blockquote className="text-body text-oe-ink mb-5">&ldquo;{quote.text}&rdquo;</blockquote>
+                  <figcaption className="flex items-center gap-3">
+                    <span
+                      aria-hidden="true"
+                      className="w-10 h-10 rounded-full bg-oe-blue-tint text-oe-blue font-bold flex items-center justify-center"
+                    >
+                      {quote.initial}
+                    </span>
+                    <span>
+                      <span className="block font-semibold text-oe-ink">{quote.name}</span>
+                      {quote.role && <span className="block text-sm text-oe-muted">{quote.role}</span>}
+                    </span>
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Closing CTA */}
+        <section className="relative overflow-hidden">
+          <img
+            src="https://static.readdy.ai/image/7c6b8d1dcab40743d27d791ddb990d62/f1efb7ec7f8e2359adf77f5e3104e7ac.jpeg"
+            alt=""
+            loading="lazy"
+            decoding="async"
+            className="absolute inset-0 w-full h-full object-cover object-top"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-white/70 via-white/60 to-white/70"></div>
-        </div>
+          <div className="absolute inset-0 bg-gradient-to-r from-[rgba(11,74,117,0.88)] to-[rgba(11,74,117,0.55)]" aria-hidden="true" />
 
-        {/* Content Container */}
-        <div className="relative z-10">
-          {/* Hero Section */}
-          <section className="relative pt-24 md:pt-28 lg:pt-32 pb-14 md:pb-18 lg:pb-20 px-4 md:px-8 lg:px-14">
-            <div className="max-w-4xl mx-auto text-center">
-              <div className="inline-flex items-center gap-1.5 px-3 md:px-4 py-1.5 bg-[#0096FF]/10 rounded-full mb-4 md:mb-5">
-                <i className="ri-heart-3-fill text-[#0096FF] text-sm"></i>
-                <span className="text-xs font-medium text-[#0096FF]">Safe Space</span>
-              </div>
-              
-              <h1 className="text-2xl md:text-3xl lg:text-5xl font-bold text-[#2A2A2A] mb-4 md:mb-5 leading-tight px-3" style={{ fontFamily: 'Playfair Display, serif' }}>
-                A Safe Place to Share<br />What's On Your Mind
-              </h1>
-              
-              <p className="text-sm md:text-base text-[#6B6B6B] mb-5 md:mb-8 max-w-2xl mx-auto leading-relaxed px-3">
-                This isn't therapy—it's emotional support when you need it most. Connect through call or chat, anytime.
-              </p>
-              
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4">
-                <Link to="/call">
-                  <button className="w-full sm:w-auto px-6 md:px-8 py-3 md:py-3.5 bg-[#0096FF] text-white rounded-xl text-sm md:text-base font-semibold hover:bg-[#0077CC] transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer">
-                    <i className="ri-phone-fill text-base"></i>
-                    Start a Call
-                  </button>
-                </Link>
-                <Link to="/chat">
-                  <button className="w-full sm:w-auto px-6 md:px-8 py-3 md:py-3.5 bg-white text-[#0096FF] border-2 border-[#0096FF] rounded-xl text-sm md:text-base font-semibold hover:bg-[#0096FF] hover:text-white transition-all flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer">
-                    <i className="ri-message-3-fill text-base"></i>
-                    AI Chat
-                  </button>
-                </Link>
-              </div>
-              
-              <p className="text-xs text-[#6B6B6B] mt-3 px-3">
-                No appointment needed • Pay per session or subscribe
+          <div ref={ctaRef} data-reveal className="relative max-w-6xl mx-auto px-5 md:px-8 py-20 md:py-28 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <div>
+              <h2 className="font-heading text-3xl md:text-5xl font-bold text-white mb-3">Ready to talk?</h2>
+              <p className="text-body-lg text-white/90">
+                Connect with support in minutes.
+                <br />
+                No judgment, just listening.
               </p>
             </div>
-          </section>
+            <Link
+              to="/get-started"
+              className="oe-btn self-start md:self-auto inline-flex items-center gap-3 rounded-oe-sm bg-white px-7 py-3.5 text-body font-semibold text-oe-ink hover:bg-oe-blue-tint"
+            >
+              Get Started Now
+              <i className="ri-arrow-right-line text-oe-blue" aria-hidden="true" />
+            </Link>
+          </div>
+        </section>
+      </main>
 
-          {/* Feature Grid */}
-          <section className="bg-white/60 backdrop-blur-sm py-10 md:py-16 lg:py-20 px-4 md:px-8 lg:px-14">
-            <div className="max-w-6xl mx-auto">
-              <div className="flex flex-col md:flex-row md:items-baseline md:justify-between mb-6 md:mb-10 gap-3">
-                <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-[#0096FF]" style={{ fontFamily: 'Poppins, sans-serif' }}>
-                  Choose Your Support Style
-                </h2>
-                <p className="text-sm text-[#6B6B6B] max-w-sm md:text-right">
-                  Real voice support when you need it most, with flexible pricing by the minute
-                </p>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
-                {/* Call Support Card */}
-                <div className="bg-[#E6F5FF] rounded-2xl p-5 md:p-6 shadow-sm hover:shadow-lg transition-shadow">
-                  <div className="w-12 h-12 md:w-14 md:h-14 bg-[#0096FF]/20 rounded-full flex items-center justify-center mb-4">
-                    <i className="ri-phone-fill text-xl md:text-2xl text-[#0096FF]"></i>
-                  </div>
-                  <h3 className="text-lg md:text-xl font-bold text-[#2A2A2A] mb-3">Voice Connection</h3>
-                  <ul className="space-y-2 mb-5">
-                    <li className="flex items-start gap-2 text-xs md:text-sm text-[#6B6B6B]">
-                      <i className="ri-check-line text-[#0096FF] text-base mt-0.5"></i>
-                      <span>Real-time emotional support</span>
-                    </li>
-                    <li className="flex items-start gap-2 text-xs md:text-sm text-[#6B6B6B]">
-                      <i className="ri-check-line text-[#0096FF] text-base mt-0.5"></i>
-                      <span>Secure Twilio-powered calls</span>
-                    </li>
-                    <li className="flex items-start gap-2 text-xs md:text-sm text-[#6B6B6B]">
-                      <i className="ri-check-line text-[#0096FF] text-base mt-0.5"></i>
-                      <span>Pay per minute - simple pricing</span>
-                    </li>
-                    <li className="flex items-start gap-2 text-xs md:text-sm text-[#6B6B6B]">
-                      <i className="ri-check-line text-[#0096FF] text-base mt-0.5"></i>
-                      <span>Connect instantly when you need it</span>
-                    </li>
-                  </ul>
-                  <Link to="/call" className="text-[#0096FF] font-semibold text-sm flex items-center gap-2 hover:gap-3 transition-all cursor-pointer">
-                    Start a Call <i className="ri-arrow-right-line"></i>
-                  </Link>
-                </div>
-
-                {/* Book Appointment Card */}
-                <div className="bg-[#E6F5FF] rounded-2xl p-5 md:p-6 shadow-sm hover:shadow-lg transition-shadow">
-                  <div className="w-12 h-12 md:w-14 md:h-14 bg-[#0096FF]/20 rounded-full flex items-center justify-center mb-4">
-                    <i className="ri-calendar-check-fill text-xl md:text-2xl text-[#0096FF]"></i>
-                  </div>
-                  <h3 className="text-lg md:text-xl font-bold text-[#2A2A2A] mb-3">Book Appointment</h3>
-                  <ul className="space-y-2 mb-5">
-                    <li className="flex items-start gap-2 text-xs md:text-sm text-[#6B6B6B]">
-                      <i className="ri-check-line text-[#0096FF] text-base mt-0.5"></i>
-                      <span>Schedule at your convenience</span>
-                    </li>
-                    <li className="flex items-start gap-2 text-xs md:text-sm text-[#6B6B6B]">
-                      <i className="ri-check-line text-[#0096FF] text-base mt-0.5"></i>
-                      <span>Email & calendar reminders</span>
-                    </li>
-                    <li className="flex items-start gap-2 text-xs md:text-sm text-[#6B6B6B]">
-                      <i className="ri-check-line text-[#0096FF] text-base mt-0.5"></i>
-                      <span>Flexible rescheduling</span>
-                    </li>
-                    <li className="flex items-start gap-2 text-xs md:text-sm text-[#6B6B6B]">
-                      <i className="ri-check-line text-[#0096FF] text-base mt-0.5"></i>
-                      <span>Dedicated support time</span>
-                    </li>
-                  </ul>
-                  <Link to="/call" className="text-[#0096FF] font-semibold text-sm flex items-center gap-2 hover:gap-3 transition-all cursor-pointer">
-                    Book Now <i className="ri-arrow-right-line"></i>
-                  </Link>
-                </div>
-
-                {/* Flexible Plans Card */}
-                <div className="bg-[#E6F5FF] rounded-2xl p-5 md:p-6 shadow-sm hover:shadow-lg transition-shadow">
-                  <div className="w-12 h-12 md:w-14 md:h-14 bg-[#0096FF]/20 rounded-full flex items-center justify-center mb-4">
-                    <i className="ri-timer-fill text-xl md:text-2xl text-[#0096FF]"></i>
-                  </div>
-                  <h3 className="text-lg md:text-xl font-bold text-[#2A2A2A] mb-3">Flexible Minutes</h3>
-                  <ul className="space-y-2 mb-5">
-                    <li className="flex items-start gap-2 text-xs md:text-sm text-[#6B6B6B]">
-                      <i className="ri-check-line text-[#0096FF] text-base mt-0.5"></i>
-                      <span>Buy minutes in packages</span>
-                    </li>
-                    <li className="flex items-start gap-2 text-xs md:text-sm text-[#6B6B6B]">
-                      <i className="ri-check-line text-[#0096FF] text-base mt-0.5"></i>
-                      <span>Save more with larger packs</span>
-                    </li>
-                    <li className="flex items-start gap-2 text-xs md:text-sm text-[#6B6B6B]">
-                      <i className="ri-check-line text-[#0096FF] text-base mt-0.5"></i>
-                      <span>Minutes never expire</span>
-                    </li>
-                    <li className="flex items-start gap-2 text-xs md:text-sm text-[#6B6B6B]">
-                      <i className="ri-check-line text-[#0096FF] text-base mt-0.5"></i>
-                      <span>No long-term commitment</span>
-                    </li>
-                  </ul>
-                  <Link to="/pricing" className="text-[#0096FF] font-semibold text-sm flex items-center gap-2 hover:gap-3 transition-all cursor-pointer">
-                    View Pricing <i className="ri-arrow-right-line"></i>
-                  </Link>
-                </div>
+      <footer className="bg-oe-deep text-white px-5 md:px-8 py-14 md:py-16">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-10 mb-10">
+            <div className="lg:col-span-4">
+              <h2 className="font-heading text-2xl md:text-3xl font-bold mb-4">Open Ear</h2>
+              <p className="text-body text-white/85 mb-6">
+                We provide a safe, judgment-free space for emotional support. Whether you need to talk or chat, we&rsquo;re here to listen when you need it most.
+              </p>
+              <div className="flex items-center gap-3">
+                {SOCIAL_LINKS.map((social) => (
+                  <a
+                    key={social.label}
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={social.label}
+                    className="oe-btn w-10 h-10 border border-white/50 rounded-full flex items-center justify-center hover:border-white hover:bg-white/10"
+                  >
+                    <i className={social.icon} aria-hidden="true" />
+                  </a>
+                ))}
               </div>
             </div>
-          </section>
 
-          {/* Testimonials */}
-          <section className="bg-white/50 backdrop-blur-sm py-10 md:py-16 lg:py-20 px-4 md:px-8 lg:px-14">
-            <div className="max-w-6xl mx-auto">
-              <div className="text-center mb-6 md:mb-10">
-                <div className="inline-flex items-center gap-1.5 px-3 md:px-4 py-1.5 bg-[#0096FF]/10 rounded-full mb-3 md:mb-4">
-                  <i className="ri-star-fill text-[#0096FF] text-xs"></i>
-                  <span className="text-xs font-medium text-[#0096FF]">Trusted Support</span>
-                </div>
-                <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-[#0096FF]" style={{ fontFamily: 'Poppins, sans-serif' }}>
-                  Real Stories, Real Support
-                </h2>
+            <div className="lg:col-span-4 space-y-5">
+              <div>
+                <p className="text-sm uppercase text-white/80 mb-1 tracking-wider">Address</p>
+                <p className="text-body text-white/90">Rantatie</p>
+                <p className="text-body text-white/90">Ranua</p>
               </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-                <div className="bg-[#E6F5FF] rounded-2xl p-4 md:p-5">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 bg-[#0096FF] rounded-full flex items-center justify-center text-white font-bold text-sm">
-                      S
-                    </div>
-                    <div>
-                      <p className="font-semibold text-sm text-[#2A2A2A]">Sarah M.</p>
-                      <p className="text-xs text-[#6B6B6B]">Student</p>
-                    </div>
-                  </div>
-                  <i className="ri-double-quotes-l text-2xl md:text-3xl text-[#0096FF]/20 mb-2 block"></i>
-                  <p className="text-xs md:text-sm text-[#2A2A2A] leading-relaxed">
-                    "Open Ear has been a lifeline during stressful exam periods. Having someone to talk to without judgment makes all the difference."
-                  </p>
-                </div>
-
-                <div className="bg-[#E6F5FF] rounded-2xl p-4 md:p-5">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 bg-[#0096FF] rounded-full flex items-center justify-center text-white font-bold text-sm">
-                      M
-                    </div>
-                    <div>
-                      <p className="font-semibold text-sm text-[#2A2A2A]">Michael T.</p>
-                      <p className="text-xs text-[#6B6B6B]">Working Professional</p>
-                    </div>
-                  </div>
-                  <i className="ri-double-quotes-l text-2xl md:text-3xl text-[#0096FF]/20 mb-2 block"></i>
-                  <p className="text-xs md:text-sm text-[#2A2A2A] leading-relaxed">
-                    "The pay-per-minute model is perfect. I can get support on my schedule without worrying about subscription fees."
-                  </p>
-                </div>
-
-                <div className="relative rounded-2xl overflow-hidden h-48 md:h-full md:min-h-[200px]">
-                  <img 
-                    src="https://readdy.ai/api/search-image?query=Peaceful%20person%20in%20serene%20natural%20setting%20feeling%20calm%20and%20supported%2C%20warm%20golden%20hour%20lighting%2C%20gentle%20expression%20of%20relief%20and%20contentment%2C%20soft%20focus%20background%20with%20nature%20elements%2C%20emotional%20wellness%20and%20peace%20theme%2C%20authentic%20candid%20moment&width=400&height=400&seq=testimonial-photo-001&orientation=squarish"
-                    alt="Testimonial"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0096FF]/90 via-[#0096FF]/40 to-transparent"></div>
-                  <div className="absolute bottom-4 md:bottom-5 left-4 md:left-5 right-4 md:right-5 text-white">
-                    <p className="font-semibold text-sm mb-0.5">Jessica L.</p>
-                    <p className="text-xs opacity-90">"A safe space when I needed it most"</p>
-                  </div>
-                </div>
+              <div>
+                <p className="text-sm uppercase text-white/80 mb-1 tracking-wider">Phone</p>
+                <p className="text-body text-white/90">+358 41 7203762</p>
               </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-                <div className="lg:col-span-3 relative rounded-2xl overflow-hidden h-48 md:h-56 lg:h-48">
-                  <img 
-                    src="https://readdy.ai/api/search-image?query=Two%20people%20having%20supportive%20conversation%20in%20comfortable%20modern%20space%2C%20warm%20ambient%20lighting%2C%20genuine%20connection%20and%20empathy%2C%20professional%20yet%20welcoming%20environment%2C%20emotional%20support%20and%20understanding%20theme%2C%20horizontal%20composition%20with%20soft%20natural%20tones&width=800&height=400&seq=testimonial-wide-001&orientation=landscape"
-                    alt="Support conversation"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#0096FF]/90 via-[#0096FF]/60 to-transparent"></div>
-                  <div className="absolute bottom-4 md:bottom-5 left-4 md:left-5 right-4 md:right-5 text-white">
-                    <p className="font-semibold text-sm mb-1">David R., Entrepreneur</p>
-                    <p className="text-xs leading-relaxed opacity-95">
-                      "Running a business can be isolating. Open Ear gives me a place to process my thoughts and feelings without the pressure of formal therapy."
-                    </p>
-                  </div>
-                </div>
-
-                <div className="lg:col-span-2 space-y-4">
-                  <div className="bg-[#E6F5FF] rounded-2xl p-4 md:p-5">
-                    <p className="text-xs md:text-sm text-[#2A2A2A] leading-relaxed mb-4">
-                      "Being able to call whenever I need support has been life-changing. The booking system makes it easy to plan ahead."
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 bg-[#0096FF] rounded-full flex items-center justify-center text-white font-bold text-xs">
-                        A
-                      </div>
-                      <div>
-                        <p className="font-semibold text-xs text-[#2A2A2A]">Amanda K.</p>
-                        <p className="text-xs text-[#6B6B6B]">Freelancer</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-[#E6F5FF] rounded-2xl p-4 md:p-5">
-                    <p className="text-xs md:text-sm text-[#2A2A2A] leading-relaxed mb-4">
-                      "I appreciate the pay-per-session model. I can use it when I need it without feeling locked into a subscription."
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 bg-[#0096FF] rounded-full flex items-center justify-center text-white font-bold text-xs">
-                        R
-                      </div>
-                      <div>
-                        <p className="font-semibold text-xs text-[#2A2A2A]">Robert P.</p>
-                        <p className="text-xs text-[#6B6B6B]">Teacher</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+              <div>
+                <p className="text-sm uppercase text-white/80 mb-1 tracking-wider">Email</p>
+                <p className="text-body text-white/90">support@openear.com</p>
               </div>
             </div>
-          </section>
 
-          {/* CTA Section */}
-          <section className="relative h-[280px] md:h-[350px] lg:h-[400px] overflow-hidden">
-            <img 
-              src="https://static.readdy.ai/image/7c6b8d1dcab40743d27d791ddb990d62/f1efb7ec7f8e2359adf77f5e3104e7ac.jpeg"
-              alt="Ready to talk"
-              className="w-full h-full object-cover object-top"
-            />
-            <div className="absolute inset-0 bg-black/30"></div>
-            
-            <div className="absolute inset-0 flex flex-col md:flex-row items-center justify-center md:justify-between px-4 md:px-8 lg:px-14 gap-5 md:gap-0">
-              <div className="text-center md:text-left">
-                <h2 className="text-2xl md:text-3xl lg:text-5xl font-bold text-white mb-2 md:mb-4" style={{ fontFamily: 'Poppins, sans-serif', textTransform: 'lowercase' }}>
-                  ready to talk?
-                </h2>
-              </div>
-              
-              <div className="text-center md:text-right">
-                <p className="text-sm md:text-base lg:text-lg text-white mb-5 md:mb-8 leading-relaxed">
-                  Connect with support in minutes<br />No judgment, just listening
-                </p>
-                <button className="inline-flex items-center gap-2 md:gap-3 px-6 md:px-10 py-3 md:py-3.5 bg-white text-[#2A2A2A] rounded-full text-sm md:text-base font-semibold hover:bg-[#E6F5FF] transition-all shadow-2xl whitespace-nowrap cursor-pointer">
-                  Get Started Now
-                  <div className="w-6 h-6 md:w-8 md:h-8 bg-[#0096FF] rounded-full flex items-center justify-center">
-                    <i className="ri-arrow-right-line text-white text-sm md:text-base"></i>
-                  </div>
-                </button>
+            <div className="lg:col-span-4">
+              <div className="rounded-oe-md overflow-hidden border-2 border-white/80 h-48 md:h-56 lg:h-60">
+                <img
+                  src="https://static.readdy.ai/image/7c6b8d1dcab40743d27d791ddb990d62/aead965964394cc03948dd12339d9860.jpeg"
+                  alt="Community"
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-full object-cover object-top"
+                />
               </div>
             </div>
-          </section>
+          </div>
 
-          {/* Footer */}
-          <footer className="bg-[#0096FF] text-white py-10 md:py-12 lg:py-14 px-4 md:px-8 lg:px-14">
-            <div className="max-w-6xl mx-auto">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 md:gap-8 lg:gap-10 mb-8 md:mb-10">
-                <div className="lg:col-span-4">
-                  <h3 className="text-xl md:text-2xl lg:text-3xl font-bold mb-4 md:mb-6" style={{ fontFamily: 'Poppins, sans-serif' }}>
-                    Open Ear
-                  </h3>
-                  <p className="text-xs md:text-sm text-white/80 leading-relaxed mb-4 md:mb-6">
-                    We provide a safe, judgment-free space for emotional support. Whether you need to talk or chat, we're here to listen when you need it most.
-                  </p>
-                  <div className="flex items-center gap-3">
-                    <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="w-8 h-8 border border-white/40 rounded-full flex items-center justify-center hover:border-white hover:bg-white/10 transition-all cursor-pointer">
-                      <i className="ri-instagram-line text-sm"></i>
-                    </a>
-                    <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="w-8 h-8 border border-white/40 rounded-full flex items-center justify-center hover:border-white hover:bg-white/10 transition-all cursor-pointer">
-                      <i className="ri-twitter-x-line text-sm"></i>
-                    </a>
-                    <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="w-8 h-8 border border-white/40 rounded-full flex items-center justify-center hover:border-white hover:bg-white/10 transition-all cursor-pointer">
-                      <i className="ri-facebook-fill text-sm"></i>
-                    </a>
-                    <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="w-8 h-8 border border-white/40 rounded-full flex items-center justify-center hover:border-white hover:bg-white/10 transition-all cursor-pointer">
-                      <i className="ri-linkedin-fill text-sm"></i>
-                    </a>
-                  </div>
-                </div>
-
-                <div className="lg:col-span-4">
-                  <div className="space-y-4 md:space-y-5">
-                    <div>
-                      <p className="text-xs uppercase text-white/70 mb-1.5 tracking-wider">ADDRESS</p>
-                      <p className="text-xs md:text-sm text-white/90">Rantatie</p>
-                      <p className="text-xs md:text-sm text-white/90">Ranua</p>
-                    </div>
-                    <div>
-                      <p className="text-xs uppercase text-white/70 mb-1.5 tracking-wider">PHONE</p>
-                      <p className="text-xs md:text-sm text-white/90">+358 41 7203762</p>
-                    </div>
-                    <div>
-                      <p className="text-xs uppercase text-white/70 mb-1.5 tracking-wider">EMAIL</p>
-                      <p className="text-xs md:text-sm text-white/90">support@openear.com</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="lg:col-span-4">
-                  <div className="rounded-xl overflow-hidden border-2 border-white h-44 md:h-52 lg:h-60">
-                    <img 
-                      src="https://static.readdy.ai/image/7c6b8d1dcab40743d27d791ddb990d62/aead965964394cc03948dd12339d9860.jpeg"
-                      alt="Community"
-                      className="w-full h-full object-cover object-top"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="border-t border-white/20 pt-5 md:pt-6">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                  <p className="text-xs text-white/70 text-center md:text-left">
-                    © 2026 Open Ear. All rights reserved.
-                  </p>
-                  <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
-                    <Link 
-                      to="/privacy" 
-                      onClick={() => window.scrollTo(0, 0)}
-                      className="text-xs text-white/70 hover:text-white transition-colors cursor-pointer"
-                    >
-                      Privacy Policy
-                    </Link>
-                    <Link 
-                      to="/terms" 
-                      onClick={() => window.scrollTo(0, 0)}
-                      className="text-xs text-white/70 hover:text-white transition-colors cursor-pointer"
-                    >
-                      Terms
-                    </Link>
-                    <Link 
-                      to="/contact" 
-                      onClick={() => window.scrollTo(0, 0)}
-                      className="text-xs text-white/70 hover:text-white transition-colors cursor-pointer"
-                    >
-                      Contact
-                    </Link>
-                    <a href="https://readdy.ai/?ref=logo" target="_blank" rel="noopener noreferrer" className="text-xs text-white/70 hover:text-white transition-colors cursor-pointer">
-                      
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </footer>
+          <div className="border-t border-white/25 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className="text-sm text-white/80 text-center md:text-left">© 2026 Open Ear. All rights reserved.</p>
+            <nav aria-label="Footer" className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+              <Link to={siteConfig.crisisPath} className="text-sm font-semibold text-white">
+                <span className="oe-link">In crisis? Get urgent help</span>
+              </Link>
+              {FOOTER_LINKS.map((link) => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  onClick={() => window.scrollTo(0, 0)}
+                  className="text-sm text-white/85 hover:text-white"
+                >
+                  <span className="oe-link">{link.label}</span>
+                </Link>
+              ))}
+            </nav>
+          </div>
         </div>
-      </section>
+      </footer>
+
+      <MobileActionBar visible={!heroVisible} />
     </div>
   );
 }
