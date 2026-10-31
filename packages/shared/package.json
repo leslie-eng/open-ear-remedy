@@ -7,6 +7,10 @@
     "./pricing": {
       "types": "./dist/pricing.d.ts",
       "default": "./dist/pricing.js"
+    },
+    "./calls": {
+      "types": "./dist/calls.d.ts",
+      "default": "./dist/calls.js"
     }
   },
   "files": [
