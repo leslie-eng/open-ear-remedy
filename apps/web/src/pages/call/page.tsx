@@ -1,5 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
 import Navbar from '../../components/feature/Navbar';
 import { useAuth } from '../../contexts/AuthContext';
 import { apiFetch } from '../../lib/api';
@@ -9,11 +8,17 @@ import {
   CREDITS_PER_CALL_MINUTE,
   FREE_TRIAL_CREDITS,
   callSecondsAvailable,
-  creditsForCall,
 } from '@openear/shared/pricing';
 import type { Balance } from '../../hooks/useBalance';
+import { useCallSession } from '../../hooks/useCallSession';
 
-const E164_REGEX = /^\+[1-9]\d{7,14}$/;
+const END_MESSAGES: Record<string, string> = {
+  hangup: 'Call ended.',
+  no_answer: 'No listener could answer in time. Nothing was charged. Please try again soon, or try our AI chat.',
+  cancelled: 'Call cancelled. Nothing was charged.',
+  dropped: 'The connection was lost, so the call ended. You were only charged up to the moment it dropped.',
+  time_limit: 'Your call time ran out, so the call ended.',
+};
 
 async function sendLowCreditNotification(currentCredits: number) {
   if (currentCredits > 50) return;
@@ -45,12 +50,8 @@ export default function CallPage() {
     ),
   });
 
-  const [isCallActive, setIsCallActive] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const [isVideoOn, setIsVideoOn] = useState(false);
-  const [isSpeakerOn, setIsSpeakerOn] = useState(true);
-  const [callDuration, setCallDuration] = useState(0);
   const [credits, setCredits] = useState(0);
+  const [displayName, setDisplayName] = useState('');
   const [passSecondsLeft, setPassSecondsLeft] = useState(0);
   const availableSeconds = callSecondsAvailable({ credits, passSecondsLeft });
   const {
@@ -62,8 +63,6 @@ export default function CallPage() {
   } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showBookingModal, setShowBookingModal] = useState(false);
-  const [showPhoneModal, setShowPhoneModal] = useState(false);
-  const [phoneNumber, setPhoneNumber] = useState('');
   const [bookingDate, setBookingDate] = useState('');
   const [bookingTime, setBookingTime] = useState('');
   const [bookingNotes, setBookingNotes] = useState('');
@@ -80,16 +79,9 @@ export default function CallPage() {
   const [password, setPassword] = useState('');
   const [isAuthLoading, setIsAuthLoading] = useState(false);
   const [authError, setAuthError] = useState('');
-  const [callId, setCallId] = useState<string | null>(null);
-  const [isInitiating, setIsInitiating] = useState(false);
   const [callError, setCallError] = useState('');
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
   const [claimingFreeCredits, setClaimingFreeCredits] = useState(false);
-  const [lowCreditWarning, setLowCreditWarning] = useState<string | null>(null);
-  const navigate = useNavigate();
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const lastWarningRef = useRef<number>(0);
-  const autoEndingRef = useRef(false);
 
   const fetchCredits = useCallback(async () => {
     try {
@@ -102,39 +94,14 @@ export default function CallPage() {
     }
   }, []);
 
-  const endCall = useCallback(async () => {
-    if (!callId) {
-      setIsCallActive(false);
-      return;
-    }
-
-    try {
-      const data = await apiFetch<{
-        success: boolean;
-        creditsUsed: number;
-        remainingCredits: number;
-        durationSeconds: number;
-      }>('/api/calls/end', {
-        method: 'POST',
-        body: JSON.stringify({ callId }),
-      });
-
-      setCredits(data.remainingCredits);
-      setCallError(
-        `✓ Call ended. ${data.creditsUsed} credits used, ${data.remainingCredits} remaining.`,
-      );
-      setTimeout(() => setCallError(''), 5000);
-      await sendLowCreditNotification(data.remainingCredits);
-    } catch (error) {
-      console.error('Error ending call:', error);
-      setCallError(error instanceof Error ? error.message : 'Failed to end call');
-    } finally {
-      setIsCallActive(false);
-      setCallId(null);
-      autoEndingRef.current = false;
-      await fetchCredits();
-    }
-  }, [callId, fetchCredits]);
+  const call = useCallSession({
+    onEnded: () => {
+      void fetchCredits();
+      // The server checks the real balance; this only asks it to email a low-balance notice if due.
+      void sendLowCreditNotification(0);
+    },
+  });
+  const callInProgress = ['preparing', 'ringing', 'connecting', 'live'].includes(call.state.phase);
 
   useEffect(() => {
     if (user) {
@@ -142,57 +109,13 @@ export default function CallPage() {
     }
   }, [user, fetchCredits]);
 
+  // The display name is the only thing a listener sees about the caller.
   useEffect(() => {
-    if (isCallActive) {
-      timerRef.current = setInterval(() => {
-        setCallDuration((prev) => prev + 1);
-      }, 1000);
-    } else {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-    }
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-    };
-  }, [isCallActive]);
-
-  // Warn as call time (Monthly Pass + credits) runs low, and end the call when it runs out.
-  useEffect(() => {
-    if (isCallActive && user) {
-      const secondsLeft = availableSeconds - callDuration;
-      const minutesLeft = Math.ceil(secondsLeft / 60);
-
-      for (const threshold of [5, 3, 2, 1]) {
-        if (minutesLeft === threshold && lastWarningRef.current !== threshold) {
-          lastWarningRef.current = threshold;
-          setLowCreditWarning(
-            threshold === 1
-              ? '⚠️ About 1 minute of call time left. The call will end soon.'
-              : `About ${threshold} minutes of call time left.`,
-          );
-          if (threshold > 1) setTimeout(() => setLowCreditWarning(null), 5000);
-          break;
-        }
-      }
-
-      if (secondsLeft <= 0 && !autoEndingRef.current) {
-        autoEndingRef.current = true;
-        setLowCreditWarning('❌ Call time used up. Ending call...');
-        setTimeout(() => void endCall(), 2000);
-      }
-    }
-  }, [callDuration, isCallActive, availableSeconds, user, endCall]);
-
-  // Reset warning when call ends
-  useEffect(() => {
-    if (!isCallActive) {
-      lastWarningRef.current = 0;
-      setLowCreditWarning(null);
-    }
-  }, [isCallActive]);
+    if (!user) return;
+    apiFetch<{ display_name: string | null }>('/api/user/profile')
+      .then((profile) => setDisplayName(profile.display_name ?? ''))
+      .catch(() => {});
+  }, [user]);
 
   const claimFreeCredits = async () => {
     if (!user) return;
@@ -217,19 +140,7 @@ export default function CallPage() {
     }
   };
 
-  const toggleMute = () => {
-    setIsMuted(!isMuted);
-  };
-
-  const toggleVideo = () => {
-    setIsVideoOn(!isVideoOn);
-  };
-
-  const toggleSpeaker = () => {
-    setIsSpeakerOn(!isSpeakerOn);
-  };
-
-  const startCall = () => {
+  const startCall = async () => {
     if (!user) {
       setShowAuthModal(true);
       return;
@@ -241,46 +152,17 @@ export default function CallPage() {
       setTimeout(() => setCallError(''), 5000);
       return;
     }
-    setShowPhoneModal(true);
-  };
-
-  const initiateCall = async () => {
-    const toNumber = phoneNumber.replace(/[\s()-]/g, '');
-    if (!toNumber) {
-      setCallError('Please enter a phone number');
-      return;
-    }
-    if (!E164_REGEX.test(toNumber)) {
-      setCallError(
-        'Please enter your number in international format: a + followed by your country code and number, with no leading 0 (e.g. +233201234567).',
-      );
-      return;
-    }
-
-    setIsInitiating(true);
     setCallError('');
-
     try {
-      const data = await apiFetch<{
-        success: boolean;
-        callId: string;
-        callSid: string;
-        maxDurationSeconds: number;
-      }>('/api/calls/initiate', {
-        method: 'POST',
-        body: JSON.stringify({ toNumber }),
+      await apiFetch('/api/user/display-name', {
+        method: 'PUT',
+        body: JSON.stringify({ displayName }),
       });
-
-      setCallId(data.callId);
-      setIsCallActive(true);
-      setCallDuration(0);
-      setShowPhoneModal(false);
-      setPhoneNumber('');
     } catch (error) {
-      setCallError(error instanceof Error ? error.message : 'Failed to start call');
-    } finally {
-      setIsInitiating(false);
+      setCallError(error instanceof Error ? error.message : 'Could not save your display name.');
+      return;
     }
+    await call.start();
   };
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -401,9 +283,14 @@ export default function CallPage() {
     <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]">
       <Navbar />
       <ConnectingOverlay
-        open={isInitiating}
-        title="Connecting your call…"
-        detail="Your phone should ring in a moment. Take a slow breath. There’s no rush."
+        open={['preparing', 'ringing', 'connecting'].includes(call.state.phase)}
+        title={call.state.phase === 'connecting' ? 'Connecting you to a listener…' : 'Finding a listener for you…'}
+        detail={
+          call.state.phase === 'preparing'
+            ? 'If your browser asks, allow the microphone so the listener can hear you.'
+            : 'Take a slow breath. There’s no rush.'
+        }
+        action={{ label: 'Cancel', onClick: call.hangup }}
       />
 
       <div className="pt-20 md:pt-24 px-6 pb-12">
@@ -493,7 +380,7 @@ export default function CallPage() {
           <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12">
             {/* Call Status */}
             <div className="text-center mb-8 md:mb-12">
-              {!isCallActive ? (
+              {call.state.phase !== 'live' ? (
                 <>
                   <div className="w-24 h-24 md:w-32 md:h-32 bg-gradient-to-br from-[#0096FF] to-[#0077CC] rounded-full flex items-center justify-center mx-auto mb-6 md:mb-8 shadow-lg">
                     <i className="ri-phone-fill text-4xl md:text-5xl text-white"></i>
@@ -502,8 +389,33 @@ export default function CallPage() {
                     Ready to Connect
                   </h2>
                   <p className="text-sm md:text-base text-[#6B6B6B]">
-                    Start an instant call or book an appointment
+                    Talk with a listener from your browser, or book an appointment
                   </p>
+                  {call.state.phase === 'ended' && call.state.endReason && (
+                    <p role="status" className="mt-4 mx-auto max-w-md text-sm md:text-base text-[#2A2A2A] bg-[#E6F5FF] rounded-xl p-3">
+                      {END_MESSAGES[call.state.endReason]}
+                      {call.state.billedSeconds > 0 && ` Talk time: ${formatTime(call.state.billedSeconds)}.`}
+                    </p>
+                  )}
+                  {user && (
+                    <div className="mt-6 mx-auto max-w-sm text-left">
+                      <label htmlFor="display-name" className="block text-sm font-medium text-[#2A2A2A] mb-2">
+                        Name the listener will see (optional)
+                      </label>
+                      <input
+                        id="display-name"
+                        type="text"
+                        maxLength={40}
+                        value={displayName}
+                        onChange={(e) => setDisplayName(e.target.value)}
+                        placeholder="Anonymous"
+                        className="w-full px-4 py-3 border-2 border-[#E5E5E5] rounded-xl focus:border-[#0096FF] focus:outline-none text-sm md:text-base"
+                      />
+                      <p className="text-xs text-[#6B6B6B] mt-2">
+                        Listeners never see your email or phone number. Calls are never recorded.
+                      </p>
+                    </div>
+                  )}
                 </>
               ) : (
                 <>
@@ -513,59 +425,24 @@ export default function CallPage() {
                   <h2 className="text-2xl md:text-3xl font-bold text-[#2A2A2A] mb-3">
                     Call in Progress
                   </h2>
-                  <div className="text-3xl md:text-4xl font-bold text-[#0096FF] mb-2">
-                    {formatTime(callDuration)}
+                  <div className="text-3xl md:text-4xl font-bold text-[#0096FF] mb-2" aria-live="off">
+                    {formatTime(call.state.elapsed)}
                   </div>
                   <p className="text-sm md:text-base text-[#6B6B6B]">
-                    Credits used: {creditsForCall(callDuration)}
+                    Up to {formatTime(call.state.maxSeconds)} on your balance
                   </p>
 
-                  {/* Low Credit Warning During Call */}
-                  {lowCreditWarning && (
-                    <div
-                      className={`mt-4 mx-auto max-w-md p-3 rounded-xl flex items-center justify-center gap-2 animate-pulse ${
-                        lowCreditWarning.includes('Critical') ||
-                        lowCreditWarning.includes('depleted')
-                          ? 'bg-red-100 border-2 border-red-400'
-                          : lowCreditWarning.includes('Low')
-                          ? 'bg-orange-100 border-2 border-orange-400'
-                          : 'bg-yellow-100 border-2 border-yellow-400'
-                      }`}
-                    >
-                      <i
-                        className={`text-lg ${
-                          lowCreditWarning.includes('Critical') ||
-                          lowCreditWarning.includes('depleted')
-                            ? 'ri-error-warning-fill text-red-600'
-                            : lowCreditWarning.includes('Low')
-                            ? 'ri-alert-fill text-orange-600'
-                            : 'ri-information-fill text-yellow-600'
-                        }`}
-                      ></i>
-                      <span
-                        className={`text-sm font-medium ${
-                          lowCreditWarning.includes('Critical') ||
-                          lowCreditWarning.includes('depleted')
-                            ? 'text-red-700'
-                            : lowCreditWarning.includes('Low')
-                            ? 'text-orange-700'
-                            : 'text-yellow-700'
-                        }`}
-                      >
-                        {lowCreditWarning}
+                  {call.state.peerReconnecting && (
+                    <p role="status" className="mt-4 mx-auto max-w-md p-3 rounded-xl bg-yellow-100 border-2 border-yellow-400 text-sm font-medium text-yellow-700">
+                      The connection is unstable. Trying to reconnect…
+                    </p>
+                  )}
+                  {call.state.lowTimeWarning && (
+                    <div role="alert" className="mt-4 mx-auto max-w-md p-3 rounded-xl flex items-center justify-center gap-2 bg-orange-100 border-2 border-orange-400">
+                      <i className="ri-alert-fill text-lg text-orange-600"></i>
+                      <span className="text-sm font-medium text-orange-700">
+                        About 2 minutes of call time left. The call will end when it runs out.
                       </span>
-                      {(lowCreditWarning.includes('Critical') ||
-                        lowCreditWarning.includes('Low')) && (
-                        <button
-                          onClick={() => {
-                            endCall();
-                            navigate('/pricing');
-                          }}
-                          className="ml-2 px-3 py-1 bg-[#0096FF] text-white rounded-lg text-xs font-medium hover:bg-[#0077CC] transition-all cursor-pointer whitespace-nowrap"
-                        >
-                          Buy Credits
-                        </button>
-                      )}
                     </div>
                   )}
                 </>
@@ -574,10 +451,10 @@ export default function CallPage() {
 
             {/* Call Action Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-6 mb-8">
-              {!isCallActive ? (
+              {!callInProgress ? (
                 <>
                   <button
-                    onClick={startCall}
+                    onClick={() => void startCall()}
                     className="w-full sm:w-auto px-8 md:px-12 py-3 md:py-4 bg-[#0096FF] text-white rounded-2xl font-semibold hover:bg-[#0077CC] transition-all flex items-center justify-center gap-3 whitespace-nowrap cursor-pointer"
                   >
                     <i className="ri-phone-fill text-lg md:text-xl"></i>
@@ -593,7 +470,7 @@ export default function CallPage() {
                 </>
               ) : (
                 <button
-                  onClick={endCall}
+                  onClick={call.hangup}
                   className="px-8 md:px-12 py-3 md:py-4 bg-red-500 text-white rounded-2xl font-semibold hover:bg-red-600 transition-all flex items-center gap-3 whitespace-nowrap cursor-pointer"
                 >
                   <i className="ri-phone-fill text-lg md:text-xl"></i>
@@ -605,61 +482,23 @@ export default function CallPage() {
             {/* Call Controls */}
             <div className="flex items-center justify-center gap-4 md:gap-6 mb-8">
               <button
-                onClick={toggleMute}
-                disabled={!isCallActive}
+                onClick={call.toggleMute}
+                disabled={call.state.phase !== 'live'}
+                aria-label={call.state.muted ? 'Unmute microphone' : 'Mute microphone'}
+                aria-pressed={call.state.muted}
                 className={`w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center transition-all cursor-pointer ${
-                  isMuted
+                  call.state.muted
                     ? 'bg-red-500 hover:bg-red-600'
                     : 'bg-[#F5F5F5] hover:bg-[#E6F5FF]'
                 } ${
-                  !isCallActive ? 'opacity-50 cursor-not-allowed' : ''
+                  call.state.phase !== 'live' ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
               >
                 <i
                   className={`${
-                    isMuted
+                    call.state.muted
                       ? 'ri-mic-off-fill text-white'
                       : 'ri-mic-fill text-[#2A2A2A]'
-                  } text-xl md:text-2xl`}
-                ></i>
-              </button>
-
-              <button
-                onClick={toggleVideo}
-                disabled={!isCallActive}
-                className={`w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center transition-all cursor-pointer ${
-                  isVideoOn
-                    ? 'bg-[#0096FF] hover:bg-[#0077CC]'
-                    : 'bg-[#F5F5F5] hover:bg-[#E6F5FF]'
-                } ${
-                  !isCallActive ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-              >
-                <i
-                  className={`${
-                    isVideoOn
-                      ? 'ri-video-on-fill text-white'
-                      : 'ri-video-off-fill text-[#2A2A2A]'
-                  } text-xl md:text-2xl`}
-                ></i>
-              </button>
-
-              <button
-                onClick={toggleSpeaker}
-                disabled={!isCallActive}
-                className={`w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center transition-all cursor-pointer ${
-                  isSpeakerOn
-                    ? 'bg-[#F5F5F5] hover:bg-[#E6F5FF]'
-                    : 'bg-red-500 hover:bg-red-600'
-                } ${
-                  !isCallActive ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-              >
-                <i
-                  className={`${
-                    isSpeakerOn
-                      ? 'ri-volume-up-fill text-[#2A2A2A]'
-                      : 'ri-volume-mute-fill text-white'
                   } text-xl md:text-2xl`}
                 ></i>
               </button>
@@ -694,70 +533,6 @@ export default function CallPage() {
           </div>
         </div>
       </div>
-
-      {/* Phone Number Modal */}
-      {showPhoneModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl p-6 md:p-10 max-w-md w-full shadow-2xl relative">
-            <div className="text-center mb-6 md:mb-8">
-              <div className="w-16 h-16 md:w-20 md:h-20 bg-[#0096FF]/10 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6">
-                <i className="ri-phone-fill text-3xl md:text-4xl text-[#0096FF]"></i>
-              </div>
-              <h2 className="text-2xl md:text-3xl font-bold text-[#2A2A2A] mb-2">
-                Enter Phone Number
-              </h2>
-              <p className="text-sm md:text-base text-[#6B6B6B]">
-                We'll call you at this number
-              </p>
-            </div>
-
-            <div className="space-y-4 md:space-y-5">
-              <div>
-                <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-[#E5E5E5] rounded-xl focus:border-[#0096FF] focus:outline-none text-sm md:text-base"
-                  placeholder="+233201234567"
-                  required
-                />
-                <p className="text-xs text-[#6B6B6B] mt-2">
-                  International format with country code, no leading 0 (e.g., +233201234567)
-                </p>
-              </div>
-
-              <button
-                onClick={initiateCall}
-                disabled={isInitiating || !phoneNumber.trim()}
-                className="w-full px-6 py-3 md:py-4 bg-[#0096FF] text-white rounded-xl text-base md:text-lg font-semibold hover:bg-[#0077CC] transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
-              >
-                {isInitiating ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <i className="ri-loader-4-line animate-spin"></i>
-                    Initiating Call...
-                  </span>
-                ) : (
-                  'Start Call'
-                )}
-              </button>
-            </div>
-
-            <button
-              onClick={() => {
-                setShowPhoneModal(false);
-                setPhoneNumber('');
-                setCallError('');
-              }}
-              className="absolute top-4 right-4 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-[#6B6B6B] hover:text-[#2A2A2A] transition-colors cursor-pointer"
-            >
-              <i className="ri-close-line text-xl md:text-2xl"></i>
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Auth Modal */}
       {showAuthModal && (

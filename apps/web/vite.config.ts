@@ -29,6 +29,8 @@ export default defineConfig({
     proxy: {
       "/api": { target: "http://localhost:3001", changeOrigin: true },
       "/uploads": { target: "http://localhost:3001", changeOrigin: true },
+      // Call signaling WebSocket (production connects straight to VITE_WS_URL).
+      "/ws": { target: "ws://localhost:3001", ws: true },
     },
   },
 });

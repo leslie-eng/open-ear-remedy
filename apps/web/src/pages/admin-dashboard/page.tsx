@@ -57,7 +57,6 @@ interface AppointmentData {
 interface CallHistoryData {
   id: string;
   user_id: string;
-  call_sid: string;
   duration_seconds: number;
   credits_used: number;
   status: string;
@@ -618,6 +617,13 @@ export default function AdminDashboardPage() {
             <i className="ri-book-line text-lg"></i>
             Store
           </Link>
+          <Link
+            to="/admin/listeners"
+            className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all whitespace-nowrap cursor-pointer bg-white text-[#2A2A2A] hover:bg-[#E6F5FF]"
+          >
+            <i className="ri-headphone-line text-lg"></i>
+            Listeners
+          </Link>
         </div>
 
         {/* Overview View */}
@@ -963,7 +969,7 @@ export default function AdminDashboardPage() {
                               <i className="ri-phone-fill text-[#0096FF]"></i>
                             </div>
                             <span className="text-sm font-medium text-[#2A2A2A] font-mono">
-                              {call.call_sid ? call.call_sid.slice(-8) : call.id.slice(0, 8)}
+                              {call.id.slice(0, 8)}
                             </span>
                           </div>
                         </td>

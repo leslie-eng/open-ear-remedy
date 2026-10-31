@@ -1,15 +1,12 @@
-import { siteConfig } from '../../config/site';
+import { useListenerAvailability } from '../../hooks/useListenerAvailability';
 
 interface AvailabilityIndicatorProps {
-  /** Overrides siteConfig.listenerAvailability (null = unknown). */
-  available?: boolean | null;
   className?: string;
 }
 
-export default function AvailabilityIndicator({
-  available = siteConfig.listenerAvailability,
-  className = '',
-}: AvailabilityIndicatorProps) {
+/** Live listener availability from the API; unknown (e.g. offline) falls back to the AI chat note. */
+export default function AvailabilityIndicator({ className = '' }: AvailabilityIndicatorProps) {
+  const available = useListenerAvailability();
   const label =
     available === true
       ? 'Listeners available now'

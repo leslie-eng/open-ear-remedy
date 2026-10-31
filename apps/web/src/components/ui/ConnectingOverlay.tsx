@@ -2,6 +2,8 @@ interface ConnectingOverlayProps {
   open: boolean;
   title?: string;
   detail?: string;
+  /** Optional way out, e.g. cancelling a call while it rings. */
+  action?: { label: string; onClick: () => void };
 }
 
 /** Calm full-screen "connecting" state with slowly expanding rings instead of a spinner. */
@@ -9,6 +11,7 @@ export default function ConnectingOverlay({
   open,
   title = 'Connecting you…',
   detail = 'Take a slow breath. This usually only takes a moment.',
+  action,
 }: ConnectingOverlayProps) {
   if (!open) return null;
 
@@ -30,6 +33,15 @@ export default function ConnectingOverlay({
         </div>
         <p className="font-heading text-xl md:text-2xl font-semibold text-oe-ink mb-2">{title}</p>
         <p className="text-body text-oe-muted">{detail}</p>
+        {action && (
+          <button
+            type="button"
+            onClick={action.onClick}
+            className="oe-btn mt-8 rounded-oe-sm border border-oe-line bg-white px-6 py-3 font-semibold text-oe-ink"
+          >
+            {action.label}
+          </button>
+        )}
       </div>
     </div>
   );

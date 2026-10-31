@@ -27,6 +27,8 @@ const CheckoutSuccessPage = lazy(() => import('../pages/checkout/success'));
 const ContactPage = lazy(() => import('../pages/contact/page'));
 const AboutPage = lazy(() => import('../pages/about/page'));
 const CrisisHelpPage = lazy(() => import('../pages/crisis-help/page'));
+const ListenerConsolePage = lazy(() => import('../pages/listener/page'));
+const ListenersAdminPage = lazy(() => import('../pages/admin/listeners/page'));
 const EbookManagementPage = lazy(() => import('../pages/admin/ebook-management/page'));
 const NotFound = lazy(() => import('../pages/NotFound'));
 
@@ -134,6 +136,14 @@ const routes: RouteObject[] = [
   {
     path: '/crisis-help',
     element: <CrisisHelpPage />,
+  },
+  {
+    path: '/listener',
+    element: <ListenerConsolePage />,
+  },
+  {
+    path: '/admin/listeners',
+    element: <ListenersAdminPage />,
   },
   {
     path: '/admin/ebook-management',

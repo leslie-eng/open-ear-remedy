@@ -17,10 +17,18 @@ export const ANONYMOUS_CALLER = 'Anonymous';
 
 export type EndReason = 'hangup' | 'no_answer' | 'cancelled' | 'dropped' | 'time_limit';
 
-/** Opaque WebRTC payload (SDP offer/answer or ICE candidate), relayed untouched. */
+/** Same shape as the browser's RTCIceCandidateInit (this package has no DOM types). */
+export interface IceCandidate {
+  candidate?: string;
+  sdpMid?: string | null;
+  sdpMLineIndex?: number | null;
+  usernameFragment?: string | null;
+}
+
+/** WebRTC payload (SDP offer/answer or ICE candidate), relayed untouched by the API. */
 export type SignalPayload =
   | { kind: 'offer' | 'answer'; sdp: string }
-  | { kind: 'candidate'; candidate: Record<string, unknown> | null };
+  | { kind: 'candidate'; candidate: IceCandidate | null };
 
 /** Browser → API. */
 export type ClientMessage =
