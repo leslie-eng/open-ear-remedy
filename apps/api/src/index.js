@@ -1,7 +1,5 @@
 import express from 'express';
 import cors from 'cors';
-import fs from 'node:fs';
-import path from 'node:path';
 import { config } from './config.js';
 import { pool } from './db.js';
 import { errorHandler } from './middleware.js';
@@ -16,13 +14,12 @@ import notificationsRoutes from './routes/notifications.js';
 import uploadsRoutes from './routes/uploads.js';
 import ebooksRoutes from './routes/ebooks.js';
 import publicRoutes from './routes/public.js';
+import { storage } from './services/storage.js';
 import { securityHeaders } from './util.js';
-
-fs.mkdirSync(config.uploadDir, { recursive: true });
 
 const app = express();
 app.disable('x-powered-by');
-// Behind LiteSpeed/Apache (cPanel) or Render's load balancer: use the real client IP for rate limits.
+// Behind Render's load balancer: use the real client IP for rate limits.
 app.set('trust proxy', config.trustProxy);
 app.use(securityHeaders);
 
@@ -66,11 +63,12 @@ app.get('/api/health', (_req, res) => {
   });
 });
 
-// Only cover images are public. Ebook files are served by /api/ebooks/:id/download to owners.
-app.use(
-  '/uploads/covers',
-  express.static(path.join(config.uploadDir, 'covers'), { dotfiles: 'deny', index: false, fallthrough: false }),
-);
+// Local-disk storage (development only): serve public covers and signed ebook downloads.
+// In production files live in Cloudflare R2 and these routes are not mounted.
+if (storage.servesLocalFiles) {
+  app.use('/uploads/covers', express.static(storage.coversDir, { dotfiles: 'deny', index: false, fallthrough: false }));
+  app.get('/api/files/download', (req, res) => storage.serveSignedDownload(req, res));
+}
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/calls', callsRoutes);

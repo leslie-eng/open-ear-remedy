@@ -128,48 +128,16 @@ export function formatMoney(amount: number, currency = 'USD'): string {
   }
 }
 
-function filenameFromDisposition(header: string | null): string | null {
-  if (!header) return null;
-  const star = /filename\*=(?:UTF-8'')?([^;]+)/i.exec(header);
-  if (star) {
-    try {
-      return decodeURIComponent(star[1].trim().replace(/^"|"$/g, ''));
-    } catch {
-      /* fall through */
-    }
-  }
-  const plain = /filename="?([^";]+)"?/i.exec(header);
-  return plain ? plain[1].trim() : null;
-}
-
 /**
- * Downloads an owned ebook. The endpoint requires the Authorization header,
- * so a plain link cannot be used: fetch -> blob -> object URL -> click.
+ * The API answers with a short-lived signed URL (5 minutes); the file then downloads straight
+ * from storage. The server sets the filename via Content-Disposition.
  */
-export async function downloadEbook(ebookId: string, fallbackFilename: string): Promise<void> {
-  const token = getAccessToken();
-  const headers: HeadersInit = {};
-  if (token) headers.Authorization = `Bearer ${token}`;
-
-  const res = await fetch(apiUrl(`/api/ebooks/${encodeURIComponent(ebookId)}/download`), {
-    headers,
-  });
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    throw new ApiError(
-      (data as { error?: string }).error || res.statusText || 'Download failed',
-      res.status,
-    );
-  }
-  const blob = await res.blob();
-  const filename =
-    filenameFromDisposition(res.headers.get('Content-Disposition')) || fallbackFilename;
-  const url = URL.createObjectURL(blob);
+export async function downloadEbook(ebookId: string): Promise<void> {
+  const { url } = await apiFetch<{ url: string }>(`/api/ebooks/${encodeURIComponent(ebookId)}/download`);
   const a = document.createElement('a');
   a.href = url;
-  a.download = filename;
+  a.rel = 'noopener';
   document.body.appendChild(a);
   a.click();
   a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 10_000);
 }

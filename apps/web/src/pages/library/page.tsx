@@ -10,12 +10,6 @@ interface LibraryEntry {
   order_reference: string | null;
 }
 
-function safeFilename(title: string, format: Ebook['file_format']) {
-  const base = title.replace(/[\\/:*?"<>|]+/g, '').trim() || 'ebook';
-  const ext = format === 'EPUB' ? 'epub' : 'pdf';
-  return `${base}.${ext}`;
-}
-
 export default function LibraryPage() {
   const { user, loading: authLoading } = useAuth();
   const [library, setLibrary] = useState<LibraryEntry[]>([]);
@@ -68,7 +62,7 @@ export default function LibraryPage() {
     setDownloadError('');
     setDownloadingId(ebook.id);
     try {
-      await downloadEbook(ebook.id, safeFilename(ebook.title, ebook.file_format));
+      await downloadEbook(ebook.id);
     } catch (err) {
       setDownloadError(
         `Could not download "${ebook.title}": ${err instanceof Error ? err.message : 'Unknown error'}`,

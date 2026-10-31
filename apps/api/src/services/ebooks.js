@@ -1,6 +1,4 @@
-import path from 'node:path';
 import { query } from '../db.js';
-import { config } from '../config.js';
 
 const minorToMajor = (n) => Math.round(Number(n) || 0) / 100;
 
@@ -50,20 +48,4 @@ export async function mapOrders(orderRows) {
       .filter((i) => i.order_id === o.id)
       .map((i) => ({ ebook_id: i.product_id, title: i.title, price: minorToMajor(i.price_amount) })),
   }));
-}
-
-/**
- * Resolves a stored file_url ("ebooks/x.pdf", or a legacy "/uploads/ebooks/x.pdf" / full URL)
- * to an absolute path inside the private ebooks directory. Returns null if it would escape it.
- */
-export function resolveEbookFile(fileUrl) {
-  if (!fileUrl) return null;
-  let key = String(fileUrl);
-  const idx = key.indexOf('ebooks/');
-  if (idx === -1) return null;
-  key = decodeURIComponent(key.slice(idx + 'ebooks/'.length).split(/[?#]/)[0]);
-  const base = path.join(config.uploadDir, 'ebooks');
-  const full = path.resolve(base, key);
-  if (!full.startsWith(base + path.sep)) return null;
-  return full;
 }

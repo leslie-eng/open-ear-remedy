@@ -1,11 +1,11 @@
 import { Router } from 'express';
-import fs from 'node:fs';
 import path from 'node:path';
 import { query } from '../db.js';
 import { config } from '../config.js';
 import { asyncHandler, requireAuth } from '../middleware.js';
 import { withTransaction } from '../services/credits.js';
-import { mapEbook, mapOrders, resolveEbookFile } from '../services/ebooks.js';
+import { mapEbook, mapOrders } from '../services/ebooks.js';
+import { ebookKeyFrom, storage } from '../services/storage.js';
 import { initializeTransaction, newReference, toMinor } from '../services/paystack.js';
 import { rateLimit } from '../util.js';
 import { CURRENCY } from '@openear/shared/pricing';
@@ -132,14 +132,16 @@ router.get(
     );
     if (!rows[0]) return res.status(403).json({ error: 'You do not own this ebook' });
 
-    const filePath = resolveEbookFile(rows[0].file_url);
-    if (!filePath || !fs.existsSync(filePath)) {
+    const key = ebookKeyFrom(rows[0].file_url);
+    const ext = key ? path.extname(key) : `.${String(rows[0].file_format || 'pdf').toLowerCase()}`;
+    const safeTitle = rows[0].title.replace(/[^\w\s.-]/g, '').trim().slice(0, 80) || 'ebook';
+    const url = key ? await storage.downloadUrl(key, `${safeTitle}${ext}`) : null;
+    if (!url) {
       console.error('Ebook file missing', { id: req.params.id, file_url: rows[0].file_url });
       return res.status(404).json({ error: 'File is not available yet. Please contact support.' });
     }
-    const ext = path.extname(filePath) || `.${String(rows[0].file_format || 'pdf').toLowerCase()}`;
-    const safeTitle = rows[0].title.replace(/[^\w\s.-]/g, '').trim().slice(0, 80) || 'ebook';
-    res.download(filePath, `${safeTitle}${ext}`, { dotfiles: 'deny' });
+    // Short-lived signed URL (5 minutes); the browser downloads straight from storage.
+    res.json({ url });
   }),
 );
 
