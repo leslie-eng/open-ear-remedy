@@ -60,7 +60,6 @@ export const config = {
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean),
-  callMaxMinutes: parseInt(process.env.CALL_MAX_MINUTES || '60', 10),
   // Number of reverse proxies in front of the app (LiteSpeed/Apache on cPanel, Render's LB).
   trustProxy: parseInt(process.env.TRUST_PROXY || '1', 10),
   // Local-disk storage for development; production uses Cloudflare R2 when R2_* vars are set.

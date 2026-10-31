@@ -13,7 +13,8 @@
     "build": "npm run build -w @openear/shared && npm run build -w @openear/web",
     "lint": "npm run lint -w @openear/web",
     "type-check": "npm run type-check --workspaces --if-present",
-    "db:migrate": "npm run db:migrate -w @openear/api"
+    "db:migrate": "npm run db:migrate -w @openear/api",
+    "test": "npm run test --workspaces --if-present"
   },
   "engines": {
     "node": ">=20"

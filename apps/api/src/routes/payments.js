@@ -1,8 +1,9 @@
 import { Router } from 'express';
 import { config } from '../config.js';
 import { asyncHandler, requireAuth } from '../middleware.js';
-import { addCredits, withTransaction } from '../services/credits.js';
-import { CREDIT_PACKS, CURRENCY, findCreditPack } from '@openear/shared/pricing';
+import { withTransaction } from '../services/credits.js';
+import { CREDIT_PACKS, CURRENCY, MONTHLY_PASS, findOffer } from '@openear/shared/pricing';
+import * as billing from '../services/billing.js';
 import {
   initializeTransaction,
   newReference,
@@ -14,10 +15,8 @@ import { rateLimit } from '../util.js';
 
 const router = Router();
 
-router.get('/packages', (_req, res) => {
-  res.json({
-    packages: CREDIT_PACKS.map((p) => ({ ...p, currency: CURRENCY })),
-  });
+router.get('/offers', (_req, res) => {
+  res.json({ currency: CURRENCY, packs: CREDIT_PACKS, pass: MONTHLY_PASS });
 });
 
 router.post(
@@ -28,24 +27,27 @@ router.post(
     if (!paystackConfigured()) {
       return res.status(503).json({ error: 'Payment service is not configured.' });
     }
-    // Accept a package id (or, for older clients, its credit count). Any client-sent price is ignored.
-    const pkg = findCreditPack(req.body.packageId ?? req.body.credits);
-    if (!pkg) {
-      return res.status(400).json({ error: 'Unknown credit package.' });
+    // The client only names the offer; the price always comes from the shared catalogue.
+    const offer = findOffer(req.body.offerId);
+    if (!offer) {
+      return res.status(400).json({ error: 'Unknown offer.' });
+    }
+    // Refuse before payment: once Paystack has taken the money it is too late to say no.
+    if (offer.kind === 'pass' && !(await billing.canBuyPass(req.user.id))) {
+      return res.status(409).json({ error: 'You already have a Monthly Pass waiting to start.' });
     }
 
     const reference = newReference('oe', req.user.id);
     const result = await initializeTransaction({
       email: req.user.email,
-      amountMinor: toMinor(pkg.price),
+      amountMinor: toMinor(offer.price),
       reference,
-      callbackUrl: `${config.clientUrl}/profile?purchase=success`,
+      callbackUrl: `${config.clientUrl}/dashboard?purchase=success`,
       metadata: {
-        kind: 'credits',
+        kind: 'offer',
         user_id: req.user.id,
-        package_id: pkg.id,
-        credits: String(pkg.credits),
-        package_name: `${pkg.name} - ${pkg.credits} Credits`,
+        offer_id: offer.id,
+        offer_name: offer.name,
         cancel_action: `${config.clientUrl}/pricing?purchase=cancelled`,
       },
     });
@@ -54,31 +56,20 @@ router.post(
   }),
 );
 
-async function handleCreditPurchase(data, meta) {
-  const pkg = findCreditPack(meta.package_id ?? Number(meta.credits));
+async function handleOfferPurchase(data, meta) {
+  const offer = findOffer(meta.offer_id);
   const userId = meta.user_id;
-  if (!pkg || !userId) return { status: 400, body: { error: 'Invalid webhook payload metadata' } };
+  if (!offer || !userId) return { status: 400, body: { error: 'Invalid webhook payload metadata' } };
 
   const amountPaid = Number(data.amount) || 0;
   const currency = String(data.currency || '').toUpperCase();
-  if (amountPaid < toMinor(pkg.price) || (currency && currency !== CURRENCY)) {
-    console.error('Paystack amount/currency mismatch', { reference: data.reference, amountPaid, currency, pkg });
+  if (amountPaid < toMinor(offer.price) || currency !== CURRENCY) {
+    console.error('Paystack amount/currency mismatch', { reference: data.reference, amountPaid, currency, offer: offer.id });
     return { status: 200, body: { received: true, ignored: 'amount_mismatch' } };
   }
 
-  return withTransaction(async (client) => {
-    // The unique index on reference makes retried webhooks a no-op.
-    const { rows } = await client.query(
-      `INSERT INTO credit_transactions (user_id, type, credits, amount, description, status, reference)
-       VALUES ($1, 'purchase', $2, $3, $4, 'completed', $5)
-       ON CONFLICT (reference) WHERE reference IS NOT NULL DO NOTHING
-       RETURNING id`,
-      [userId, pkg.credits, amountPaid, `Purchased ${pkg.name} - ${pkg.credits} Credits`, data.reference],
-    );
-    if (!rows[0]) return { status: 200, body: { success: true, duplicate: true } };
-    await addCredits(client, userId, pkg.credits);
-    return { status: 200, body: { success: true, credits_added: pkg.credits } };
-  });
+  const { alreadyGranted } = await billing.grantPurchase(userId, offer.id, { reference: data.reference });
+  return { status: 200, body: { success: true, duplicate: alreadyGranted } };
 }
 
 async function handleEbookPurchase(data) {
@@ -142,7 +133,7 @@ export function paystackWebhookHandler() {
     if (event.event === 'charge.success') {
       if (!reference) return res.status(400).json({ error: 'Missing reference' });
       const result =
-        meta.kind === 'ebook_order' ? await handleEbookPurchase(data) : await handleCreditPurchase(data, meta);
+        meta.kind === 'ebook_order' ? await handleEbookPurchase(data) : await handleOfferPurchase(data, meta);
       return res.status(result.status).json(result.body);
     }
 
@@ -158,13 +149,8 @@ export function paystackWebhookHandler() {
         await withTransaction((client) =>
           client.query(
             `INSERT INTO credit_transactions (user_id, type, credits, amount, description, status)
-             VALUES ($1, 'purchase', $2, $3, $4, 'failed')`,
-            [
-              meta.user_id,
-              parseInt(meta.credits || '0', 10) || 0,
-              Number(data.amount) || 0,
-              `Failed purchase: ${meta.package_name || 'Credit Package'}`,
-            ],
+             VALUES ($1, 'purchase', 0, $2, $3, 'failed')`,
+            [meta.user_id, Number(data.amount) || 0, `Failed purchase: ${meta.offer_name || 'Open Ear purchase'}`],
           ),
         );
       }

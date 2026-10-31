@@ -42,3 +42,26 @@ services:
         sync: false
       - key: R2_PUBLIC_URL
         sync: false
+
+  # Daily at 06:00 Nairobi (03:00 UTC): email Monthly Pass holders whose pass ends within 3 days.
+  - type: cron
+    name: openear-pass-reminders
+    runtime: node
+    plan: starter
+    schedule: "0 3 * * *"
+    buildCommand: npm ci
+    startCommand: npm run jobs:pass-reminders -w @openear/api
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CLIENT_URL
+        value: https://openearemedy.com
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        value: Open Ear <noreply@openearemedy.com>
+

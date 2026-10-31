@@ -189,6 +189,13 @@ describe.skipIf(!hasTestDatabase)('billing', () => {
       expect((await billing.getBalance(userId, { now: lateEvening })).credits).toBe(99);
     });
 
+    it('reports how many pass messages are left today', async () => {
+      const userId = await userWithPass('ps_m6');
+      for (let i = 0; i < 3; i += 1) await billing.chargeChatMessage(userId, { now: lateEvening });
+      expect((await billing.getBalance(userId, { now: lateEvening })).pass.aiMessagesLeftToday).toBe(97);
+      expect((await billing.getBalance(userId, { now: nextNairobiDay })).pass.aiMessagesLeftToday).toBe(100);
+    });
+
     it('gives a fresh daily allowance at midnight Nairobi time', async () => {
       const userId = await userWithPass('ps_m3');
       for (let i = 0; i < 100; i += 1) await billing.chargeChatMessage(userId, { now: lateEvening });

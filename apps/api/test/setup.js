@@ -6,3 +6,8 @@ if (url) {
   process.env.DATABASE_URL = url;
   process.env.DATABASE_URL_UNPOOLED = url;
 }
+
+// Never use real payment keys in tests: a fixed webhook secret signs the test payloads,
+// and no Paystack API key is set, so nothing can reach Paystack.
+process.env.PAYSTACK_WEBHOOK_SECRET = 'whsec_test_open_ear_webhook_secret';
+process.env.PAYSTACK_SECRET_KEY = '';

@@ -3,10 +3,10 @@ import { query } from '../db.js';
 import { config } from '../config.js';
 import { comparePassword, findUserByEmail } from '../auth.js';
 import { asyncHandler, requireAuth } from '../middleware.js';
-import { getOrCreateCredits, withTransaction } from '../services/credits.js';
+import { getOrCreateCredits } from '../services/credits.js';
 import { mapEbook, mapOrders } from '../services/ebooks.js';
 import { rateLimit } from '../util.js';
-import { FREE_TRIAL_CREDITS } from '@openear/shared/pricing';
+import * as billing from '../services/billing.js';
 
 const router = Router();
 
@@ -20,7 +20,8 @@ router.get(
   requireAuth,
   asyncHandler(async (req, res) => {
     const row = await getOrCreateCredits(req.user.id);
-    res.json({ credits: row.credits, free_credits_available: !row.free_credits_claimed_at });
+    const balance = await billing.getBalance(req.user.id);
+    res.json({ ...balance, free_credits_available: !row.free_credits_claimed_at });
   }),
 );
 
@@ -28,27 +29,7 @@ router.post(
   '/claim-free-credits',
   requireAuth,
   asyncHandler(async (req, res) => {
-    await getOrCreateCredits(req.user.id);
-    const credits = await withTransaction(async (client) => {
-      const { rows } = await client.query(
-        `UPDATE user_credits
-         SET credits = credits + $2, free_credits_claimed_at = NOW(), updated_at = NOW()
-         WHERE user_id = $1 AND free_credits_claimed_at IS NULL
-         RETURNING credits`,
-        [req.user.id, FREE_TRIAL_CREDITS],
-      );
-      if (!rows[0]) return null;
-      await client.query(
-        `INSERT INTO credit_transactions (user_id, type, credits, amount, description, status)
-         VALUES ($1, 'bonus', $2, 0, 'Free trial credits', 'completed')`,
-        [req.user.id, FREE_TRIAL_CREDITS],
-      );
-      return rows[0].credits;
-    });
-    if (credits === null) {
-      return res.status(400).json({ error: 'Free credits have already been claimed on this account.' });
-    }
-    res.json({ credits });
+    res.json(await billing.claimTrial(req.user.id));
   }),
 );
 

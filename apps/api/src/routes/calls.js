@@ -2,9 +2,9 @@ import { Router } from 'express';
 import { query } from '../db.js';
 import { config } from '../config.js';
 import { asyncHandler, requireAuth } from '../middleware.js';
-import { deductCredits, getCredits } from '../services/credits.js';
+import * as billing from '../services/billing.js';
 import { rateLimit } from '../util.js';
-import { CREDITS_PER_CALL_MINUTE, callMinutesFor, creditsForCall } from '@openear/shared/pricing';
+import { CREDITS_PER_CALL_MINUTE, callSecondsAvailable } from '@openear/shared/pricing';
 
 const router = Router();
 
@@ -32,19 +32,13 @@ async function finishCall(userId, callId) {
   if (!call) return null;
 
   const duration = billableSeconds(call);
-  const minutes = Math.ceil(duration / 60);
-  const creditsUsed = creditsForCall(duration);
+  const charge = await billing.chargeCall(userId, duration, { callId: call.id });
   await query(
     `UPDATE call_history SET duration_seconds = $1, credits_used = $2 WHERE id = $3`,
-    [duration, creditsUsed, call.id],
+    [duration, charge.credits, call.id],
   );
-  const remainingCredits = await deductCredits(
-    userId,
-    creditsUsed,
-    `Call duration: ${minutes} minutes`,
-    call.id,
-  );
-  return { duration, creditsUsed, remainingCredits };
+  const { credits: remainingCredits } = await billing.getBalance(userId);
+  return { duration, creditsUsed: charge.credits, passSecondsUsed: charge.passSeconds, remainingCredits };
 }
 
 router.post(
@@ -72,12 +66,13 @@ router.post(
     );
     for (const call of open) await finishCall(req.user.id, call.id);
 
-    const credits = await getCredits(req.user.id);
-    if (credits < CREDITS_PER_CALL_MINUTE) {
-      return res.status(400).json({ error: `Insufficient credits. Minimum ${CREDITS_PER_CALL_MINUTE} credits required.` });
+    const { credits, pass } = await billing.getBalance(req.user.id);
+    const maxDurationSeconds = callSecondsAvailable({ credits, passSecondsLeft: pass?.callSecondsLeft ?? 0 });
+    if (maxDurationSeconds < 60) {
+      return res.status(402).json({
+        error: `You need at least 1 minute of call time (${CREDITS_PER_CALL_MINUTE} credits or Monthly Pass time).`,
+      });
     }
-    const affordableMinutes = callMinutesFor(credits);
-    const maxDurationSeconds = Math.min(affordableMinutes, config.callMaxMinutes) * 60;
 
     let callSid = `sim_${Date.now()}`;
 

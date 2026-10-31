@@ -1,8 +1,7 @@
 import { Router } from 'express';
 import { config } from '../config.js';
 import { asyncHandler, requireAuth } from '../middleware.js';
-import { addCredits, deductCredits, withTransaction } from '../services/credits.js';
-import { CREDITS_PER_CHAT_MESSAGE } from '@openear/shared/pricing';
+import * as billing from '../services/billing.js';
 import { rateLimit } from '../util.js';
 
 const SYSTEM_PROMPT = `You are a warm, friendly AI companion for Open Ear. Be supportive, conversational, and brief (2-4 sentences). If someone mentions self-harm, gently suggest 988 Suicide & Crisis Lifeline.`;
@@ -42,10 +41,8 @@ router.post(
     messages.push({ role: 'user', content: message });
 
     // Charge first (atomically) so concurrent requests can't overspend; refund if the AI call fails.
-    const newCredits = await deductCredits(req.user.id, CREDITS_PER_CHAT_MESSAGE, 'Chat message', null, { requireFull: true });
-    if (newCredits === null) {
-      return res.status(400).json({ error: 'Insufficient credits' });
-    }
+    // Throws a 402 BillingError when there is no pass allowance or credit left.
+    const receipt = await billing.chargeChatMessage(req.user.id);
 
     let aiResponse;
     try {
@@ -70,19 +67,11 @@ router.post(
     }
 
     if (!aiResponse) {
-      const refunded = await withTransaction(async (client) => {
-        const credits = await addCredits(client, req.user.id, CREDITS_PER_CHAT_MESSAGE);
-        await client.query(
-          `INSERT INTO credit_transactions (user_id, type, credits, amount, description, status)
-           VALUES ($1, 'refund', $2, $2, 'Chat message refund', 'completed')`,
-          [req.user.id, CREDITS_PER_CHAT_MESSAGE],
-        );
-        return credits;
-      });
-      return res.status(502).json({ error: 'Failed to get AI response', credits: refunded });
+      await billing.refundChatMessage(req.user.id, receipt);
+      return res.status(502).json({ error: 'Failed to get AI response', balance: await billing.getBalance(req.user.id) });
     }
 
-    res.json({ response: aiResponse, credits: newCredits });
+    res.json({ response: aiResponse, balance: await billing.getBalance(req.user.id) });
   }),
 );
 

@@ -4,6 +4,7 @@ import { config } from '../config.js';
 import { asyncHandler, requireAdmin } from '../middleware.js';
 import { sendRawEmail } from '../email.js';
 import { mapAdminEbook } from '../services/ebooks.js';
+import * as billing from '../services/billing.js';
 import { escapeHtml } from '../util.js';
 import {
   getMonthlyRevenueInRange,
@@ -275,6 +276,33 @@ router.delete(
     const { rowCount } = await query(`DELETE FROM products WHERE id = $1`, [req.params.id]);
     if (!rowCount) return res.status(404).json({ error: 'Ebook not found' });
     res.json({ success: true });
+  }),
+);
+
+/** Credit corrections (refunds, goodwill). A reason is required and every change is recorded. */
+router.post(
+  '/users/:id/credits',
+  requireAdmin,
+  asyncHandler(async (req, res) => {
+    const delta = Number(req.body?.delta);
+    if (!Number.isInteger(delta) || delta === 0 || Math.abs(delta) > 100_000) {
+      return res.status(400).json({ error: 'delta must be a non-zero whole number of credits' });
+    }
+    const result = await billing.adjustCredits({
+      adminId: req.user.id,
+      userId: req.params.id,
+      delta,
+      reason: req.body?.reason,
+    });
+    res.json(result);
+  }),
+);
+
+router.get(
+  '/users/:id/credit-adjustments',
+  requireAdmin,
+  asyncHandler(async (req, res) => {
+    res.json({ adjustments: await billing.listAdjustments(req.params.id) });
   }),
 );
 

@@ -18,6 +18,9 @@ export class BillingError extends Error {
   constructor(code, message) {
     super(message);
     this.code = code;
+    // Read by the API error handler: the message is safe to show to the user.
+    this.status = code === 'INSUFFICIENT_BALANCE' ? 402 : 400;
+    this.expose = true;
   }
 }
 
@@ -51,9 +54,17 @@ export async function getBalance(userId, { now = new Date() } = {}) {
   ]);
   const active = passRows.find((p) => p.starts_at <= now) ?? null;
   const queued = passRows.find((p) => p.starts_at > now) ?? null;
+  let pass = null;
+  if (active) {
+    const { rows: usage } = await query(
+      `SELECT messages FROM pass_chat_usage WHERE pass_id = $1 AND day = $2`,
+      [active.id, chatDay(now)],
+    );
+    pass = { ...toPass(active), aiMessagesLeftToday: active.ai_messages_per_day - (usage[0]?.messages ?? 0) };
+  }
   return {
     credits: creditRows[0]?.credits ?? 0,
-    pass: active && toPass(active),
+    pass,
     queuedPass: queued && { startsAt: queued.starts_at, expiresAt: queued.expires_at },
   };
 }
