@@ -1,15 +1,16 @@
 # Render Blueprint: https://render.com/docs/blueprint-spec
 # Deploy from repo root → New → Blueprint → connect GitHub repo.
+# NOTE: the database section moves to Neon in the next stage.
 
 services:
   - type: web
     name: openear-api
     runtime: node
-    rootDir: server
     plan: free
-    buildCommand: npm install
-    preDeployCommand: npm run db:migrate
-    startCommand: npm start
+    # npm workspaces: install from the repo root so @openear/shared is linked and built (root postinstall).
+    buildCommand: npm ci
+    preDeployCommand: npm run db:migrate -w @openear/api
+    startCommand: npm start -w @openear/api
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
