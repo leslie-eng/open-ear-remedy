@@ -1,16 +1,12 @@
 import { BrowserRouter } from "react-router-dom";
 import { AppRoutes } from "./router";
-import { I18nextProvider } from "react-i18next";
-import i18n from "./i18n";
-import NewsletterPopup from "./components/feature/NewsletterPopup";
 import { CartProvider } from "./contexts/CartContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { Suspense } from "react";
 
 function App() {
   return (
-    <I18nextProvider i18n={i18n}>
-      <AuthProvider>
+    <AuthProvider>
       <CartProvider>
         <BrowserRouter basename={__BASE_PATH__}>
           <Suspense fallback={
@@ -23,11 +19,9 @@ function App() {
           }>
             <AppRoutes />
           </Suspense>
-          <NewsletterPopup />
         </BrowserRouter>
       </CartProvider>
-      </AuthProvider>
-    </I18nextProvider>
+    </AuthProvider>
   );
 }
 
