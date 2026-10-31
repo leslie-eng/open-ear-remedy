@@ -72,7 +72,7 @@
 @keyframes fade-in {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(calc(var(--move-sm) * -1));
   }
   to {
     opacity: 1;
@@ -81,5 +81,5 @@
 }
 
 .animate-fade-in {
-  animation: fade-in 0.3s ease-out;
+  animation: fade-in var(--dur-base) var(--ease-out);
 }

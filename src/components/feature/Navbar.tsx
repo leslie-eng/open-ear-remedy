@@ -1,9 +1,12 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { apiFetch } from '../../lib/api';
+import CrisisLink from '../ui/CrisisLink';
+
+const SCROLL_THRESHOLD = 40;
 
 // Cache the admin check per user id so navigating between pages doesn't refetch it.
 const adminCheckCache = new Map<string, Promise<boolean>>();
@@ -33,13 +36,34 @@ export default function Navbar({ transparent = false }: NavbarProps) {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      setIsScrolled(window.scrollY > SCROLL_THRESHOLD);
     };
-    window.addEventListener('scroll', handleScroll);
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Close the user menu on outside click or Escape. (A fixed backdrop would break inside
+  // the transformed header row.)
+  useEffect(() => {
+    if (!showUserMenu) return;
+    const handlePointer = (e: PointerEvent) => {
+      if (!userMenuRef.current?.contains(e.target as Node)) setShowUserMenu(false);
+    };
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowUserMenu(false);
+    };
+    document.addEventListener('pointerdown', handlePointer);
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      document.removeEventListener('pointerdown', handlePointer);
+      document.removeEventListener('keydown', handleKey);
+    };
+  }, [showUserMenu]);
 
   const userId = user?.id ?? null;
   const isUserLoggedIn = !!user;
@@ -79,38 +103,61 @@ export default function Navbar({ transparent = false }: NavbarProps) {
 
   const isActive = (path: string) => location.pathname === path;
 
+  const showBackground = !transparent || isScrolled || isMobileMenuOpen;
+  // The header "shrinks" by sliding its background up and the content half as far
+  // (transform only, so nothing reflows). Distance is --nav-shrink.
+  const shrink = isScrolled ? 'translateY(calc(var(--nav-shrink) * -1))' : 'none';
+  const shrinkHalf = isScrolled ? 'translateY(calc(var(--nav-shrink) / -2))' : 'none';
+
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        transparent && !isScrolled
-          ? 'bg-transparent'
-          : 'bg-white/95 backdrop-blur-md shadow-sm'
-      }`}
-    >
-      <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20 py-4 md:py-6">
+    <nav aria-label="Main" className="fixed top-0 left-0 right-0 z-50 [--nav-shrink:8px] md:[--nav-shrink:16px]">
+      <div
+        aria-hidden="true"
+        style={{ transform: shrink }}
+        className={`absolute inset-0 border-b transition-[opacity,transform] duration-oe-base ease-oe-out ${
+          showBackground ? 'opacity-100' : 'opacity-0'
+        } ${
+          isScrolled
+            ? 'bg-white/75 backdrop-blur-[10px] border-oe-line shadow-oe-sm'
+            : 'bg-white/95 border-transparent'
+        }`}
+      />
+      <div
+        style={{ transform: shrinkHalf }}
+        className="relative max-w-7xl mx-auto px-6 md:px-12 lg:px-20 py-4 md:py-6 transition-transform duration-oe-base ease-oe-out"
+      >
         <div className="flex items-center justify-between">
           <Link
             to="/"
-            className="text-2xl md:text-3xl font-bold text-[#0096FF] hover:opacity-80 transition-opacity"
-            style={{ fontFamily: 'Poppins, sans-serif' }}
+            style={{ fontFamily: 'Poppins, sans-serif', transform: isScrolled ? 'scale(0.92)' : 'none' }}
+            className="origin-left text-2xl md:text-3xl font-bold text-[#0096FF] hover:opacity-80 transition-[opacity,transform] duration-oe-base ease-oe-out"
           >
             Open Ear
           </Link>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden w-10 h-10 flex items-center justify-center text-[#0096FF] cursor-pointer"
-          >
-            <i
-              className={`${
-                isMobileMenuOpen ? 'ri-close-line' : 'ri-menu-line'
-              } text-2xl`}
-            ></i>
-          </button>
+          <div className="md:hidden flex items-center gap-2">
+            <CrisisLink compact className="text-sm px-2 py-2" />
+            {/* Mobile Menu Button */}
+            <button
+              type="button"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={isMobileMenuOpen}
+              aria-controls="mobile-menu"
+              className="w-11 h-11 flex items-center justify-center text-oe-blue cursor-pointer"
+            >
+              <i
+                aria-hidden="true"
+                className={`${
+                  isMobileMenuOpen ? 'ri-close-line' : 'ri-menu-line'
+                } text-2xl`}
+              ></i>
+            </button>
+          </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8 lg:gap-12">
+          <div className="hidden md:flex items-center gap-6 lg:gap-10">
+            <CrisisLink compact className="text-sm lg:text-base whitespace-nowrap" />
             {navLinks.map((link) => (
               <Link
                 key={link.path}
@@ -154,9 +201,12 @@ export default function Navbar({ transparent = false }: NavbarProps) {
               </Link>
             )}
             {isUserLoggedIn ? (
-              <div className="relative">
+              <div className="relative" ref={userMenuRef}>
                 <button
+                  type="button"
                   onClick={() => setShowUserMenu(!showUserMenu)}
+                  aria-label="Account menu"
+                  aria-expanded={showUserMenu}
                   className="flex items-center gap-2 cursor-pointer"
                 >
                   <div className="w-8 h-8 bg-[#0096FF] rounded-full flex items-center justify-center">
@@ -170,11 +220,7 @@ export default function Navbar({ transparent = false }: NavbarProps) {
                 {/* User Dropdown Menu */}
                 {showUserMenu && (
                   <>
-                    <div 
-                      className="fixed inset-0 z-40" 
-                      onClick={() => setShowUserMenu(false)}
-                    ></div>
-                    <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
+                    <div className="animate-fade-in absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
                       <div className="px-4 py-3 border-b border-gray-100">
                         <p className="text-xs text-[#6B6B6B]">Signed in as</p>
                         <p className="text-sm font-medium text-[#2A2A2A] truncate">{userEmail}</p>
@@ -229,7 +275,7 @@ export default function Navbar({ transparent = false }: NavbarProps) {
             )}
             <Link
               to="/get-started"
-              className="px-6 lg:px-8 py-2.5 lg:py-3 bg-[#0096FF] text-white rounded-full text-sm lg:text-base font-semibold hover:bg-[#0077CC] transition-colors whitespace-nowrap cursor-pointer"
+              className="oe-btn px-6 lg:px-8 py-2.5 lg:py-3 bg-oe-blue text-white rounded-full text-sm lg:text-base font-semibold hover:bg-oe-blue-hover whitespace-nowrap cursor-pointer"
             >
               Get Started
             </Link>
@@ -238,7 +284,7 @@ export default function Navbar({ transparent = false }: NavbarProps) {
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden mt-6 pb-6 space-y-4 border-t border-gray-100 pt-6">
+          <div id="mobile-menu" className="animate-fade-in md:hidden mt-6 pb-6 space-y-4 border-t border-gray-100 pt-6">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
