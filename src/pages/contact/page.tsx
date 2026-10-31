@@ -80,8 +80,8 @@ export default function ContactPage() {
                       <p className="text-[#6B6B6B] text-sm mb-2">
                         Get help with your ebook purchases and downloads
                       </p>
-                      <a href="mailto:support@openear.com" className="text-[#0096FF] hover:text-[#0077CC] transition-colors">
-                        support@openear.com
+                      <a href="mailto:support@openearemedy.com" className="text-[#0096FF] hover:text-[#0077CC] transition-colors">
+                        support@openearemedy.com
                       </a>
                     </div>
                   </div>

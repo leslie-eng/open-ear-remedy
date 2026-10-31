@@ -109,7 +109,7 @@ export default function GetStartedPage() {
                   </li>
                   <li className="flex items-start gap-3 text-sm text-[#6B6B6B]">
                     <i className="ri-check-line text-[#0096FF] text-lg mt-0.5"></i>
-                    <span>Secure Twilio-powered calls</span>
+                    <span>Secure, private calls</span>
                   </li>
                   <li className="flex items-start gap-3 text-sm text-[#6B6B6B]">
                     <i className="ri-check-line text-[#0096FF] text-lg mt-0.5"></i>

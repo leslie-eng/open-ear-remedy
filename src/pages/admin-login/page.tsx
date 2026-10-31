@@ -69,7 +69,7 @@ export default function AdminLoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-3.5 bg-[#F5F5F5] border-2 border-transparent rounded-xl focus:border-[#0096FF] outline-none text-sm"
-                placeholder="admin@openear.com"
+                placeholder="admin@openearemedy.com"
                 required
               />
             </div>

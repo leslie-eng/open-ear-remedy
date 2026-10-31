@@ -130,7 +130,7 @@ export const generateOrganizationSchema = () => {
       '@type': 'ContactPoint',
       telephone: '+1-555-123-4567',
       contactType: 'Customer Service',
-      email: 'support@openear.com',
+      email: 'support@openearemedy.com',
       availableLanguage: 'English',
     },
     sameAs: [

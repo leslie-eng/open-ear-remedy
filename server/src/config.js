@@ -28,7 +28,7 @@ export const config = {
     .map((s) => s.trim())
     .filter(Boolean),
   resendApiKey: process.env.RESEND_API_KEY || '',
-  emailFrom: process.env.EMAIL_FROM || 'Open Ear <noreply@openear.com>',
+  emailFrom: process.env.EMAIL_FROM || 'Open Ear <noreply@openearemedy.com>',
   paystackSecretKey: process.env.PAYSTACK_SECRET_KEY || '',
   paystackWebhookSecret: process.env.PAYSTACK_WEBHOOK_SECRET || '',
   paystackCurrency: (process.env.PAYSTACK_CURRENCY || 'USD').trim().toUpperCase(),

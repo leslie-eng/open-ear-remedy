@@ -25,4 +25,4 @@ Disallow: /reset-password
 Disallow: /admin/
 Disallow: /*?*
 
-Sitemap: https://openear.com/sitemap.xml
+Sitemap: https://openearemedy.com/sitemap.xml

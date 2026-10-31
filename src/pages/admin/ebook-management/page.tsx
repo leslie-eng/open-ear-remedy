@@ -471,7 +471,7 @@ export default function EbookManagementPage() {
                       value={formData.cover_image_url}
                       onChange={handleInputChange}
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0096FF] focus:border-transparent"
-                      placeholder="https://openear.com/images/cover.jpg"
+                      placeholder="https://openearemedy.com/images/cover.jpg"
                     />
                   </div>
                 </div>

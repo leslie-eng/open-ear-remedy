@@ -322,9 +322,9 @@ export default function TermsPage() {
                 If you have any questions about these Terms of Service, please contact our legal team.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <a href="mailto:legal@openear.com" className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-[#0096FF] rounded-full font-semibold text-sm hover:bg-[#E6F5FF] transition-colors cursor-pointer whitespace-nowrap">
+                <a href="mailto:legal@openearemedy.com" className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-[#0096FF] rounded-full font-semibold text-sm hover:bg-[#E6F5FF] transition-colors cursor-pointer whitespace-nowrap">
                   <i className="ri-mail-line"></i>
-                  legal@openear.com
+                  legal@openearemedy.com
                 </a>
                 <Link to="/contact" className="inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-white text-white rounded-full font-semibold text-sm hover:bg-white/10 transition-colors cursor-pointer whitespace-nowrap">
                   <i className="ri-message-3-line"></i>

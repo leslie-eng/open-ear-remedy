@@ -171,7 +171,7 @@ export default function PrivacyPage() {
               </p>
               <ul className="space-y-3">
                 {[
-                  { title: 'Service Providers', desc: 'Third-party vendors who assist in providing our services (e.g., Twilio for calls, payment processors)' },
+                  { title: 'Service Providers', desc: 'Third-party vendors who assist in providing our services (e.g., Cloudflare for call relay and file storage, Paystack for payments)' },
                   { title: 'Legal Requirements', desc: 'When required by law or to protect our rights and safety' },
                   { title: 'Business Transfers', desc: 'In connection with a merger, acquisition, or sale of assets' },
                   { title: 'With Your Consent', desc: 'When you explicitly authorize us to share your information' },
@@ -259,9 +259,9 @@ export default function PrivacyPage() {
                 If you have any questions about this Privacy Policy or our data practices, please contact us.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <a href="mailto:privacy@openear.com" className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-[#0096FF] rounded-full font-semibold text-sm hover:bg-[#E6F5FF] transition-colors cursor-pointer whitespace-nowrap">
+                <a href="mailto:privacy@openearemedy.com" className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-[#0096FF] rounded-full font-semibold text-sm hover:bg-[#E6F5FF] transition-colors cursor-pointer whitespace-nowrap">
                   <i className="ri-mail-line"></i>
-                  privacy@openear.com
+                  privacy@openearemedy.com
                 </a>
                 <Link to="/contact" className="inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-white text-white rounded-full font-semibold text-sm hover:bg-white/10 transition-colors cursor-pointer whitespace-nowrap">
                   <i className="ri-message-3-line"></i>
