@@ -1,0 +1,240 @@
+/*
+ * Open Ear motion system.
+ * Calm by design: slow ease-out curves, small movements (8–16px), soft fades.
+ * Only transform and opacity are animated. Everything here is disabled under
+ * prefers-reduced-motion (see the bottom of this file).
+ */
+
+:root {
+  --ease-out: cubic-bezier(.22, 1, .36, 1);
+  --ease-in-out: cubic-bezier(.65, 0, .35, 1);
+  --dur-fast: 200ms;
+  --dur-base: 350ms;
+  --dur-slow: 600ms;
+  --move-sm: 8px;
+  --move-md: 16px;
+  --stagger: 80ms;
+}
+
+/* ---------- Reveal on scroll ----------
+ * Add `data-reveal` to an element (or `data-reveal-group` to a parent whose
+ * direct children should reveal one after another). useReveal() toggles
+ * `.is-revealed` once, at 15% visibility. Without JS, html lacks `.js-motion`
+ * and content is simply visible.
+ */
+.js-motion [data-reveal],
+.js-motion [data-reveal-group] > * {
+  opacity: 0;
+  transform: translateY(var(--move-md));
+  transition:
+    opacity var(--dur-slow) var(--ease-out),
+    transform var(--dur-slow) var(--ease-out);
+  transition-delay: calc(var(--reveal-index, 0) * var(--stagger));
+}
+
+.js-motion [data-reveal].is-revealed,
+.js-motion [data-reveal-group].is-revealed > * {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---------- Entrance (above the fold, runs on load) ---------- */
+@keyframes oe-rise-in {
+  from { opacity: 0; transform: translateY(var(--move-md)); }
+  to   { opacity: 1; transform: none; }
+}
+
+.oe-enter {
+  animation: oe-rise-in var(--dur-slow) var(--ease-out) both;
+  animation-delay: calc(var(--enter-index, 0) * var(--stagger) * 2);
+}
+
+/* ---------- Route change ----------
+ * Opacity only: a transform here would break position:fixed descendants. */
+@keyframes oe-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.oe-route {
+  animation: oe-fade-in var(--dur-base) var(--ease-out) both;
+}
+
+/* ---------- Breathing availability dot ---------- */
+@keyframes oe-breathe {
+  0%, 100% { transform: scale(1);   opacity: .55; }
+  50%      { transform: scale(1.9); opacity: 0; }
+}
+
+.oe-breathe {
+  position: relative;
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 9999px;
+  background: var(--oe-available);
+}
+
+.oe-breathe::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: inherit;
+  animation: oe-breathe 2.4s var(--ease-in-out) infinite;
+}
+
+/* ---------- Drifting hero gradient ---------- */
+@keyframes oe-drift {
+  from { transform: translate3d(-4%, -2%, 0) scale(1.05); }
+  to   { transform: translate3d(4%, 3%, 0) scale(1.12); }
+}
+
+.oe-drift {
+  position: absolute;
+  inset: -15%;
+  background:
+    radial-gradient(40% 45% at 20% 25%, var(--oe-sage-soft) 0%, transparent 70%),
+    radial-gradient(45% 50% at 80% 30%, var(--oe-mist) 0%, transparent 70%),
+    radial-gradient(50% 50% at 55% 85%, var(--oe-sand) 0%, transparent 70%);
+  animation: oe-drift 18s var(--ease-in-out) infinite alternate;
+  will-change: transform;
+}
+
+/* ---------- Connecting rings ---------- */
+@keyframes oe-ring {
+  from { transform: scale(.4); opacity: .6; }
+  to   { transform: scale(1);  opacity: 0; }
+}
+
+.oe-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  border: 2px solid var(--oe-blue);
+  animation: oe-ring 3.2s var(--ease-out) infinite;
+}
+
+.oe-ring:nth-child(2) { animation-delay: 1.07s; }
+.oe-ring:nth-child(3) { animation-delay: 2.13s; }
+
+/* ---------- Typing indicator (soft wave) ---------- */
+@keyframes oe-wave {
+  0%, 60%, 100% { transform: translateY(0);     opacity: .45; }
+  30%           { transform: translateY(-4px);  opacity: 1; }
+}
+
+.oe-typing-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  background: currentColor;
+  animation: oe-wave 1.4s var(--ease-in-out) infinite;
+}
+
+.oe-typing-dot:nth-child(2) { animation-delay: .16s; }
+.oe-typing-dot:nth-child(3) { animation-delay: .32s; }
+
+/* ---------- Skeleton shimmer ---------- */
+@keyframes oe-shimmer {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(100%); }
+}
+
+.oe-skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--oe-skeleton);
+  border-radius: var(--oe-radius-sm);
+}
+
+.oe-skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .55), transparent);
+  animation: oe-shimmer 1.6s var(--ease-in-out) infinite;
+}
+
+/* ---------- Micro-interactions ---------- */
+.oe-btn {
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+.oe-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--oe-shadow-md);
+}
+
+.oe-btn:active:not(:disabled) {
+  transform: scale(.98);
+  box-shadow: var(--oe-shadow-sm);
+}
+
+.oe-card {
+  transition:
+    transform var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out);
+}
+
+.oe-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--oe-shadow-md);
+}
+
+/* Underline that grows from the left. */
+.oe-link {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 1px;
+  transition: background-size var(--dur-base) var(--ease-out);
+}
+
+.oe-link:hover,
+.oe-link:focus-visible {
+  background-size: 100% 1px;
+}
+
+/* ---------- Reduced motion (mandatory) ----------
+ * Kill every animation/transition site-wide and show revealed content at once. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .js-motion [data-reveal],
+  .js-motion [data-reveal-group] > *,
+  .oe-enter,
+  .oe-route {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .oe-drift,
+  .oe-breathe::after,
+  .oe-ring,
+  .oe-skeleton::after {
+    animation: none !important;
+  }
+
+  .oe-ring:not(:first-child) { display: none; }
+  .oe-ring:first-child { opacity: .35; transform: scale(.8); }
+
+  .oe-btn:hover:not(:disabled),
+  .oe-btn:active:not(:disabled),
+  .oe-card:hover {
+    transform: none;
+  }
+}
