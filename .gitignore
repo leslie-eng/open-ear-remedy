@@ -1,7 +1,12 @@
 node_modules
 .env
 !.env.example
-server/.env
-server/uploads
+
 *.zip
-out/**/*.map
+out/
+
+# Workspaces
+apps/api/.env
+apps/api/uploads
+packages/*/dist
+apps/web/out/

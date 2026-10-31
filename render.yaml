@@ -1,15 +1,18 @@
 # Render Blueprint: https://render.com/docs/blueprint-spec
 # Deploy from repo root → New → Blueprint → connect GitHub repo.
+# Database: Neon (not a Render database). Files: Neon S3-compatible storage.
 
 services:
   - type: web
     name: openear-api
     runtime: node
-    rootDir: server
-    plan: free
-    buildCommand: npm install
-    preDeployCommand: npm run db:migrate
-    startCommand: npm start
+    # Starter, not free: free services sleep after 15 idle minutes, which drops every
+    # listener's call connection. Calls need an always-on instance.
+    plan: starter
+    # npm workspaces: install from the repo root so @openear/shared is linked and built (root postinstall).
+    buildCommand: npm ci
+    preDeployCommand: npm run db:migrate -w @openear/api
+    startCommand: npm start -w @openear/api
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
@@ -20,16 +23,65 @@ services:
         value: https://openearemedy.com,https://www.openearemedy.com
       - key: JWT_SECRET
         generateValue: true
-      # Set to this service's URL (e.g. https://openear-api.onrender.com) so cover image links resolve.
+      # This service's public URL: cover image links and the website's API calls use it.
       - key: PUBLIC_API_URL
-        sync: false
+        value: https://api.openearemedy.com
+      # Neon: pooled connection string for the app, direct one for migrations (sslmode=verify-full).
       - key: DATABASE_URL
-        fromDatabase:
-          name: openear-db
-          property: connectionString
+        sync: false
+      - key: DATABASE_URL_UNPOOLED
+        sync: false
+      # Cloudflare TURN relay for calls (required: calls are refused without it in production)
+      - key: CLOUDFLARE_TURN_KEY_ID
+        sync: false
+      - key: CLOUDFLARE_TURN_API_TOKEN
+        sync: false
+      # File storage: Neon S3-compatible storage (one private bucket: covers/ + ebooks/)
+      - key: AWS_ENDPOINT_URL_S3
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_REGION
+        sync: false
+      - key: S3_BUCKET
+        sync: false
+      # Email, payments, AI chat
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        value: Open Ear <noreply@openearemedy.com>
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: PAYSTACK_SECRET_KEY
+        sync: false
+      - key: PAYSTACK_WEBHOOK_SECRET
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: OPENROUTER_MODEL
+        value: meta-llama/llama-3.3-70b-instruct
 
-databases:
-  - name: openear-db
-    plan: free
-    databaseName: openear
-    user: openear
+  # Daily at 06:00 Nairobi (03:00 UTC): email Monthly Pass holders whose pass ends within 3 days.
+  - type: cron
+    name: openear-pass-reminders
+    runtime: node
+    plan: starter
+    schedule: "0 3 * * *"
+    buildCommand: npm ci
+    startCommand: npm run jobs:pass-reminders -w @openear/api
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CLIENT_URL
+        value: https://openearemedy.com
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        value: Open Ear <noreply@openearemedy.com>
+
