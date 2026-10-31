@@ -6,7 +6,7 @@ import { escapeHtml } from '../util.js';
 
 /**
  * Emails people whose Monthly Pass ends within 3 days (and who haven't renewed), once per pass.
- * Run daily: `npm run jobs:pass-reminders -w @openear/api` (a Render cron job in production).
+ * Run daily: `npm run jobs:pass-reminders -w @openear/api` (GitHub Actions in production, see .github/workflows/scheduled.yml).
  */
 async function main() {
   const due = await passesDueForReminder();

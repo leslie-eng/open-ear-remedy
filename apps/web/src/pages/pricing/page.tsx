@@ -84,7 +84,7 @@ export default function PricingPage() {
       '@context': 'https://schema.org',
       '@graph': [
         generateWebPageSchema('Pricing Plans', 'Flexible credit-based pricing for emotional support services', '/pricing'),
-        generateProductSchema('Starter Plan', 'Perfect for trying out our support with 100 credits', 29),
+        generateProductSchema(CREDIT_PACKS[0].name, `${CREDIT_PACKS[0].credits} credits for calls and AI chat`, CREDIT_PACKS[0].price),
         generateFAQSchema(faqData),
       ],
     },

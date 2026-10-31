@@ -11,5 +11,5 @@ Callers and Listeners talk browser-to-browser over WebRTC: the API pairs them th
 ## Consequences
 
 - Calls need a modern browser and microphone permission; there is no dial-in by phone.
-- Who is online and every live Call are held in the API's memory, so the API must run as **one always-on instance** (Render Starter, not free, and never scaled out). A restart or deploy ends live Calls; they are billed up to the drop.
+- Who is online and every live Call are held in the API's memory, so the API must run as **one always-on instance**, never scaled out. On Render's free plan, a GitHub Actions ping every 10 minutes keeps it from sleeping. A restart or deploy ends live Calls; they are billed up to the drop.
 - Calls are never recorded, because no media passes through our servers.

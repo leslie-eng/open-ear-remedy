@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { CURRENCY } from '@openear/shared/pricing';
 
 interface SEOProps {
   title: string;
@@ -209,7 +210,7 @@ export const generateProductSchema = (name: string, description: string, price: 
     offers: {
       '@type': 'Offer',
       price,
-      priceCurrency: 'USD',
+      priceCurrency: CURRENCY,
       availability: 'https://schema.org/InStock',
       url: `${siteUrl}/pricing`,
     },
