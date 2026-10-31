@@ -15,13 +15,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MIGRATIONS_DIR = path.join(__dirname, '..', 'db', 'migrations');
 const LOCK_ID = 727274; // arbitrary, unique to Open Ear migrations
 
-async function main() {
-  if (!config.migrationDatabaseUrl) {
-    console.error('Set DATABASE_URL (and ideally DATABASE_URL_UNPOOLED) before migrating.');
-    process.exit(1);
-  }
-
-  const client = new pg.Client({ connectionString: config.migrationDatabaseUrl });
+/** Applies pending migrations. Exported for the test harness; `npm run db:migrate` runs it via main(). */
+export async function runMigrations(connectionString, { log = console.log } = {}) {
+  const client = new pg.Client({ connectionString });
   await client.connect();
   try {
     await client.query(`
@@ -50,19 +46,30 @@ async function main() {
         await client.query('INSERT INTO schema_migrations (version) VALUES ($1)', [version]);
         await client.query('COMMIT');
         applied += 1;
-        console.log(`Applied ${version}`);
+        log(`Applied ${version}`);
       } catch (err) {
         await client.query('ROLLBACK');
         throw new Error(`Migration ${version} failed: ${err.message}`);
       }
     }
-    console.log(applied ? `Done: ${applied} migration(s) applied.` : 'Database is up to date.');
+    log(applied ? `Done: ${applied} migration(s) applied.` : 'Database is up to date.');
   } finally {
     await client.end();
   }
 }
 
-main().catch((err) => {
-  console.error(err.message);
-  process.exit(1);
-});
+async function main() {
+  if (!config.migrationDatabaseUrl) {
+    console.error('Set DATABASE_URL (and ideally DATABASE_URL_UNPOOLED) before migrating.');
+    process.exit(1);
+  }
+  await runMigrations(config.migrationDatabaseUrl);
+}
+
+// Run only when invoked directly (npm run db:migrate), not when imported.
+if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
+  main().catch((err) => {
+    console.error(err.message);
+    process.exit(1);
+  });
+}
