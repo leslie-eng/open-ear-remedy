@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/feature/Navbar';
+import NewsletterSignup from '../../components/feature/NewsletterSignup';
 import Hero from '../../components/home/Hero';
 import TrustBlock from '../../components/home/TrustBlock';
 import HowItWorksSteps from '../../components/home/HowItWorksSteps';
@@ -16,7 +17,7 @@ const SUPPORT_STYLES = [
     title: 'Voice Connection',
     points: [
       'Real-time emotional support',
-      'Secure Twilio-powered calls',
+      'Secure, private calls',
       'Pay per minute - simple pricing',
       'Connect instantly when you need it',
     ],
@@ -115,18 +116,18 @@ export default function HomePage() {
           '@type': 'WebSite',
           name: 'Open Ear',
           alternateName: 'OpenEar',
-          url: 'https://openear.com',
+          url: 'https://openearemedy.com',
         },
         {
           '@type': 'WebPage',
           name: 'Open Ear Home',
-          url: 'https://openear.com/',
+          url: 'https://openearemedy.com/',
           description:
             'Open Ear offers judgment-free emotional support through call and chat for people who need someone to listen.',
           isPartOf: {
             '@type': 'WebSite',
             name: 'Open Ear',
-            url: 'https://openear.com',
+            url: 'https://openearemedy.com',
           },
         },
         generateOrganizationSchema(),
@@ -285,6 +286,9 @@ export default function HomePage() {
                   </a>
                 ))}
               </div>
+              <div className="mt-8">
+                <NewsletterSignup />
+              </div>
             </div>
 
             <div className="lg:col-span-4 space-y-5">
@@ -299,7 +303,7 @@ export default function HomePage() {
               </div>
               <div>
                 <p className="text-sm uppercase text-white/80 mb-1 tracking-wider">Email</p>
-                <p className="text-body text-white/90">support@openear.com</p>
+                <p className="text-body text-white/90">support@openearemedy.com</p>
               </div>
             </div>
 
