@@ -1,14 +1,16 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/feature/Navbar';
+import MpesaPaymentModal from '../../components/feature/MpesaPaymentModal';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { apiFetch, ApiError, formatMoney } from '../../lib/api';
 
 interface CheckoutResponse {
-  url: string | null;
   reference: string;
   free?: boolean;
+  /** Set for paid orders: the M-Pesa payment to wait for. */
+  paymentId?: string;
 }
 
 export default function CheckoutPage() {
@@ -17,11 +19,22 @@ export default function CheckoutPage() {
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState('');
+  const [paying, setPaying] = useState(false);
+  const orderReference = useRef<string | null>(null);
   const currency = items[0]?.ebook.currency || 'USD';
 
   const goToSignIn = () => {
     navigate('/signin', { state: { returnTo: '/checkout' } });
   };
+
+  /** Creates the order; with a phone number it also sends the M-Pesa prompt. */
+  const createOrder = (phone?: string) =>
+    apiFetch<CheckoutResponse>('/api/ebooks/checkout', {
+      method: 'POST',
+      body: JSON.stringify({ ebookIds: items.map((item) => item.ebook.id), phone }),
+    });
+
+  const goToSuccess = (reference: string) => navigate(`/checkout/success?reference=${encodeURIComponent(reference)}`);
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -30,38 +43,34 @@ export default function CheckoutPage() {
       goToSignIn();
       return;
     }
+    setPaymentError('');
+    // Paid orders need a phone number first: the M-Pesa window creates the order.
+    if (totalPrice > 0) {
+      setPaying(true);
+      return;
+    }
 
     setIsProcessing(true);
-    setPaymentError('');
-
     try {
-      const data = await apiFetch<CheckoutResponse>('/api/ebooks/checkout', {
-        method: 'POST',
-        body: JSON.stringify({ ebookIds: items.map((item) => item.ebook.id) }),
-      });
-
-      if (data.free || !data.url) {
-        if (!data.reference) throw new Error('Checkout did not return an order reference.');
-        // Free order: already added to library. Success page clears the cart once confirmed.
-        navigate(`/checkout/success?reference=${encodeURIComponent(data.reference)}`);
-        return;
-      }
-
-      // Hand off to Paystack's hosted payment page. Keep the spinner while the browser navigates.
-      window.location.assign(data.url);
+      const data = await createOrder();
+      // Free order: already added to library. Success page clears the cart once confirmed.
+      goToSuccess(data.reference);
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) {
         goToSignIn();
         return;
       }
       console.error('Checkout error:', error);
-      setPaymentError(
-        error instanceof Error && error.message
-          ? error.message
-          : 'We could not start checkout. Please try again.',
-      );
+      setPaymentError(error instanceof Error && error.message ? error.message : 'We could not start checkout. Please try again.');
       setIsProcessing(false);
     }
+  };
+
+  const startPayment = async (phone: string) => {
+    const data = await createOrder(phone);
+    if (!data.paymentId) throw new Error('Checkout did not start a payment.');
+    orderReference.current = data.reference;
+    return data.paymentId;
   };
 
   if (items.length === 0) {
@@ -102,6 +111,15 @@ export default function CheckoutPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]">
       <Navbar />
+      {paying && (
+        <MpesaPaymentModal
+          title="Your ebooks"
+          amountLabel={formatMoney(totalPrice, currency)}
+          start={startPayment}
+          onPaid={() => orderReference.current && goToSuccess(orderReference.current)}
+          onClose={() => setPaying(false)}
+        />
+      )}
 
       <div className="pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20">
@@ -167,7 +185,7 @@ export default function CheckoutPage() {
                     <i className="ri-secure-payment-line text-4xl text-[#0096FF] mb-2"></i>
                     <p className="text-[#0096FF] font-medium mb-1">Secure Payment Processing</p>
                     <p className="text-sm text-[#6B6B6B]">
-                      You&apos;ll be redirected to Paystack to complete your payment securely. We never see or store your card details.
+                      You&apos;ll pay with M-Pesa: we send a prompt to your phone and you confirm with your PIN. We never see your PIN.
                     </p>
                   </div>
                 </div>
@@ -247,7 +265,7 @@ export default function CheckoutPage() {
                 <div className="mt-4 text-center">
                   <div className="flex items-center justify-center gap-2 text-sm text-[#6B6B6B] mb-2">
                     <i className="ri-shield-check-line text-green-600"></i>
-                    <span>Secured by Paystack</span>
+                    <span>Pay securely with M-Pesa</span>
                   </div>
                   <div className="flex items-center justify-center gap-2 text-sm text-[#6B6B6B]">
                     <i className="ri-download-line text-[#0096FF]"></i>

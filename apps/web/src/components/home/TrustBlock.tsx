@@ -17,7 +17,7 @@ const TRUST_POINTS = [
   {
     icon: 'ri-secure-payment-line',
     title: 'Secure payments',
-    text: 'Payments are processed by Paystack. Credits never expire.',
+    text: 'Pay with M-Pesa. Credits never expire.',
   },
 ];
 

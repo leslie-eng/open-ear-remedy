@@ -89,7 +89,7 @@ interface UsageBreakdown {
   percent: number;
 }
 
-/** Paystack amounts in DB are stored in minor units (cents). */
+/** Payment amounts in the DB are stored in minor units (cents). */
 function toDollars(minor: number) {
   return (Number(minor) || 0) / 100;
 }

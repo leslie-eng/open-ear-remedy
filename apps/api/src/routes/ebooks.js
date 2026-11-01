@@ -1,12 +1,12 @@
 import { Router } from 'express';
 import path from 'node:path';
 import { query } from '../db.js';
-import { config } from '../config.js';
 import { asyncHandler, requireAuth } from '../middleware.js';
 import { withTransaction } from '../services/credits.js';
 import { mapEbook, mapOrders } from '../services/ebooks.js';
 import { ebookKeyFrom, storage } from '../services/storage.js';
-import { initializeTransaction, newReference, toMinor } from '../services/paystack.js';
+import { newReference, toMinor } from '../services/money.js';
+import * as mpesa from '../services/mpesa.js';
 import { rateLimit } from '../util.js';
 import { CURRENCY } from '@openear/shared/pricing';
 
@@ -61,10 +61,14 @@ router.post(
     }
 
     const total = products.reduce((sum, p) => sum + toMinor(p.price), 0);
+    // Check the number before creating an order, so a typo doesn't leave a failed order behind.
+    if (total > 0 && !mpesa.normalisePhone(req.body.phone)) {
+      return res.status(400).json({ error: 'Enter a Safaricom number like 0712 345 678.' });
+    }
     const reference = newReference('eb', req.user.id);
     const free = total === 0;
 
-    await withTransaction(async (client) => {
+    const orderId = await withTransaction(async (client) => {
       const { rows } = await client.query(
         `INSERT INTO ebook_orders (user_id, reference, status, total_amount, currency, completed_at)
          VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
@@ -85,19 +89,21 @@ router.post(
           [req.user.id, orderId],
         );
       }
+      return orderId;
     });
 
-    if (free) return res.json({ url: null, reference, free: true });
+    if (free) return res.json({ reference, free: true });
 
     try {
-      const result = await initializeTransaction({
-        email: req.user.email,
-        amountMinor: total,
-        reference,
-        callbackUrl: `${config.clientUrl}/checkout/success?reference=${encodeURIComponent(reference)}`,
-        metadata: { kind: 'ebook_order', user_id: req.user.id, order_reference: reference },
+      const paymentId = await mpesa.startPayment({
+        userId: req.user.id,
+        purpose: 'ebook_order',
+        ebookOrderId: orderId,
+        amount: total / 100,
+        phone: req.body.phone,
+        description: 'Ebooks',
       });
-      res.json(result);
+      res.json({ reference, paymentId });
     } catch (err) {
       await query(`UPDATE ebook_orders SET status = 'failed' WHERE reference = $1`, [reference]);
       throw err;
