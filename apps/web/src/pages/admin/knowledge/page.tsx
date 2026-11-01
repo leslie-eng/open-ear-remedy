@@ -14,6 +14,8 @@ interface Source {
   productId: string | null;
   fileName: string | null;
   passageCount: number;
+  /** Indexed with a different embedding model than the one now configured; it is not searched. */
+  needsReindex: boolean;
   createdAt: string;
   usesLast30Days: number;
 }
@@ -226,6 +228,9 @@ export default function KnowledgeAdminPage() {
                         <span className="text-[#6B6B6B]">
                           {[s.author, `${s.passageCount} passages`, s.enabled ? 'On' : 'Off'].filter(Boolean).join(' · ')}
                         </span>
+                        {s.needsReindex && (
+                          <span className="block text-[#C62828]">Not searched: indexed with an older model. Remove it and add it again.</span>
+                        )}
                       </td>
                       <td className="py-3 pr-4">{s.licence}</td>
                       <td className="py-3 pr-4">{s.approvedBy ?? <span className="text-[#C62828]">Not yet</span>}</td>

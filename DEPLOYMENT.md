@@ -52,7 +52,7 @@ Go to **Cloudflare dashboard → Realtime → TURN Server → Create**. Copy the
    | `RESEND_API_KEY` | Resend → API Keys |
    | `ADMIN_EMAIL` | where contact-form and appointment emails go |
    | `PAYSTACK_SECRET_KEY`, `PAYSTACK_WEBHOOK_SECRET` | Paystack → Settings → API Keys & Webhooks (Kenyan account) |
-   | `OPENROUTER_API_KEY` | https://openrouter.ai/keys |
+   | `OPENROUTER_API_KEY` | https://openrouter.ai/keys (chat replies and Knowledge Source search) |
 
    `JWT_SECRET` is generated for you. `PUBLIC_API_URL`, `CLIENT_URL`, `CORS_ORIGINS`, `EMAIL_FROM` and `OPENROUTER_MODEL` already have values in the blueprint.
 3. **Scheduled jobs (GitHub).** In the GitHub repo, go to **Settings → Secrets and variables → Actions → New repository secret** and add `DATABASE_URL` (pooled) and `RESEND_API_KEY`. The workflow then pings the API every 10 minutes so it doesn't sleep, and sends Monthly Pass reminders daily. To check it, open **Actions → Scheduled → Run workflow**.
@@ -107,6 +107,7 @@ Verify `openearemedy.com` under **Domains** (add the DNS records Resend shows). 
 
 - [ ] **Two-phone call test** on different networks (for example Wi-Fi and mobile data), so that audio goes through TURN.
 - [ ] **Crisis Help numbers:** a qualified person verifies `/crisis-help` and adds Kenyan resources.
+- [ ] **AI Companion review:** add the approved Knowledge Sources (admin → **AI knowledge**), run `npm run review:companion -w @openear/api` with the production `DATABASE_URL` and `OPENROUTER_API_KEY`, and have your mental-health professional review the 30 conversations in the file it writes. Until then, set `RAG_ENABLED=false` on Render.
 - [ ] **Test payment:** buy a Credit Pack with Paystack test keys and check the Credits arrive. Then switch to live keys.
 - [ ] **Rotate leaked secrets:** any secrets that were ever committed to git must be rotated.
 

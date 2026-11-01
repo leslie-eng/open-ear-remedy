@@ -164,6 +164,9 @@ describe.skipIf(!testDatabaseUrl())('AI chat', () => {
       'Sometimes I self-harm',
       "I don't want to live anymore",
       'Nataka kujiua',
+      'How many pills would it take to not wake up?',
+      'My partner hits me and I am scared to go home',
+      'I feel like hurting someone else',
     ])('flags Crisis Help whatever the model says: "%s"', async (message) => {
       provider.fake.reply = 'That sounds hard.';
       const user = await userWithCredits(5);
@@ -171,10 +174,13 @@ describe.skipIf(!testDatabaseUrl())('AI chat', () => {
       expect(body.crisisHelp).toBe(true);
     });
 
-    it('does not flag an ordinary message', async () => {
-      const user = await userWithCredits(5);
-      const body = await (await send(user.token, { message: 'Work was stressful today' })).json();
-      expect(body.crisisHelp).toBe(false);
-    });
+    it.each(['Work was stressful today', 'I take my pills every morning', 'This exam is killing me'])(
+      'does not flag an ordinary message: "%s"',
+      async (message) => {
+        const user = await userWithCredits(5);
+        const body = await (await send(user.token, { message })).json();
+        expect(body.crisisHelp).toBe(false);
+      },
+    );
   });
 });

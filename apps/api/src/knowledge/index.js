@@ -14,7 +14,7 @@ export { KnowledgeError, SUPPORTED_EXTENSIONS } from './extract.js';
 const SEARCH_LIMIT = 4;
 
 const SOURCE_COLUMNS = `id, title, author, licence, approved_by, approved_at, enabled, product_id,
-  file_name, passage_count, created_at`;
+  file_name, passage_count, embedding_model, created_at`;
 
 function toSource(row) {
   return {
@@ -28,6 +28,9 @@ function toSource(row) {
     productId: row.product_id,
     fileName: row.file_name,
     passageCount: row.passage_count,
+    embeddingModel: row.embedding_model,
+    // Indexed with a different model than the one now configured: remove and add it again.
+    needsReindex: row.embedding_model !== config.openRouterEmbeddingModel,
     createdAt: row.created_at,
   };
 }
@@ -39,9 +42,9 @@ export async function addSource({ title, author = null, licence, buffer, ext, fi
 
   return withTransaction(async (client) => {
     const { rows } = await client.query(
-      `INSERT INTO knowledge_sources (title, author, licence, file_name, product_id, added_by, passage_count)
-       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING ${SOURCE_COLUMNS}`,
-      [title, author, licence, fileName, productId, addedBy, passages.length],
+      `INSERT INTO knowledge_sources (title, author, licence, file_name, product_id, added_by, passage_count, embedding_model)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING ${SOURCE_COLUMNS}`,
+      [title, author, licence, fileName, productId, addedBy, passages.length, config.openRouterEmbeddingModel],
     );
     const sourceId = rows[0].id;
     await client.query(
@@ -96,11 +99,11 @@ export async function search(question) {
     `SELECT s.id AS source_id, s.title, s.author, p.content, 1 - (p.embedding <=> $1::vector) AS similarity
      FROM knowledge_passages p
      JOIN knowledge_sources s ON s.id = p.source_id
-     WHERE s.enabled AND s.approved_at IS NOT NULL
+     WHERE s.enabled AND s.approved_at IS NOT NULL AND s.embedding_model = $4
        AND 1 - (p.embedding <=> $1::vector) >= $2
      ORDER BY p.embedding <=> $1::vector
      LIMIT $3`,
-    [toVector(embedding), config.ragMinSimilarity, SEARCH_LIMIT],
+    [toVector(embedding), config.ragMinSimilarity, SEARCH_LIMIT, config.openRouterEmbeddingModel],
   );
   return rows.map((r) => ({ sourceId: r.source_id, title: r.title, author: r.author, content: r.content, similarity: r.similarity }));
 }

@@ -7,17 +7,20 @@ describe.skipIf(!testDatabaseUrl())('knowledge sources', () => {
   let knowledge;
   let resetData;
   let createUser;
+  let config;
 
   beforeAll(async () => {
     provider = await startFakeOpenRouter();
     useFakeOpenRouter(provider.baseUrl);
     knowledge = await import('../src/knowledge/index.js');
     ({ resetData, createUser } = await import('./db.js'));
+    ({ config } = await import('../src/config.js'));
   });
   afterAll(() => provider?.close());
   beforeEach(async () => {
     await resetData();
     provider.reset();
+    config.openRouterEmbeddingModel = 'openai/text-embedding-3-small';
   });
 
   const text = (s) => ({ buffer: Buffer.from(s), ext: '.txt', fileName: 'notes.txt' });
@@ -71,5 +74,13 @@ describe.skipIf(!testDatabaseUrl())('knowledge sources', () => {
   it('rejects a file with no readable text and stores nothing', async () => {
     await expect(knowledge.addSource({ title: 'Blank', licence: 'x', ...text('   ') })).rejects.toMatchObject({ code: 'NO_TEXT' });
     expect(await knowledge.listSources()).toEqual([]);
+  });
+
+  it('skips sources indexed with a different embedding model, and flags them for re-indexing', async () => {
+    await source('Breathing', 'Slow breathing helps when panic rises.');
+    config.openRouterEmbeddingModel = 'another/embedding-model'; // OPENROUTER_EMBEDDING_MODEL changed
+
+    expect(await knowledge.search('what helps when panic rises')).toEqual([]);
+    expect((await knowledge.listSources())[0]).toMatchObject({ embeddingModel: 'openai/text-embedding-3-small', needsReindex: true });
   });
 });

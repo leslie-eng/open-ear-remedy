@@ -42,6 +42,7 @@ npm test          # shared pricing tests, plus API tests when TEST_DATABASE_URL 
 npm run lint
 npm run type-check
 npm run build
+npm run review:companion -w @openear/api   # real AI replies to 30 test conversations, for a professional to review
 ```
 
 The API tests **wipe** the database in `TEST_DATABASE_URL`, and refuse to run unless its name contains `test`.

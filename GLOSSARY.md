@@ -74,6 +74,10 @@ _Avoid_: product, SKU
 The AI that chats with people in text. It is not a therapist and points anyone in danger to Crisis Help.
 _Avoid_: bot, AI therapist, assistant
 
+**Knowledge Source**:
+A book or document the AI Companion may draw on. It is used only once a qualified professional has approved it and an Admin has switched it on.
+_Avoid_: training data, corpus, document
+
 **Crisis Help**:
 The page listing emergency numbers and helplines for people in immediate danger.
 _Avoid_: SOS, emergency page

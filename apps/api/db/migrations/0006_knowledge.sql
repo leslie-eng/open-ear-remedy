@@ -16,6 +16,9 @@ CREATE TABLE knowledge_sources (
   product_id TEXT REFERENCES products(id) ON DELETE SET NULL,
   file_name TEXT,
   passage_count INTEGER NOT NULL DEFAULT 0,
+  -- The model that made this source's embeddings. Search skips sources whose model differs from
+  -- OPENROUTER_EMBEDDING_MODEL: vectors from different models cannot be compared.
+  embedding_model TEXT NOT NULL,
   added_by UUID REFERENCES users(id) ON DELETE SET NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   CHECK ((approved_by IS NULL) = (approved_at IS NULL))
