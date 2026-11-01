@@ -11,7 +11,8 @@ services:
     # fits in Render's 750 free hours a month.
     plan: free
     # npm workspaces: install from the repo root so @openear/shared is linked and built (root postinstall).
-    buildCommand: npm ci
+    # --include=dev: NODE_ENV=production would otherwise skip TypeScript, which that build needs.
+    buildCommand: npm ci --include=dev
     # Pre-deploy commands are paid-only, so migrations run at start (already-applied ones are skipped).
     startCommand: npm run db:migrate -w @openear/api && npm start -w @openear/api
     healthCheckPath: /api/health
