@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { MAX_CHAT_MESSAGE_CHARS, MAX_NOTE_CHARS, type ListenerNote } from '@openear/shared/calls';
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/feature/Navbar';
 import { useAuth } from '../../contexts/AuthContext';
@@ -63,10 +64,49 @@ export default function ListenerConsolePage() {
   );
 }
 
+function NotesPanel({ notes }: { notes: ListenerNote[] }) {
+  if (notes.length === 0) {
+    return <p className="text-sm text-[#6B6B6B]">No earlier notes about this person.</p>;
+  }
+  return (
+    <ul className="space-y-2">
+      {notes.map((n, i) => (
+        <li key={i} className="rounded-xl bg-[#FAFAFA] p-3 text-sm">
+          <p className="mb-1 text-xs text-[#6B6B6B]">
+            {new Date(n.at).toLocaleDateString()} · {n.mode === 'text' ? 'Text chat' : 'Call'}
+            {n.byYou && ' · your note'}
+          </p>
+          <p className="whitespace-pre-wrap text-[#2A2A2A]">{n.body}</p>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function Console() {
   const session = useListenerSession();
   const cooldownSeconds = useSecondsUntil(session.cooldownUntil);
   const [reportReason, setReportReason] = useState('');
+  const [draft, setDraft] = useState('');
+  const [note, setNote] = useState('');
+  const [noteError, setNoteError] = useState('');
+  const threadEnd = useRef<HTMLDivElement>(null);
+  const lineCount = session.active?.lines.length ?? 0;
+
+  useEffect(() => {
+    threadEnd.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, [lineCount]);
+
+  const submitNote = async (e: FormEvent, callId: string) => {
+    e.preventDefault();
+    setNoteError('');
+    try {
+      await session.saveNote(callId, note);
+      setNote('');
+    } catch (err) {
+      setNoteError(err instanceof Error ? err.message : 'Could not save the note.');
+    }
+  };
 
   if (session.role === 'caller') {
     return (
@@ -120,15 +160,67 @@ function Console() {
 
       {session.active && (
         <div className="bg-white rounded-3xl shadow-lg p-6 md:p-8 text-center">
-          <p className="text-sm text-[#6B6B6B] mb-1">On a call with</p>
+          <p className="text-sm text-[#6B6B6B] mb-1">{session.active.mode === 'text' ? 'Text chat with' : 'On a call with'}</p>
           <h2 className="text-2xl font-bold text-[#2A2A2A] mb-4">{session.active.callerName}</h2>
           <div className="text-3xl font-bold text-[#0096FF] mb-2">
-            {session.active.phase === 'live' ? formatTime(session.active.elapsed) : 'Connecting audio…'}
+            {session.active.phase === 'live' ? formatTime(session.active.elapsed) : session.active.mode === 'text' ? 'Starting…' : 'Connecting audio…'}
           </div>
           {session.active.peerReconnecting && (
             <p role="status" className="mb-4 text-sm text-yellow-700">The caller's connection dropped. Waiting up to 30 seconds for them…</p>
           )}
+          {session.active.mode === 'text' && (
+            <div className="mt-4 text-left">
+              <div className="h-72 space-y-2 overflow-y-auto rounded-2xl border border-gray-100 p-3" aria-live="polite">
+                {session.active.lines.length === 0 && <p className="text-center text-sm text-[#6B6B6B]">No messages yet.</p>}
+                {session.active.lines.map((line) => (
+                  <div key={line.id} className={`flex ${line.from === 'me' ? 'justify-end' : 'justify-start'}`}>
+                    <p
+                      className={`max-w-[80%] whitespace-pre-wrap rounded-2xl px-3 py-2 text-sm ${
+                        line.from === 'me' ? 'rounded-br-md bg-[#0096FF] text-white' : 'rounded-bl-md bg-[#F5F5F5] text-[#2A2A2A]'
+                      }`}
+                    >
+                      {line.text}
+                    </p>
+                  </div>
+                ))}
+                <div ref={threadEnd} />
+              </div>
+              <form
+                className="mt-2 flex gap-2"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (session.sendChat(draft)) setDraft('');
+                }}
+              >
+                <label htmlFor="listener-draft" className="sr-only">
+                  Message
+                </label>
+                <input
+                  id="listener-draft"
+                  value={draft}
+                  maxLength={MAX_CHAT_MESSAGE_CHARS}
+                  onChange={(e) => setDraft(e.target.value)}
+                  disabled={session.active.phase !== 'live'}
+                  placeholder="Type a message"
+                  autoComplete="off"
+                  className="flex-1 rounded-xl border-2 border-[#E5E5E5] px-4 py-2 focus:border-[#0096FF] focus:outline-none"
+                />
+                <button type="submit" disabled={!draft.trim()} className="cursor-pointer rounded-xl bg-[#0096FF] px-5 font-semibold text-white hover:bg-[#0077CC] disabled:opacity-50">
+                  Send
+                </button>
+              </form>
+            </div>
+          )}
+          <details className="mt-4 text-left" open={session.active.notes.length > 0}>
+            <summary className="cursor-pointer text-sm font-semibold text-[#2A2A2A]">
+              Earlier notes about {session.active.callerName} ({session.active.notes.length})
+            </summary>
+            <div className="mt-2">
+              <NotesPanel notes={session.active.notes} />
+            </div>
+          </details>
           <div className="flex items-center justify-center gap-4 mt-6">
+            {session.active.mode === 'voice' && (
             <button
               onClick={session.toggleMute}
               aria-label={session.muted ? 'Unmute microphone' : 'Mute microphone'}
@@ -139,11 +231,12 @@ function Console() {
             >
               <i className={`${session.muted ? 'ri-mic-off-fill text-white' : 'ri-mic-fill text-[#2A2A2A]'} text-2xl`}></i>
             </button>
+            )}
             <button
               onClick={session.hangup}
               className="px-8 py-3 bg-red-500 text-white rounded-2xl font-semibold hover:bg-red-600 cursor-pointer"
             >
-              End call
+              {session.active.mode === 'text' ? 'End chat' : 'End call'}
             </button>
           </div>
         </div>
@@ -155,9 +248,14 @@ function Console() {
           <ul className="space-y-3">
             {session.incoming.map((call) => (
               <li key={call.callId} className="flex items-center justify-between gap-4 p-4 bg-[#E6F5FF] rounded-2xl">
-                <span className="font-semibold text-[#2A2A2A]">{call.callerName}</span>
+                <span className="font-semibold text-[#2A2A2A]">
+                  {call.callerName}
+                  <span className="ml-2 rounded-full bg-white px-2 py-0.5 text-xs font-medium text-[#0096FF]">
+                    {call.mode === 'text' ? 'Text chat' : 'Call'}
+                  </span>
+                </span>
                 <button
-                  onClick={() => void session.accept(call.callId)}
+                  onClick={() => void session.accept(call)}
                   className="px-6 py-2 bg-[#0096FF] text-white rounded-xl font-semibold hover:bg-[#0077CC] cursor-pointer"
                 >
                   Accept
@@ -172,15 +270,44 @@ function Console() {
         <div className="bg-white rounded-3xl shadow-lg p-6 md:p-8">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h2 className="text-lg font-bold text-[#2A2A2A]">Last call: {session.lastCall.callerName}</h2>
+              <h2 className="text-lg font-bold text-[#2A2A2A]">{session.lastCall.mode === 'text' ? 'Last chat' : 'Last call'}: {session.lastCall.callerName}</h2>
               <p className="text-sm text-[#6B6B6B]">
-                {END_LABELS[session.lastCall.reason] ?? 'The call ended.'} Talk time {formatTime(session.lastCall.billedSeconds)}.
+                {session.lastCall.mode === 'text' && session.lastCall.reason === 'hangup'
+                  ? 'The chat ended.'
+                  : (END_LABELS[session.lastCall.reason] ?? 'The call ended.')}{' '}
+                {session.lastCall.mode === 'text' ? 'Chat' : 'Talk'} time {formatTime(session.lastCall.billedSeconds)}.
               </p>
             </div>
             <button onClick={session.dismissLastCall} aria-label="Dismiss" className="text-[#6B6B6B] hover:text-[#2A2A2A] cursor-pointer">
               <i className="ri-close-line text-xl"></i>
             </button>
           </div>
+          {session.lastCall.noteSaved ? (
+            <p className="mt-4 text-sm text-[#2A2A2A]">Note saved. The next Listener will see it.</p>
+          ) : (
+            <form className="mt-4" onSubmit={(e) => void submitNote(e, session.lastCall!.callId)}>
+              <label htmlFor="listener-note" className="mb-2 block text-sm font-medium text-[#2A2A2A]">
+                Private note for the next Listener (optional)
+              </label>
+              <textarea
+                id="listener-note"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                maxLength={MAX_NOTE_CHARS}
+                rows={3}
+                placeholder="What would help the next Listener? Avoid full names, addresses or anything not needed."
+                className="w-full rounded-xl border-2 border-[#E5E5E5] px-4 py-3 text-sm focus:border-[#0096FF] focus:outline-none"
+              />
+              {noteError && (
+                <p role="alert" className="mt-1 text-sm text-[#C62828]">
+                  {noteError}
+                </p>
+              )}
+              <button type="submit" disabled={!note.trim()} className="mt-2 cursor-pointer rounded-xl bg-[#0096FF] px-6 py-2 font-semibold text-white hover:bg-[#0077CC] disabled:opacity-50">
+                Save note
+              </button>
+            </form>
+          )}
           {session.lastCall.reported ? (
             <p className="mt-4 text-sm text-[#2A2A2A]">Thank you. An admin will review your report.</p>
           ) : (

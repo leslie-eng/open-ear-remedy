@@ -70,8 +70,8 @@ export default function PrivacyPage() {
               <ul className="space-y-2 mb-6">
                 {[
                   'Email address and password for account creation',
-                  'Phone number for call services and notifications',
-                  'Payment information processed securely through third-party providers',
+                  'Your M-Pesa phone number and receipt number when you pay (shown only to you and our admins)',
+                  'Payment confirmations from Safaricom M-Pesa (we never see your M-Pesa PIN)',
                   'Appointment scheduling preferences and history',
                   'Communication preferences and settings',
                 ].map((item, index) => (
@@ -99,6 +99,18 @@ export default function PrivacyPage() {
                   </li>
                 ))}
               </ul>
+
+              <h3 className="text-base md:text-lg font-semibold text-[#2A2A2A] mt-6 mb-3">Conversations and Listener notes</h3>
+              <p className="text-sm md:text-base text-[#6B6B6B] leading-relaxed mb-3">
+                Calls and text chats with Listeners are never recorded, and what you type in a text chat is never
+                saved. AI chat messages are not stored either.
+              </p>
+              <p className="text-sm md:text-base text-[#6B6B6B] leading-relaxed">
+                After a conversation, a Listener may keep a brief private note so the next Listener does not need to ask
+                you to repeat your story. Only Listeners you talk to and Open Ear admins can read notes; Listeners only
+                ever see the display name you choose. Notes are deleted after 12 months. You can turn notes off (which
+                also deletes existing ones) or delete them at any time from your profile.
+              </p>
             </div>
 
             {/* How We Use Your Information */}
