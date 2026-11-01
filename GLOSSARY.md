@@ -44,6 +44,18 @@ _Avoid_: duration, talk time
 A short quiet period after each Call during which a Listener is not offered new Calls.
 _Avoid_: break, pause
 
+**Free Time**:
+A start time a Listener has said they can take a Booking.
+_Avoid_: slot, availability, shift
+
+**Booking**:
+A Conversation arranged for a set time with one Listener, 30 or 45 minutes, by Call or Text Chat. Credits are held when it is made and given back when it starts; only Connected Time is charged.
+_Avoid_: appointment, session, reservation
+
+**No-show**:
+A Booking nobody joined within 15 minutes of its start. Counted against the person only if their Listener was there.
+_Avoid_: missed call
+
 **Listener Note**:
 A Listener's brief private note after a Conversation, shown to later Listeners talking with the same person, never to the person. Kept 12 months.
 _Avoid_: case notes, file, record

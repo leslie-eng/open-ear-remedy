@@ -15,7 +15,7 @@ import type { Balance } from '../../hooks/useBalance';
 import { useCallSession } from '../../hooks/useCallSession';
 import { useNotesNoticeGate } from '../../hooks/useNotesNoticeGate';
 import NotesNotice from '../../components/feature/NotesNotice';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 
 const END_MESSAGES: Record<string, string> = {
   hangup: 'Call ended.',
@@ -90,14 +90,6 @@ export default function CallPage() {
     forgotPassword: sendForgotPassword,
   } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [showBookingModal, setShowBookingModal] = useState(false);
-  const [bookingDate, setBookingDate] = useState('');
-  const [bookingTime, setBookingTime] = useState('');
-  const [bookingNotes, setBookingNotes] = useState('');
-  const [bookingLoading, setBookingLoading] = useState(false);
-  const [bookingError, setBookingError] = useState('');
-  const [bookingSuccess, setBookingSuccess] = useState(false);
-  const [bookingPhoneNumber, setBookingPhoneNumber] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
   const [forgotPassword, setForgotPassword] = useState(false);
   const [verificationSent, setVerificationSent] = useState(false);
@@ -123,6 +115,9 @@ export default function CallPage() {
   }, []);
 
   const notesGate = useNotesNoticeGate();
+  // Joining a booked Conversation from the dashboard: /call?booking=<id>.
+  const [searchParams] = useSearchParams();
+  const bookingId = searchParams.get('booking');
   const call = useCallSession({
     onEnded: () => {
       void fetchCredits();
@@ -130,7 +125,7 @@ export default function CallPage() {
       void sendLowCreditNotification(0);
     },
   });
-  const callInProgress = ['preparing', 'ringing', 'connecting', 'live'].includes(call.state.phase);
+  const callInProgress = ['preparing', 'waiting', 'ringing', 'connecting', 'live'].includes(call.state.phase);
 
   useEffect(() => {
     if (user) {
@@ -192,7 +187,7 @@ export default function CallPage() {
       return;
     }
     // First Conversation: tell them about Listener notes before connecting.
-    await notesGate.gate(() => void call.start());
+    await notesGate.gate(() => void call.start(bookingId ?? undefined));
   };
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -254,53 +249,6 @@ export default function CallPage() {
     }
   };
 
-  const handleBookAppointment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setBookingLoading(true);
-    setBookingError('');
-    setBookingSuccess(false);
-
-    try {
-      await apiFetch('/api/appointments', {
-        method: 'POST',
-        body: JSON.stringify({
-          appointmentDate: bookingDate,
-          appointmentTime: bookingTime,
-          notes: bookingNotes,
-          phoneNumber: bookingPhoneNumber,
-        }),
-      });
-
-      setBookingSuccess(true);
-      setTimeout(() => {
-        setShowBookingModal(false);
-        setBookingDate('');
-        setBookingTime('');
-        setBookingNotes('');
-        setBookingPhoneNumber('');
-        setBookingSuccess(false);
-      }, 3000);
-    } catch (err: any) {
-      setBookingError(err.message || 'Failed to book appointment. Please try again.');
-    } finally {
-      setBookingLoading(false);
-    }
-  };
-
-  const openBookingModal = () => {
-    if (!user) {
-      setShowAuthModal(true);
-      return;
-    }
-    setShowBookingModal(true);
-  };
-
-  // Get minimum date (today)
-  const getMinDate = () => {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
-  };
-
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -316,12 +264,20 @@ export default function CallPage() {
       <Navbar />
       {notesGate.noticeOpen && <NotesNotice onChoose={(allow) => void notesGate.choose(allow)} onCancel={notesGate.cancel} />}
       <ConnectingOverlay
-        open={['preparing', 'ringing', 'connecting'].includes(call.state.phase)}
-        title={call.state.phase === 'connecting' ? 'Connecting you to a listener…' : 'Finding a listener for you…'}
+        open={['preparing', 'waiting', 'ringing', 'connecting'].includes(call.state.phase)}
+        title={
+          call.state.phase === 'connecting'
+            ? 'Connecting you to a listener…'
+            : call.state.phase === 'waiting'
+              ? 'Waiting for your Listener to join…'
+              : 'Finding a listener for you…'
+        }
         detail={
           call.state.phase === 'preparing'
             ? 'If your browser asks, allow the microphone so the listener can hear you.'
-            : 'Take a slow breath. There’s no rush.'
+            : call.state.phase === 'waiting'
+              ? 'They’ll be with you shortly. Stay on this page; you’re only charged once you’re talking.'
+              : 'Take a slow breath. There’s no rush.'
         }
         action={{ label: 'Cancel', onClick: call.hangup }}
       />
@@ -371,7 +327,9 @@ export default function CallPage() {
             <p className="inline-flex items-center gap-2 rounded-full bg-oe-accent-tint px-3 py-1 text-xs font-medium uppercase tracking-wide text-oe-accent">
               <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-oe-accent" /> Getting ready · Zero pressure
             </p>
-            <h1 className="mt-4 text-4xl font-bold md:text-5xl">Getting ready to connect.</h1>
+            <h1 className="mt-4 text-4xl font-bold md:text-5xl">
+              {bookingId ? 'Getting ready for your booked call.' : 'Getting ready to connect.'}
+            </h1>
             <p className="mt-3 max-w-2xl text-lg text-oe-muted">
               Take 30 seconds to settle in. There&rsquo;s no performance here, just an honest conversation with someone who
               listens.
@@ -381,6 +339,14 @@ export default function CallPage() {
               <p role="status" className="mt-6 max-w-2xl rounded-2xl bg-oe-primary-tint px-5 py-3 text-sm text-oe-ink">
                 {END_MESSAGES[call.state.endReason]}
                 {call.state.billedSeconds > 0 && ` Talk time: ${formatTime(call.state.billedSeconds)}.`}
+                {call.state.billedSeconds > 0 && call.state.callId && (
+                  <>
+                    {' '}
+                    <Link to={`/book?again=${call.state.callId}`} className="font-medium text-oe-primary underline">
+                      Book again with this Listener
+                    </Link>
+                  </>
+                )}
               </p>
             )}
             {callError && (
@@ -502,15 +468,15 @@ export default function CallPage() {
                 <Link to="/listener-chat" className="px-2 text-sm font-medium text-oe-primary hover:underline">
                   Prefer to type?
                 </Link>
-                <button onClick={openBookingModal} className="cursor-pointer px-2 text-sm font-medium text-oe-primary hover:underline">
+                <Link to="/book" className="px-2 text-sm font-medium text-oe-primary hover:underline">
                   Book a time instead
-                </button>
+                </Link>
               </div>
               <button
                 onClick={() => void startCall()}
                 className="oe-btn inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-oe-primary px-8 py-4 text-lg font-semibold text-white hover:bg-oe-primary-hover sm:w-auto"
               >
-                Find a Listener now <i className="ri-arrow-right-line" aria-hidden="true" />
+                {bookingId ? 'Join my booked call' : 'Find a Listener now'} <i className="ri-arrow-right-line" aria-hidden="true" />
               </button>
             </div>
             <p className="mt-4 text-center text-xs text-oe-muted">
@@ -757,111 +723,6 @@ export default function CallPage() {
         </div>
       )}
 
-      {/* Booking Modal */}
-      {showBookingModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl p-6 md:p-10 max-w-md w-full shadow-2xl relative">
-            <div className="text-center mb-6 md:mb-8">
-              <div className="w-16 h-16 md:w-20 md:h-20 bg-oe-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6">
-                <i className="ri-calendar-fill text-3xl md:text-4xl text-oe-primary"></i>
-              </div>
-              <h2 className="text-2xl md:text-3xl font-bold text-oe-ink mb-2">
-                Book Appointment
-              </h2>
-              <p className="text-sm md:text-base text-oe-muted">
-                Schedule a call at your convenience
-              </p>
-            </div>
-
-            <form onSubmit={handleBookAppointment} className="space-y-4 md:space-y-5">
-              <div>
-                <label className="block text-sm font-medium text-oe-ink mb-2">
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  value={bookingPhoneNumber}
-                  onChange={(e) => setBookingPhoneNumber(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-oe-line rounded-xl focus:border-oe-primary focus:outline-none text-sm md:text-base"
-                  placeholder="+233201234567"
-                  required
-                />
-                <p className="text-xs text-oe-muted mt-1">
-                  Include country code
-                </p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-oe-ink mb-2">
-                  Date
-                </label>
-                <input
-                  type="date"
-                  value={bookingDate}
-                  onChange={(e) => setBookingDate(e.target.value)}
-                  min={getMinDate()}
-                  className="w-full px-4 py-3 border-2 border-oe-line rounded-xl focus:border-oe-primary focus:outline-none text-sm md:text-base"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-oe-ink mb-2">
-                  Time
-                </label>
-                <input
-                  type="time"
-                  value={bookingTime}
-                  onChange={(e) => setBookingTime(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-oe-line rounded-xl focus:border-oe-primary focus:outline-none text-sm md:text-base"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-oe-ink mb-2">
-                  Notes (Optional)
-                </label>
-                <textarea
-                  value={bookingNotes}
-                  onChange={(e) => setBookingNotes(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-oe-line rounded-xl focus:border-oe-primary focus:outline-none text-sm md:text-base resize-none"
-                  rows={3}
-                  placeholder="Any specific topics you'd like to discuss..."
-                />
-              </div>
-
-              {bookingError && (
-                <div className="bg-oe-crisis-tint border border-oe-crisis text-oe-crisis px-4 py-3 rounded-xl text-sm">
-                  {bookingError}
-                </div>
-              )}
-
-              {bookingSuccess && (
-                <div className="bg-oe-primary-tint border border-oe-primary text-oe-primary px-4 py-3 rounded-xl text-sm">
-                  ✓ Appointment booked! Admin notified and calendar updated.
-                  Check your email for confirmation.
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={bookingLoading}
-                className="w-full px-6 py-3 md:py-4 bg-oe-primary text-white rounded-xl text-base md:text-lg font-semibold hover:bg-oe-primary-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
-              >
-                {bookingLoading ? 'Booking...' : 'Confirm Booking'}
-              </button>
-            </form>
-
-            <button
-              onClick={() => setShowBookingModal(false)}
-              className="absolute top-4 right-4 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-oe-muted hover:text-oe-ink transition-colors cursor-pointer"
-            >
-              <i className="ri-close-line text-xl md:text-2xl"></i>
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

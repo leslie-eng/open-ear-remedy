@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import MyBookingsCard from '../../components/feature/MyBookingsCard';
 import Navbar from '../../components/feature/Navbar';
 import MpesaPaymentModal from '../../components/feature/MpesaPaymentModal';
 import { useSEO } from '../../utils/seo';
@@ -350,6 +351,12 @@ export default function DashboardPage() {
             <i className="ri-arrow-right-line text-xl group-hover:translate-x-1 transition-transform"></i>
           </button>
         </div>
+
+        {!loading && user && (
+          <div className="mb-8">
+            <MyBookingsCard />
+          </div>
+        )}
 
         {/* Quick Mood Check-in */}
         {!loading && user && <MoodCheckIn user={user} />}

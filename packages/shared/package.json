@@ -11,6 +11,10 @@
     "./calls": {
       "types": "./dist/calls.d.ts",
       "default": "./dist/calls.js"
+    },
+    "./booking": {
+      "types": "./dist/booking.d.ts",
+      "default": "./dist/booking.js"
     }
   },
   "files": [

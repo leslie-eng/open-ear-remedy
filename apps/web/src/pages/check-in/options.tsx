@@ -146,7 +146,24 @@ export default function CheckInOptionsPage() {
           })}
         </div>
 
-        <section className="mt-8 flex flex-col gap-4 rounded-3xl border border-oe-line bg-oe-surface p-6 md:flex-row md:items-center md:justify-between">
+        <section className="mt-8 flex flex-col gap-4 rounded-3xl border border-oe-line bg-white p-6 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-4">
+            <span aria-hidden="true" className="flex h-11 w-11 items-center justify-center rounded-full bg-oe-accent-tint text-oe-accent">
+              <i className="ri-calendar-line" />
+            </span>
+            <div>
+              <h2 className="font-sans text-base font-semibold">Book a time</h2>
+              <p className="text-sm text-oe-muted">
+                Pick a time for later today or this week, 30 or 45 minutes, call or text. Same price. Cancelling is always free.
+              </p>
+            </div>
+          </div>
+          <Link to="/book" className="shrink-0 rounded-full bg-oe-surface px-5 py-2.5 text-center text-sm font-medium text-oe-ink">
+            Pick a time
+          </Link>
+        </section>
+
+        <section className="mt-4 flex flex-col gap-4 rounded-3xl border border-oe-line bg-oe-surface p-6 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-4">
             <span aria-hidden="true" className="flex h-11 w-11 items-center justify-center rounded-full bg-oe-primary-soft text-oe-primary-deep">
               <i className="ri-coins-line" />

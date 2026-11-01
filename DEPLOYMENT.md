@@ -50,7 +50,7 @@ Go to **Cloudflare dashboard → Realtime → TURN Server → Create**. Copy the
    | `AWS_ENDPOINT_URL_S3`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, `S3_BUCKET` | Neon storage, from step 1 |
    | `CLOUDFLARE_TURN_KEY_ID`, `CLOUDFLARE_TURN_API_TOKEN` | from step 2 |
    | `RESEND_API_KEY` | Resend → API Keys |
-   | `ADMIN_EMAIL` | where contact-form and appointment emails go |
+   | `ADMIN_EMAIL` | where contact-form emails and missed-Booking alerts go |
    | `DARAJA_CONSUMER_KEY`, `DARAJA_CONSUMER_SECRET`, `DARAJA_SHORT_CODE`, `DARAJA_PASSKEY` | Daraja portal → your app (see §5) |
    | `GOOGLE_CLIENT_ID` | Google Cloud Console → Credentials → OAuth client (Web). Add the site's addresses under **Authorized JavaScript origins** |
    | `OPENROUTER_API_KEY` | https://openrouter.ai/keys (chat replies and Knowledge Source search) |
