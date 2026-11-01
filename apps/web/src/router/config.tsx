@@ -29,6 +29,7 @@ const AboutPage = lazy(() => import('../pages/about/page'));
 const CrisisHelpPage = lazy(() => import('../pages/crisis-help/page'));
 const ListenerConsolePage = lazy(() => import('../pages/listener/page'));
 const ListenersAdminPage = lazy(() => import('../pages/admin/listeners/page'));
+const KnowledgeAdminPage = lazy(() => import('../pages/admin/knowledge/page'));
 const EbookManagementPage = lazy(() => import('../pages/admin/ebook-management/page'));
 const NotFound = lazy(() => import('../pages/NotFound'));
 
@@ -144,6 +145,10 @@ const routes: RouteObject[] = [
   {
     path: '/admin/listeners',
     element: <ListenersAdminPage />,
+  },
+  {
+    path: '/admin/knowledge',
+    element: <KnowledgeAdminPage />,
   },
   {
     path: '/admin/ebook-management',

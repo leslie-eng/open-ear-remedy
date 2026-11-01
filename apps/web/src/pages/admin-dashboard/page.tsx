@@ -624,6 +624,13 @@ export default function AdminDashboardPage() {
             <i className="ri-headphone-line text-lg"></i>
             Listeners
           </Link>
+          <Link
+            to="/admin/knowledge"
+            className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all whitespace-nowrap cursor-pointer bg-white text-[#2A2A2A] hover:bg-[#E6F5FF]"
+          >
+            <i className="ri-book-open-line text-lg"></i>
+            AI knowledge
+          </Link>
         </div>
 
         {/* Overview View */}

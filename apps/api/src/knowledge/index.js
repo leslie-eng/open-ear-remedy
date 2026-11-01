@@ -59,7 +59,7 @@ export async function approveSource(id, approvedBy) {
     `UPDATE knowledge_sources SET approved_by = $2, approved_at = NOW() WHERE id = $1 RETURNING ${SOURCE_COLUMNS}`,
     [id, approvedBy],
   );
-  if (!rows[0]) throw new KnowledgeError('NOT_FOUND', 'Source not found');
+  if (!rows[0]) throw new KnowledgeError('NOT_FOUND', 'Source not found', 404);
   return toSource(rows[0]);
 }
 
@@ -72,7 +72,7 @@ export async function setSourceEnabled(id, enabled) {
   );
   if (rows[0]) return toSource(rows[0]);
   const exists = await query('SELECT 1 FROM knowledge_sources WHERE id = $1', [id]);
-  if (!exists.rowCount) throw new KnowledgeError('NOT_FOUND', 'Source not found');
+  if (!exists.rowCount) throw new KnowledgeError('NOT_FOUND', 'Source not found', 404);
   throw new KnowledgeError('NOT_APPROVED', 'A qualified professional must approve this source before it can be switched on.');
 }
 

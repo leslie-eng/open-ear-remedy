@@ -7,10 +7,10 @@ import { extractText as extractPdfText, getDocumentProxy } from 'unpdf';
  */
 
 export class KnowledgeError extends Error {
-  constructor(code, message) {
+  constructor(code, message, status = 400) {
     super(message);
     this.code = code;
-    this.status = 400;
+    this.status = status;
     this.expose = true;
   }
 }
