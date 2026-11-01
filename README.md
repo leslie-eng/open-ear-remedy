@@ -7,11 +7,12 @@ Emotional support at https://openearemedy.com: talk to a trained Listener on an 
 ```text
 apps/
   web/        React 19 + Vite + Tailwind website (Vercel)
-  api/        Express API, call signaling WebSocket, migrations, cron job (Render)
+  api/        Express API, call signaling WebSocket, migrations, pass-reminder job (Render)
     db/migrations/   numbered SQL, applied in order by `npm run db:migrate`
 packages/
   shared/     pricing rules and call message types, used by both apps
 docs/adr/     why the architecture is the way it is
+.github/workflows/scheduled.yml   keep-awake ping + daily pass reminders
 ```
 
 ## Run it locally

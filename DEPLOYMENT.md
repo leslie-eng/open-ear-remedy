@@ -3,8 +3,8 @@
 | Part | Host | Address |
 |---|---|---|
 | Website (`apps/web`) | Vercel | https://openearemedy.com |
-| API + call signaling (`apps/api`) | Render (web service, Starter) | https://api.openearemedy.com |
-| Pass reminder emails | Render (cron job) | daily, 06:00 Nairobi |
+| API + call signaling (`apps/api`) | Render (web service, free plan) | https://api.openearemedy.com |
+| Keep-awake ping + pass reminder emails | GitHub Actions (`.github/workflows/scheduled.yml`) | every 10 min / daily 06:00 Nairobi |
 | Database | Neon Postgres | |
 | Covers and ebooks | Neon S3-compatible storage (one private bucket) | |
 | Call audio relay | Cloudflare Realtime TURN | |
@@ -33,7 +33,7 @@ Do the steps in order. Each one names what you need from the previous one.
 2. **Test database (optional, for `npm test`).** Create a branch or database whose name contains `test`, for example `openear_test`. The tests **wipe** it.
 3. **Storage.** Under **Storage**, create a bucket (ours is `ebook`) and an access key. Copy the endpoint, key ID, secret and region.
 
-You don't need to create tables. Render runs the migrations before every deploy.
+You don't need to create tables. The API runs the migrations each time it starts.
 
 ## 2. Cloudflare TURN (call audio)
 
@@ -41,7 +41,7 @@ Go to **Cloudflare dashboard → Realtime → TURN Server → Create**. Copy the
 
 ## 3. Render (API)
 
-1. **Deploy the blueprint.** In Render, choose **New → Blueprint**, connect the GitHub repo and pick `render.yaml`. This creates `openear-api` and `openear-pass-reminders`.
+1. **Deploy the blueprint.** In Render, choose **New → Blueprint**, connect the GitHub repo (branch `master`) and pick `render.yaml`. This creates `openear-api` on the free plan.
 2. **Fill in the secret values on `openear-api`.** Render asks for every `sync: false` value:
 
    | Key | Value |
@@ -55,11 +55,13 @@ Go to **Cloudflare dashboard → Realtime → TURN Server → Create**. Copy the
    | `OPENROUTER_API_KEY` | https://openrouter.ai/keys |
 
    `JWT_SECRET` is generated for you. `PUBLIC_API_URL`, `CLIENT_URL`, `CORS_ORIGINS`, `EMAIL_FROM` and `OPENROUTER_MODEL` already have values in the blueprint.
-3. **Fill in the cron job.** On `openear-pass-reminders`, set `DATABASE_URL` (pooled), `RESEND_API_KEY`, and `JWT_SECRET` (copy it from `openear-api`).
+3. **Scheduled jobs (GitHub).** In the GitHub repo, go to **Settings → Secrets and variables → Actions → New repository secret** and add `DATABASE_URL` (pooled) and `RESEND_API_KEY`. The workflow then pings the API every 10 minutes so it doesn't sleep, and sends Monthly Pass reminders daily. To check it, open **Actions → Scheduled → Run workflow**.
 4. **Add the custom domain.** Under `openear-api` → **Settings → Custom Domains**, add `api.openearemedy.com`, then add the CNAME record Render shows to your DNS.
 5. **Check it.** Open `https://api.openearemedy.com/api/health`. It should return `{"ok":true,...}`.
 
-> **Keep exactly one instance on a paid plan.** The free plan sleeps, which disconnects Listeners. Running more than one instance splits who is online, so Calls fail to match. Every deploy or restart ends any live Calls. See [ADR 0001](docs/adr/0001-in-house-browser-calls.md).
+> **Keep exactly one instance.** Running more than one splits who is online, so Calls fail to match. Every deploy or restart ends any live Calls. See [ADR 0001](docs/adr/0001-in-house-browser-calls.md).
+>
+> **Free plan limits:** the keep-awake ping is what stops the API sleeping. GitHub can delay scheduled runs, and it pauses them after 60 days with no commits to the repo; re-enable them under **Actions** if that happens. If Listeners report being dropped, or the first visit of the day is slow, move to Starter: in `render.yaml`, set `plan: starter`.
 
 ## 4. Vercel (website)
 
@@ -119,4 +121,5 @@ Verify `openearemedy.com` under **Domains** (add the DNS records Resend shows). 
 | Listener shows offline after a deploy | Expected: the console reconnects and comes back online by itself within seconds |
 | Cover images broken | `PUBLIC_API_URL` is not `https://api.openearemedy.com`, or the storage variables are wrong |
 | Paystack paid but no Credits | Webhook URL or `PAYSTACK_WEBHOOK_SECRET` mismatch; check the Render logs |
-| Deploy fails at "pre-deploy" | Migration error. Check `DATABASE_URL_UNPOOLED` and the Render logs |
+| Deploy never goes live / crashes at start | Migration error. Check `DATABASE_URL_UNPOOLED` and the Render logs |
+| First request takes ~1 minute | The API was asleep. Check that the **Scheduled** workflow is running under GitHub **Actions** |

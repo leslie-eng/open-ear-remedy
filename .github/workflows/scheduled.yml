@@ -1,0 +1,41 @@
+# Free-tier stand-ins for things Render only does on paid plans.
+name: Scheduled
+
+on:
+  schedule:
+    - cron: "*/10 * * * *" # keep the API awake
+    - cron: "0 3 * * *" # 06:00 Nairobi: Monthly Pass reminders
+  workflow_dispatch:
+    inputs:
+      job:
+        description: Which job to run
+        type: choice
+        options: [keep-awake, pass-reminders]
+
+jobs:
+  keep-awake:
+    # Render's free plan sleeps after 15 idle minutes, which disconnects online Listeners.
+    if: github.event.schedule == '*/10 * * * *' || inputs.job == 'keep-awake'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - run: curl --fail --silent --show-error --retry 3 --retry-delay 20 --max-time 90 https://api.openearemedy.com/api/health
+
+  pass-reminders:
+    # Emails people whose Monthly Pass ends within 3 days, once per pass.
+    if: github.event.schedule == '0 3 * * *' || inputs.job == 'pass-reminders'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run jobs:pass-reminders -w @openear/api
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          CLIENT_URL: https://openearemedy.com
+          EMAIL_FROM: Open Ear <noreply@openearemedy.com>

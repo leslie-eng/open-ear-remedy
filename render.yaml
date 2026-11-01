@@ -6,13 +6,14 @@ services:
   - type: web
     name: openear-api
     runtime: node
-    # Starter, not free: free services sleep after 15 idle minutes, which drops every
-    # listener's call connection. Calls need an always-on instance.
-    plan: starter
+    # Free plan: it sleeps after 15 idle minutes, so .github/workflows/scheduled.yml pings
+    # /api/health every 10 minutes to keep Listeners connected. One always-on free service
+    # fits in Render's 750 free hours a month.
+    plan: free
     # npm workspaces: install from the repo root so @openear/shared is linked and built (root postinstall).
     buildCommand: npm ci
-    preDeployCommand: npm run db:migrate -w @openear/api
-    startCommand: npm start -w @openear/api
+    # Pre-deploy commands are paid-only, so migrations run at start (already-applied ones are skipped).
+    startCommand: npm run db:migrate -w @openear/api && npm start -w @openear/api
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
@@ -63,25 +64,5 @@ services:
       - key: OPENROUTER_MODEL
         value: meta-llama/llama-3.3-70b-instruct
 
-  # Daily at 06:00 Nairobi (03:00 UTC): email Monthly Pass holders whose pass ends within 3 days.
-  - type: cron
-    name: openear-pass-reminders
-    runtime: node
-    plan: starter
-    schedule: "0 3 * * *"
-    buildCommand: npm ci
-    startCommand: npm run jobs:pass-reminders -w @openear/api
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: CLIENT_URL
-        value: https://openearemedy.com
-      - key: DATABASE_URL
-        sync: false
-      - key: JWT_SECRET
-        sync: false
-      - key: RESEND_API_KEY
-        sync: false
-      - key: EMAIL_FROM
-        value: Open Ear <noreply@openearemedy.com>
-
+# Monthly Pass reminder emails run from GitHub Actions (.github/workflows/scheduled.yml):
+# Render cron jobs are not free.
