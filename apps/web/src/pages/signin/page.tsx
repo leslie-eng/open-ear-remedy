@@ -166,14 +166,14 @@ export default function SignInPage() {
   // Code entry screen
   if (codeSent) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]">
+      <div className="min-h-screen bg-oe-bg">
         <Navbar />
         <div className="pt-24 pb-16 flex items-center justify-center px-4">
           <div className="w-full max-w-sm">
           {/* Logo */}
           <div className="text-center mb-5">
             <Link to="/" className="inline-block">
-              <h1 className="text-2xl font-bold text-[#0096FF]" style={{ fontFamily: 'Poppins, sans-serif' }}>
+              <h1 className="text-2xl font-bold text-oe-primary">
                 Open Ear
               </h1>
             </Link>
@@ -181,25 +181,25 @@ export default function SignInPage() {
 
           {/* Verification Card */}
           <div className="bg-white rounded-2xl shadow-lg p-6 text-center">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i className="ri-shield-check-fill text-3xl text-green-600"></i>
+            <div className="w-16 h-16 bg-forest-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i className="ri-shield-check-fill text-3xl text-forest-600"></i>
             </div>
             
-            <h2 className="text-xl font-bold text-[#2A2A2A] mb-2">
+            <h2 className="text-xl font-bold text-oe-ink mb-2">
               Enter verification code
             </h2>
             
-            <p className="text-sm text-[#6B6B6B] mb-2">
+            <p className="text-sm text-oe-muted mb-2">
               We sent a code to:
             </p>
             
-            <p className="text-sm font-semibold text-[#0096FF] mb-5">
+            <p className="text-sm font-semibold text-oe-primary mb-5">
               {email}
             </p>
 
             <form onSubmit={verifyCode} className="space-y-3">
               <div className="text-left">
-                <label className="block text-xs font-semibold text-[#2A2A2A] mb-1.5">
+                <label className="block text-xs font-semibold text-oe-ink mb-1.5">
                   Verification code
                 </label>
                 <input
@@ -208,7 +208,7 @@ export default function SignInPage() {
                   autoComplete="one-time-code"
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-[#F5F5F5] border border-transparent rounded-lg focus:border-[#0096FF] focus:bg-white transition-all outline-none text-sm text-center tracking-widest"
+                  className="w-full px-3 py-2.5 bg-oe-surface border border-transparent rounded-lg focus:border-oe-primary focus:bg-white transition-all outline-none text-sm text-center tracking-widest"
                   placeholder="123456"
                   required
                 />
@@ -217,7 +217,7 @@ export default function SignInPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2.5 bg-[#0096FF] text-white rounded-lg font-semibold text-sm hover:bg-[#0077CC] transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
+                className="w-full py-2.5 bg-oe-primary text-white rounded-lg font-semibold text-sm hover:bg-oe-primary-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
               >
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
@@ -238,8 +238,8 @@ export default function SignInPage() {
             )}
 
             {success && (
-              <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                <p className="text-green-700 text-xs">{success}</p>
+              <div className="mb-4 p-3 bg-forest-50 border border-forest-200 rounded-lg">
+                <p className="text-forest-700 text-xs">{success}</p>
               </div>
             )}
             
@@ -247,7 +247,7 @@ export default function SignInPage() {
               <button
                 onClick={handleResendCode}
                 disabled={resendingCode}
-                className="w-full py-2.5 bg-white border-2 border-[#0096FF] text-[#0096FF] rounded-lg font-semibold text-sm hover:bg-[#E6F5FF] transition-all disabled:opacity-50 whitespace-nowrap cursor-pointer"
+                className="w-full py-2.5 bg-white border-2 border-oe-primary text-oe-primary rounded-lg font-semibold text-sm hover:bg-oe-primary-tint transition-all disabled:opacity-50 whitespace-nowrap cursor-pointer"
               >
                 {resendingCode ? (
                   <span className="flex items-center justify-center gap-2">
@@ -270,20 +270,20 @@ export default function SignInPage() {
                   setSuccess('');
                   setCode('');
                 }}
-                className="w-full py-2.5 bg-[#0096FF] text-white rounded-lg font-semibold text-sm hover:bg-[#0077CC] transition-all whitespace-nowrap cursor-pointer"
+                className="w-full py-2.5 bg-oe-primary text-white rounded-lg font-semibold text-sm hover:bg-oe-primary-hover transition-all whitespace-nowrap cursor-pointer"
               >
                 Back
               </button>
             </div>
             
-            <p className="text-xs text-[#6B6B6B] mt-5">
+            <p className="text-xs text-oe-muted mt-5">
               Didnâ€™t receive the code? Check spam, or resend it.
             </p>
           </div>
 
           {/* Back to Home */}
           <div className="mt-4 text-center">
-            <Link to="/" className="text-xs text-[#0096FF] hover:underline flex items-center justify-center gap-1 cursor-pointer">
+            <Link to="/" className="text-xs text-oe-primary hover:underline flex items-center justify-center gap-1 cursor-pointer">
               <i className="ri-arrow-left-line text-sm"></i>
               Back to Home
             </Link>
@@ -296,18 +296,18 @@ export default function SignInPage() {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]">
+    <div className="min-h-screen bg-oe-bg">
       <Navbar />
       <div className="pt-24 pb-16 flex items-center justify-center px-4">
         <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-5">
           <Link to="/" className="inline-block">
-            <h1 className="text-2xl font-bold text-[#0096FF]" style={{ fontFamily: 'Poppins, sans-serif' }}>
+            <h1 className="text-2xl font-bold text-oe-primary">
               Open Ear
             </h1>
           </Link>
-          <p className="text-sm text-[#6B6B6B] mt-1">
+          <p className="text-sm text-oe-muted mt-1">
             {isSignUp ? 'Create your account' : 'Welcome back'}
           </p>
         </div>
@@ -316,13 +316,13 @@ export default function SignInPage() {
         <div className="bg-white rounded-2xl shadow-lg p-6">
           {/* Header */}
           <div className="mb-5">
-            <div className="w-10 h-10 bg-[#0096FF]/10 rounded-xl flex items-center justify-center mx-auto mb-3">
-              <i className={`${isSignUp ? 'ri-user-add-fill' : 'ri-user-fill'} text-xl text-[#0096FF]`}></i>
+            <div className="w-10 h-10 bg-oe-primary/10 rounded-xl flex items-center justify-center mx-auto mb-3">
+              <i className={`${isSignUp ? 'ri-user-add-fill' : 'ri-user-fill'} text-xl text-oe-primary`}></i>
             </div>
-            <h2 className="text-lg font-bold text-[#2A2A2A] text-center">
+            <h2 className="text-lg font-bold text-oe-ink text-center">
               {isSignUp ? 'Create Account' : 'Sign In'}
             </h2>
-            <p className="text-xs text-[#6B6B6B] text-center mt-1">
+            <p className="text-xs text-oe-muted text-center mt-1">
               {isSignUp ? 'Join Open Ear and start your journey' : 'Continue your journey with Open Ear'}
             </p>
           </div>
@@ -336,9 +336,9 @@ export default function SignInPage() {
           )}
 
           {success && (
-            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-start gap-2">
-              <i className="ri-checkbox-circle-fill text-green-500 text-base mt-0.5"></i>
-              <p className="text-green-700 text-xs">{success}</p>
+            <div className="mb-4 p-3 bg-forest-50 border border-forest-200 rounded-lg flex items-start gap-2">
+              <i className="ri-checkbox-circle-fill text-forest-500 text-base mt-0.5"></i>
+              <p className="text-forest-700 text-xs">{success}</p>
             </div>
           )}
 
@@ -350,9 +350,9 @@ export default function SignInPage() {
                 onError={setError}
               />
               <div className="flex items-center gap-3 mt-4" aria-hidden="true">
-                <span className="h-px flex-1 bg-[#E5E5E5]" />
-                <span className="text-xs text-[#6B6B6B]">or with email</span>
-                <span className="h-px flex-1 bg-[#E5E5E5]" />
+                <span className="h-px flex-1 bg-oe-line" />
+                <span className="text-xs text-oe-muted">or with email</span>
+                <span className="h-px flex-1 bg-oe-line" />
               </div>
             </div>
           )}
@@ -364,18 +364,18 @@ export default function SignInPage() {
           >
             {isSignUp && (
               <div>
-                <label className="block text-xs font-semibold text-[#2A2A2A] mb-1.5">
+                <label className="block text-xs font-semibold text-oe-ink mb-1.5">
                   Full Name
                 </label>
                 <div className="relative">
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 flex items-center justify-center">
-                    <i className="ri-user-fill text-sm text-[#6B6B6B]"></i>
+                    <i className="ri-user-fill text-sm text-oe-muted"></i>
                   </div>
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2.5 bg-[#F5F5F5] border border-transparent rounded-lg focus:border-[#0096FF] focus:bg-white transition-all outline-none text-sm"
+                    className="w-full pl-9 pr-3 py-2.5 bg-oe-surface border border-transparent rounded-lg focus:border-oe-primary focus:bg-white transition-all outline-none text-sm"
                     placeholder="Enter your full name"
                     required={isSignUp}
                   />
@@ -384,18 +384,18 @@ export default function SignInPage() {
             )}
 
             <div>
-              <label className="block text-xs font-semibold text-[#2A2A2A] mb-1.5">
+              <label className="block text-xs font-semibold text-oe-ink mb-1.5">
                 Email Address
               </label>
               <div className="relative">
                 <div className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 flex items-center justify-center">
-                  <i className="ri-mail-fill text-sm text-[#6B6B6B]"></i>
+                  <i className="ri-mail-fill text-sm text-oe-muted"></i>
                 </div>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2.5 bg-[#F5F5F5] border border-transparent rounded-lg focus:border-[#0096FF] focus:bg-white transition-all outline-none text-sm"
+                  className="w-full pl-9 pr-3 py-2.5 bg-oe-surface border border-transparent rounded-lg focus:border-oe-primary focus:bg-white transition-all outline-none text-sm"
                   placeholder="your@email.com"
                   required
                 />
@@ -403,18 +403,18 @@ export default function SignInPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#2A2A2A] mb-1.5">
+              <label className="block text-xs font-semibold text-oe-ink mb-1.5">
                 Password
               </label>
               <div className="relative">
                 <div className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 flex items-center justify-center">
-                  <i className="ri-lock-fill text-sm text-[#6B6B6B]"></i>
+                  <i className="ri-lock-fill text-sm text-oe-muted"></i>
                 </div>
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2.5 bg-[#F5F5F5] border border-transparent rounded-lg focus:border-[#0096FF] focus:bg-white transition-all outline-none text-sm"
+                  className="w-full pl-9 pr-3 py-2.5 bg-oe-surface border border-transparent rounded-lg focus:border-oe-primary focus:bg-white transition-all outline-none text-sm"
                   placeholder={isSignUp ? 'Create a password' : 'Enter your password'}
                   required
                 />
@@ -423,18 +423,18 @@ export default function SignInPage() {
 
             {isSignUp && (
               <div>
-                <label className="block text-xs font-semibold text-[#2A2A2A] mb-1.5">
+                <label className="block text-xs font-semibold text-oe-ink mb-1.5">
                   Confirm Password
                 </label>
                 <div className="relative">
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 flex items-center justify-center">
-                    <i className="ri-lock-fill text-sm text-[#6B6B6B]"></i>
+                    <i className="ri-lock-fill text-sm text-oe-muted"></i>
                   </div>
                   <input
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2.5 bg-[#F5F5F5] border border-transparent rounded-lg focus:border-[#0096FF] focus:bg-white transition-all outline-none text-sm"
+                    className="w-full pl-9 pr-3 py-2.5 bg-oe-surface border border-transparent rounded-lg focus:border-oe-primary focus:bg-white transition-all outline-none text-sm"
                     placeholder="Confirm your password"
                     required={isSignUp}
                   />
@@ -445,10 +445,10 @@ export default function SignInPage() {
             {!isSignUp && (
               <div className="flex items-center justify-between text-xs">
                 <label className="flex items-center gap-1.5 cursor-pointer">
-                  <input type="checkbox" className="w-3.5 h-3.5 rounded border-[#E5E5E5] text-[#0096FF] focus:ring-[#0096FF]" />
-                  <span className="text-[#6B6B6B]">Remember me</span>
+                  <input type="checkbox" className="w-3.5 h-3.5 rounded border-oe-line text-oe-primary focus:ring-oe-primary" />
+                  <span className="text-oe-muted">Remember me</span>
                 </label>
-                <Link to="/forgot-password" className="text-[#0096FF] font-semibold hover:underline cursor-pointer">
+                <Link to="/forgot-password" className="text-oe-primary font-semibold hover:underline cursor-pointer">
                   Forgot password?
                 </Link>
               </div>
@@ -457,7 +457,7 @@ export default function SignInPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 bg-[#0096FF] text-white rounded-lg font-semibold text-sm hover:bg-[#0077CC] transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
+              className="w-full py-2.5 bg-oe-primary text-white rounded-lg font-semibold text-sm hover:bg-oe-primary-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -471,8 +471,8 @@ export default function SignInPage() {
           </form>
 
           {/* Toggle Sign In/Sign Up */}
-          <div className="mt-4 pt-4 border-t border-[#E5E5E5] text-center">
-            <p className="text-xs text-[#6B6B6B]">
+          <div className="mt-4 pt-4 border-t border-oe-line text-center">
+            <p className="text-xs text-oe-muted">
               {isSignUp ? 'Already have an account?' : "Don't have an account?"}
               {' '}
               <button
@@ -486,7 +486,7 @@ export default function SignInPage() {
                   setConfirmPassword('');
                   setCode('');
                 }}
-                className="text-[#0096FF] font-semibold hover:underline cursor-pointer"
+                className="text-oe-primary font-semibold hover:underline cursor-pointer"
               >
                 {isSignUp ? 'Sign In' : 'Sign Up'}
               </button>
@@ -495,7 +495,7 @@ export default function SignInPage() {
 
           {/* Back to Home */}
           <div className="mt-3 text-center">
-            <Link to="/" className="text-xs text-[#0096FF] hover:underline flex items-center justify-center gap-1 cursor-pointer">
+            <Link to="/" className="text-xs text-oe-primary hover:underline flex items-center justify-center gap-1 cursor-pointer">
               <i className="ri-arrow-left-line text-sm"></i>
               Back to Home
             </Link>
@@ -504,18 +504,18 @@ export default function SignInPage() {
 
         {/* Terms & Privacy */}
         <div className="mt-4 text-center">
-          <p className="text-[10px] text-[#6B6B6B]">
+          <p className="text-[10px] text-oe-muted">
             By continuing, you agree to our{' '}
-            <Link to="/terms" className="text-[#0096FF] hover:underline cursor-pointer">Terms of Service</Link>
+            <Link to="/terms" className="text-oe-primary hover:underline cursor-pointer">Terms of Service</Link>
             {' '}and{' '}
-            <Link to="/privacy" className="text-[#0096FF] hover:underline cursor-pointer">Privacy Policy</Link>
+            <Link to="/privacy" className="text-oe-primary hover:underline cursor-pointer">Privacy Policy</Link>
           </p>
         </div>
 
         {/* Security Badge */}
         <div className="mt-3 text-center">
-          <p className="text-[10px] text-[#6B6B6B] flex items-center justify-center gap-1">
-            <i className="ri-shield-check-fill text-sm text-[#0096FF]"></i>
+          <p className="text-[10px] text-oe-muted flex items-center justify-center gap-1">
+            <i className="ri-shield-check-fill text-sm text-oe-primary"></i>
             Your data is secure and encrypted
           </p>
         </div>

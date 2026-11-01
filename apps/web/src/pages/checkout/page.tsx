@@ -75,20 +75,20 @@ export default function CheckoutPage() {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]">
+      <div className="min-h-screen bg-oe-bg">
         <Navbar />
         <div className="pt-24 pb-16">
           <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20">
             <div className="text-center py-16">
               <div className="bg-white rounded-xl shadow-sm p-12 max-w-md mx-auto">
-                <i className="ri-shopping-cart-line text-6xl text-[#6B6B6B] mb-4"></i>
-                <h3 className="text-xl font-semibold text-[#2A2A2A] mb-2">Your cart is empty</h3>
-                <p className="text-[#6B6B6B] mb-6">
+                <i className="ri-shopping-cart-line text-6xl text-oe-muted mb-4"></i>
+                <h3 className="text-xl font-semibold text-oe-ink mb-2">Your cart is empty</h3>
+                <p className="text-oe-muted mb-6">
                   Add some ebooks to your cart before proceeding to checkout.
                 </p>
                 <Link
                   to="/ebook-store"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-[#0096FF] text-white rounded-lg hover:bg-[#0077CC] transition-colors"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-oe-primary text-white rounded-lg hover:bg-oe-primary-hover transition-colors"
                 >
                   <i className="ri-book-line"></i>
                   Browse Ebooks
@@ -109,7 +109,7 @@ export default function CheckoutPage() {
   })();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]">
+    <div className="min-h-screen bg-oe-bg">
       <Navbar />
       {paying && (
         <MpesaPaymentModal
@@ -125,10 +125,10 @@ export default function CheckoutPage() {
         <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-[#2A2A2A] mb-2">
+            <h1 className="text-3xl md:text-4xl font-bold text-oe-ink mb-2">
               Checkout
             </h1>
-            <p className="text-[#6B6B6B]">
+            <p className="text-oe-muted">
               Complete your purchase to get instant access to your ebooks
             </p>
           </div>
@@ -137,7 +137,7 @@ export default function CheckoutPage() {
             {/* Checkout Details */}
             <div className="lg:col-span-2">
               <form id="checkout-form" onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm p-8">
-                <h2 className="text-xl font-semibold text-[#2A2A2A] mb-6">Account</h2>
+                <h2 className="text-xl font-semibold text-oe-ink mb-6">Account</h2>
 
                 {/* Payment Error */}
                 {paymentError && (
@@ -150,27 +150,27 @@ export default function CheckoutPage() {
                 )}
 
                 {authLoading ? (
-                  <div className="flex items-center gap-3 text-[#6B6B6B] mb-8">
-                    <div className="w-5 h-5 border-2 border-[#0096FF] border-t-transparent rounded-full animate-spin"></div>
+                  <div className="flex items-center gap-3 text-oe-muted mb-8">
+                    <div className="w-5 h-5 border-2 border-oe-primary border-t-transparent rounded-full animate-spin"></div>
                     <span>Checking your account...</span>
                   </div>
                 ) : user ? (
-                  <div className="mb-8 p-4 bg-[#E6F5FF] rounded-xl flex items-center gap-3">
-                    <i className="ri-user-line text-[#0096FF] text-xl"></i>
+                  <div className="mb-8 p-4 bg-oe-primary-tint rounded-xl flex items-center gap-3">
+                    <i className="ri-user-line text-oe-primary text-xl"></i>
                     <div className="min-w-0">
-                      <p className="text-sm text-[#6B6B6B]">Purchasing as</p>
-                      <p className="font-medium text-[#2A2A2A] truncate">{user.email}</p>
+                      <p className="text-sm text-oe-muted">Purchasing as</p>
+                      <p className="font-medium text-oe-ink truncate">{user.email}</p>
                     </div>
                   </div>
                 ) : (
                   <div className="mb-8 p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
-                    <p className="text-sm text-[#2A2A2A] mb-3">
+                    <p className="text-sm text-oe-ink mb-3">
                       Please sign in so your ebooks can be added to your library.
                     </p>
                     <button
                       type="button"
                       onClick={goToSignIn}
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-[#0096FF] text-white rounded-lg hover:bg-[#0077CC] transition-colors text-sm"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-oe-primary text-white rounded-lg hover:bg-oe-primary-hover transition-colors text-sm"
                     >
                       <i className="ri-login-box-line"></i>
                       Sign In
@@ -180,11 +180,11 @@ export default function CheckoutPage() {
 
                 {/* Payment Section */}
                 <div className="border-t border-gray-200 pt-8">
-                  <h3 className="text-lg font-semibold text-[#2A2A2A] mb-4">Payment Method</h3>
-                  <div className="bg-[#E6F5FF] rounded-xl p-6 text-center">
-                    <i className="ri-secure-payment-line text-4xl text-[#0096FF] mb-2"></i>
-                    <p className="text-[#0096FF] font-medium mb-1">Secure Payment Processing</p>
-                    <p className="text-sm text-[#6B6B6B]">
+                  <h3 className="text-lg font-semibold text-oe-ink mb-4">Payment Method</h3>
+                  <div className="bg-oe-primary-tint rounded-xl p-6 text-center">
+                    <i className="ri-secure-payment-line text-4xl text-oe-primary mb-2"></i>
+                    <p className="text-oe-primary font-medium mb-1">Secure Payment Processing</p>
+                    <p className="text-sm text-oe-muted">
                       You&apos;ll pay with M-Pesa: we send a prompt to your phone and you confirm with your PIN. We never see your PIN.
                     </p>
                   </div>
@@ -195,7 +195,7 @@ export default function CheckoutPage() {
             {/* Order Summary */}
             <div className="lg:col-span-1">
               <div className="bg-white rounded-xl shadow-sm p-6 sticky top-24">
-                <h2 className="text-xl font-semibold text-[#2A2A2A] mb-6">Order Summary</h2>
+                <h2 className="text-xl font-semibold text-oe-ink mb-6">Order Summary</h2>
 
                 {/* Items */}
                 <div className="space-y-4 mb-6">
@@ -205,19 +205,19 @@ export default function CheckoutPage() {
                         {item.ebook.cover_image_url ? (
                           <img src={item.ebook.cover_image_url} alt={item.ebook.title} className="w-full h-full object-cover" />
                         ) : (
-                          <i className="ri-book-line text-[#6B6B6B]"></i>
+                          <i className="ri-book-line text-oe-muted"></i>
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-[#2A2A2A] text-sm line-clamp-2">
+                        <h4 className="font-medium text-oe-ink text-sm line-clamp-2">
                           {item.ebook.title}
                         </h4>
                         {item.ebook.author && (
-                          <p className="text-xs text-[#6B6B6B]">
+                          <p className="text-xs text-oe-muted">
                             by {item.ebook.author}
                           </p>
                         )}
-                        <p className="text-sm font-semibold text-[#0096FF] mt-1">
+                        <p className="text-sm font-semibold text-oe-primary mt-1">
                           {formatMoney(item.ebook.price, item.ebook.currency)}
                         </p>
                       </div>
@@ -227,19 +227,19 @@ export default function CheckoutPage() {
 
                 {/* Totals */}
                 <div className="space-y-3 mb-6 pt-4 border-t border-gray-200">
-                  <div className="flex justify-between text-[#6B6B6B]">
+                  <div className="flex justify-between text-oe-muted">
                     <span>Subtotal</span>
                     <span>{formatMoney(totalPrice, currency)}</span>
                   </div>
-                  <div className="flex justify-between text-[#6B6B6B]">
+                  <div className="flex justify-between text-oe-muted">
                     <span>Tax</span>
                     <span>{formatMoney(0, currency)}</span>
                   </div>
-                  <div className="flex justify-between text-lg font-semibold text-[#2A2A2A] pt-3 border-t border-gray-200">
+                  <div className="flex justify-between text-lg font-semibold text-oe-ink pt-3 border-t border-gray-200">
                     <span>Total</span>
                     <span>{formatMoney(totalPrice, currency)}</span>
                   </div>
-                  <p className="text-xs text-[#6B6B6B]">
+                  <p className="text-xs text-oe-muted">
                     Final price is confirmed by our server before payment.
                   </p>
                 </div>
@@ -249,7 +249,7 @@ export default function CheckoutPage() {
                   type="submit"
                   form="checkout-form"
                   disabled={isProcessing || authLoading}
-                  className="w-full px-6 py-3 bg-[#0096FF] text-white rounded-lg hover:bg-[#0077CC] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-6 py-3 bg-oe-primary text-white rounded-lg hover:bg-oe-primary-hover transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isProcessing ? (
                     <div className="flex items-center justify-center gap-2">
@@ -263,12 +263,12 @@ export default function CheckoutPage() {
 
                 {/* Security Info */}
                 <div className="mt-4 text-center">
-                  <div className="flex items-center justify-center gap-2 text-sm text-[#6B6B6B] mb-2">
-                    <i className="ri-shield-check-line text-green-600"></i>
+                  <div className="flex items-center justify-center gap-2 text-sm text-oe-muted mb-2">
+                    <i className="ri-shield-check-line text-forest-600"></i>
                     <span>Pay securely with M-Pesa</span>
                   </div>
-                  <div className="flex items-center justify-center gap-2 text-sm text-[#6B6B6B]">
-                    <i className="ri-download-line text-[#0096FF]"></i>
+                  <div className="flex items-center justify-center gap-2 text-sm text-oe-muted">
+                    <i className="ri-download-line text-oe-primary"></i>
                     <span>Instant digital delivery</span>
                   </div>
                 </div>

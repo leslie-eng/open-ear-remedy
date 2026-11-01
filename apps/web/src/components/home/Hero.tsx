@@ -13,7 +13,7 @@ const Hero = forwardRef<HTMLElement>(function Hero(_props, ref) {
     <section
       ref={ref}
       aria-labelledby="hero-heading"
-      className="relative overflow-hidden bg-oe-cream pt-32 md:pt-40 pb-20 md:pb-28 px-5 md:px-8"
+      className="relative overflow-hidden bg-oe-bg pt-32 md:pt-40 pb-20 md:pb-28 px-5 md:px-8"
     >
       <div aria-hidden="true" className="oe-drift" />
 
@@ -31,11 +31,11 @@ const Hero = forwardRef<HTMLElement>(function Hero(_props, ref) {
         </p>
 
         <div className="oe-enter flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 mb-5" style={enter(2)}>
-          <Link to="/chat" className={`${ctaBase} bg-oe-sage hover:bg-oe-sage-hover sm:min-w-[200px]`}>
+          <Link to="/chat" className={`${ctaBase} bg-oe-primary hover:bg-oe-primary-hover sm:min-w-[200px]`}>
             <i className="ri-message-3-line text-lg" aria-hidden="true" />
             Start a chat
           </Link>
-          <Link to="/call" className={`${ctaBase} bg-oe-blue hover:bg-oe-blue-hover sm:min-w-[200px]`}>
+          <Link to="/call" className={`${ctaBase} bg-oe-primary hover:bg-oe-primary-hover sm:min-w-[200px]`}>
             <i className="ri-phone-line text-lg" aria-hidden="true" />
             Call now
           </Link>

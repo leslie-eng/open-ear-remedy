@@ -27,7 +27,7 @@ export default function CrisisHelpPage() {
   });
 
   return (
-    <div className="min-h-screen bg-oe-cream text-oe-ink">
+    <div className="min-h-screen bg-oe-bg text-oe-ink">
       <Navbar />
 
       <main className="oe-route max-w-3xl mx-auto px-5 md:px-8 pt-28 md:pt-36 pb-20">
@@ -68,7 +68,7 @@ export default function CrisisHelpPage() {
           </ul>
           <p className="text-body text-oe-muted">
             Somewhere else? Find a free, confidential helpline in your country at{' '}
-            <a href="https://findahelpline.com" target="_blank" rel="noopener noreferrer" className="oe-link font-semibold text-oe-blue">
+            <a href="https://findahelpline.com" target="_blank" rel="noopener noreferrer" className="oe-link font-semibold text-oe-primary">
               findahelpline.com
             </a>
             .
@@ -77,7 +77,7 @@ export default function CrisisHelpPage() {
 
         <p className="text-body text-oe-muted">
           When you&rsquo;re safe and would like someone to talk to,{' '}
-          <Link to="/" className="oe-link font-semibold text-oe-blue">
+          <Link to="/" className="oe-link font-semibold text-oe-primary">
             Open Ear is here
           </Link>
           .

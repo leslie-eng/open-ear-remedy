@@ -52,7 +52,7 @@ export default function NewsletterSignup() {
           {status === 'submitting' ? 'Sending…' : 'Subscribe'}
         </button>
       </div>
-      <p aria-live="polite" className={`mt-2 text-sm ${status === 'error' ? 'text-[#ffd6d2]' : 'text-white/85'}`}>
+      <p aria-live="polite" className={`mt-2 text-sm ${status === 'error' ? 'text-oe-crisis-tint' : 'text-white/85'}`}>
         {status === 'success' || status === 'error' ? message : 'No spam. Unsubscribe anytime.'}
       </p>
     </form>

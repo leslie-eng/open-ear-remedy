@@ -156,7 +156,7 @@ export default function PricingPage() {
       {notification && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 animate-fade-in">
           <div className={`flex items-center gap-3 px-5 py-3 rounded-lg shadow-lg ${
-            notification.type === 'success' ? 'bg-green-500 text-white' :
+            notification.type === 'success' ? 'bg-forest-500 text-white' :
             notification.type === 'error' ? 'bg-red-500 text-white' :
             'bg-gray-700 text-white'
           }`}>
@@ -186,20 +186,20 @@ export default function PricingPage() {
         </p>
 
         {/* Free Trial Highlight */}
-        <div className="inline-flex items-center gap-2 bg-green-50 border border-green-200 px-4 py-2 rounded-full mb-4">
-          <i className="ri-gift-fill text-green-600 text-base"></i>
-          <span className="text-green-700 font-semibold text-sm">First-time users get {FREE_TRIAL_CREDITS} FREE credits ({callMinutesFor(FREE_TRIAL_CREDITS)} min call)</span>
+        <div className="inline-flex items-center gap-2 bg-forest-50 border border-forest-200 px-4 py-2 rounded-full mb-4">
+          <i className="ri-gift-fill text-forest-600 text-base"></i>
+          <span className="text-forest-700 font-semibold text-sm">First-time users get {FREE_TRIAL_CREDITS} FREE credits ({callMinutesFor(FREE_TRIAL_CREDITS)} min call)</span>
         </div>
 
         {/* Credit Usage Info */}
         <div className="flex flex-wrap items-center justify-center gap-4 mt-4">
-          <div className="flex items-center gap-2 bg-[#E6F5FF] px-4 py-2 rounded-full">
-            <i className="ri-phone-fill text-[#0096FF] text-base"></i>
-            <span className="text-[#0096FF] font-medium text-sm">Voice: {CREDITS_PER_CALL_MINUTE} credits/min</span>
+          <div className="flex items-center gap-2 bg-oe-primary-tint px-4 py-2 rounded-full">
+            <i className="ri-phone-fill text-oe-primary text-base"></i>
+            <span className="text-oe-primary font-medium text-sm">Voice: {CREDITS_PER_CALL_MINUTE} credits/min</span>
           </div>
-          <div className="flex items-center gap-2 bg-[#E6F5FF] px-4 py-2 rounded-full">
-            <i className="ri-message-3-fill text-[#0096FF] text-base"></i>
-            <span className="text-[#0096FF] font-medium text-sm">Chat: {CREDITS_PER_CHAT_MESSAGE} credits/message</span>
+          <div className="flex items-center gap-2 bg-oe-primary-tint px-4 py-2 rounded-full">
+            <i className="ri-message-3-fill text-oe-primary text-base"></i>
+            <span className="text-oe-primary font-medium text-sm">Chat: {CREDITS_PER_CHAT_MESSAGE} credits/message</span>
           </div>
         </div>
       </div>
@@ -212,12 +212,12 @@ export default function PricingPage() {
               key={plan.name}
               className={`relative bg-white rounded-xl p-5 transition-all ${
                 plan.popular
-                  ? 'border-2 border-[#0096FF] shadow-lg scale-105'
+                  ? 'border-2 border-oe-primary shadow-lg scale-105'
                   : 'border border-gray-200 shadow-md hover:shadow-lg'
               }`}
             >
               {plan.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#0096FF] text-white px-4 py-1 rounded-full text-xs font-medium whitespace-nowrap">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-oe-primary text-white px-4 py-1 rounded-full text-xs font-medium whitespace-nowrap">
                   Most Popular
                 </div>
               )}
@@ -237,14 +237,14 @@ export default function PricingPage() {
                 <p className="text-xs text-gray-500 mb-1">
                   for {plan.credits} credits
                 </p>
-                <p className="text-xs text-[#0096FF] font-medium">
+                <p className="text-xs text-oe-primary font-medium">
                   {formatPrice(plan.perCredit)}/credit
                 </p>
               </div>
 
               <div className="mb-5">
                 <div className="flex items-center justify-center gap-2 mb-4 pb-4 border-b border-gray-100">
-                  <i className="ri-copper-coin-fill text-lg text-[#0096FF]"></i>
+                  <i className="ri-copper-coin-fill text-lg text-oe-primary"></i>
                   <span className="text-sm font-semibold text-gray-900">
                     {plan.credits} Credits
                   </span>
@@ -253,7 +253,7 @@ export default function PricingPage() {
                 <ul className="space-y-2">
                   {plan.features.map((feature, index) => (
                     <li key={index} className="flex items-start gap-2">
-                      <i className="ri-check-line text-base text-[#0096FF] mt-0.5"></i>
+                      <i className="ri-check-line text-base text-oe-primary mt-0.5"></i>
                       <span className="text-gray-700 text-xs">{feature}</span>
                     </li>
                   ))}
@@ -265,7 +265,7 @@ export default function PricingPage() {
                 disabled={paying !== null}
                 className={`w-full py-2.5 rounded-lg font-medium text-sm transition-all cursor-pointer whitespace-nowrap disabled:opacity-70 disabled:cursor-not-allowed ${
                   plan.popular
-                    ? 'bg-[#0096FF] text-white hover:bg-[#0085e6]'
+                    ? 'bg-oe-primary text-white hover:bg-oe-primary'
                     : 'bg-gray-50 text-gray-900 hover:bg-gray-100 border border-gray-200'
                 }`}
               >
@@ -276,23 +276,23 @@ export default function PricingPage() {
         </div>
 
         {/* Monthly Pass */}
-        <div className="mt-10 bg-white rounded-2xl border-2 border-[#0096FF] p-6 md:p-8 flex flex-col md:flex-row md:items-center gap-6">
+        <div className="mt-10 bg-white rounded-2xl border-2 border-oe-primary p-6 md:p-8 flex flex-col md:flex-row md:items-center gap-6">
           <div className="flex-1">
             <h3 className="text-xl font-bold text-gray-900 mb-1">{MONTHLY_PASS.name}</h3>
             <p className="text-gray-600 mb-4">
               {formatPrice(MONTHLY_PASS.price)} for {MONTHLY_PASS.days} days. Bought when you want it; it never renews by itself.
             </p>
             <ul className="space-y-2 text-sm text-gray-700">
-              <li className="flex gap-2"><i className="ri-check-line text-[#0096FF]"></i>{MONTHLY_PASS.callSeconds / 60} minutes of calls</li>
-              <li className="flex gap-2"><i className="ri-check-line text-[#0096FF]"></i>{MONTHLY_PASS.aiMessagesPerDay} AI chat messages every day</li>
-              <li className="flex gap-2"><i className="ri-check-line text-[#0096FF]"></i>Used before your credits, so your credits last longer</li>
-              <li className="flex gap-2"><i className="ri-check-line text-[#0096FF]"></i>Renew early and the next pass starts when this one ends</li>
+              <li className="flex gap-2"><i className="ri-check-line text-oe-primary"></i>{MONTHLY_PASS.callSeconds / 60} minutes of calls</li>
+              <li className="flex gap-2"><i className="ri-check-line text-oe-primary"></i>{MONTHLY_PASS.aiMessagesPerDay} AI chat messages every day</li>
+              <li className="flex gap-2"><i className="ri-check-line text-oe-primary"></i>Used before your credits, so your credits last longer</li>
+              <li className="flex gap-2"><i className="ri-check-line text-oe-primary"></i>Renew early and the next pass starts when this one ends</li>
             </ul>
           </div>
           <button
             onClick={() => handleSelectPlan(MONTHLY_PASS)}
             disabled={paying !== null}
-            className="px-6 py-3 rounded-xl bg-[#0A6EB4] text-white font-semibold hover:bg-[#085A94] disabled:opacity-50 whitespace-nowrap cursor-pointer"
+            className="px-6 py-3 rounded-xl bg-oe-primary text-white font-semibold hover:bg-oe-primary-hover disabled:opacity-50 whitespace-nowrap cursor-pointer"
           >
             {`Get the pass for ${formatPrice(MONTHLY_PASS.price)}`}
           </button>
@@ -300,17 +300,17 @@ export default function PricingPage() {
 
         {/* Secure Payment Badge */}
         <div className="flex items-center justify-center gap-2 mt-6 text-gray-500">
-          <i className="ri-shield-check-fill text-green-500"></i>
+          <i className="ri-shield-check-fill text-forest-500"></i>
           <span className="text-xs">Pay securely with M-Pesa</span>
         </div>
 
         {/* Credit Usage Examples */}
-        <div className="mt-10 bg-[#E6F5FF] rounded-2xl p-6 md:p-8">
-          <h3 className="text-lg font-bold text-[#2A2A2A] mb-4 text-center">What Can You Do With Credits?</h3>
+        <div className="mt-10 bg-oe-primary-tint rounded-2xl p-6 md:p-8">
+          <h3 className="text-lg font-bold text-oe-ink mb-4 text-center">What Can You Do With Credits?</h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {CREDIT_PACKS.map((pack) => (
               <div key={pack.id} className="bg-white rounded-xl p-4 text-center">
-                <p className="text-xl font-bold text-[#0096FF] mb-1">{pack.credits} credits</p>
+                <p className="text-xl font-bold text-oe-primary mb-1">{pack.credits} credits</p>
                 <p className="text-sm text-gray-700">{callMinutesFor(pack.credits)} min of calls</p>
                 <p className="text-sm text-gray-500">or {Math.floor(pack.credits / CREDITS_PER_CHAT_MESSAGE)} AI messages</p>
               </div>
@@ -359,7 +359,7 @@ export default function PricingPage() {
         <div className="flex items-center justify-center gap-3">
           <button
             onClick={() => navigate('/call')}
-            className="px-6 py-2.5 bg-[#0096FF] text-white rounded-lg text-sm hover:bg-[#0085e6] transition-colors cursor-pointer whitespace-nowrap"
+            className="px-6 py-2.5 bg-oe-primary text-white rounded-lg text-sm hover:bg-oe-primary transition-colors cursor-pointer whitespace-nowrap"
           >
             Start Free Trial
           </button>
@@ -373,7 +373,7 @@ export default function PricingPage() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-[#0096FF] text-white py-8">
+      <footer className="bg-oe-primary text-white py-8">
         <div className="max-w-6xl mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-6 mb-6">
             <div>
@@ -458,8 +458,8 @@ export default function PricingPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-6 max-w-sm w-full">
             <div className="text-center mb-5">
-              <div className="w-12 h-12 bg-[#0096FF]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                <i className="ri-user-line text-xl text-[#0096FF]"></i>
+              <div className="w-12 h-12 bg-oe-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                <i className="ri-user-line text-xl text-oe-primary"></i>
               </div>
               <h3 className="text-lg font-bold text-gray-900 mb-1">
                 Sign In to Continue
@@ -472,7 +472,7 @@ export default function PricingPage() {
             <div className="space-y-3">
               <button
                 onClick={handleSignIn}
-                className="w-full py-2.5 bg-[#0096FF] text-white rounded-lg text-sm hover:bg-[#0085e6] transition-colors cursor-pointer whitespace-nowrap"
+                className="w-full py-2.5 bg-oe-primary text-white rounded-lg text-sm hover:bg-oe-primary transition-colors cursor-pointer whitespace-nowrap"
               >
                 Sign In
               </button>

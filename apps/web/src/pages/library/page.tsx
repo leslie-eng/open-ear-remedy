@@ -74,21 +74,21 @@ export default function LibraryPage() {
 
   if (!authLoading && !user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]">
+      <div className="min-h-screen bg-oe-bg">
         <Navbar />
         <div className="pt-24 pb-16">
           <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20">
             <div className="text-center py-16">
               <div className="bg-white rounded-xl shadow-sm p-12 max-w-md mx-auto">
-                <i className="ri-lock-line text-6xl text-[#6B6B6B] mb-4"></i>
-                <h3 className="text-xl font-semibold text-[#2A2A2A] mb-2">Sign in required</h3>
-                <p className="text-[#6B6B6B] mb-6">
+                <i className="ri-lock-line text-6xl text-oe-muted mb-4"></i>
+                <h3 className="text-xl font-semibold text-oe-ink mb-2">Sign in required</h3>
+                <p className="text-oe-muted mb-6">
                   Please sign in to access your ebook library.
                 </p>
                 <Link
                   to="/signin"
                   state={{ returnTo: '/library' }}
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-[#0096FF] text-white rounded-lg hover:bg-[#0077CC] transition-colors"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-oe-primary text-white rounded-lg hover:bg-oe-primary-hover transition-colors"
                 >
                   <i className="ri-login-box-line"></i>
                   Sign In
@@ -103,13 +103,13 @@ export default function LibraryPage() {
 
   if (loading || authLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]">
+      <div className="min-h-screen bg-oe-bg">
         <Navbar />
         <div className="pt-24 pb-16">
           <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20">
             <div className="text-center py-16">
-              <div className="w-16 h-16 border-4 border-[#0096FF] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-[#6B6B6B]">Loading your library...</p>
+              <div className="w-16 h-16 border-4 border-oe-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-oe-muted">Loading your library...</p>
             </div>
           </div>
         </div>
@@ -118,17 +118,17 @@ export default function LibraryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]">
+    <div className="min-h-screen bg-oe-bg">
       <Navbar />
 
       <div className="pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-[#2A2A2A] mb-2">
+            <h1 className="text-3xl md:text-4xl font-bold text-oe-ink mb-2">
               My Library
             </h1>
-            <p className="text-[#6B6B6B]">
+            <p className="text-oe-muted">
               {error
                 ? 'We could not load your library'
                 : library.length > 0
@@ -149,11 +149,11 @@ export default function LibraryPage() {
             <div className="text-center py-16">
               <div className="bg-white rounded-xl shadow-sm p-12 max-w-md mx-auto">
                 <i className="ri-error-warning-line text-6xl text-red-500 mb-4"></i>
-                <h3 className="text-xl font-semibold text-[#2A2A2A] mb-2">Something went wrong</h3>
-                <p className="text-[#6B6B6B] mb-6">{error}</p>
+                <h3 className="text-xl font-semibold text-oe-ink mb-2">Something went wrong</h3>
+                <p className="text-oe-muted mb-6">{error}</p>
                 <button
                   onClick={() => void loadLibrary()}
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-[#0096FF] text-white rounded-lg hover:bg-[#0077CC] transition-colors"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-oe-primary text-white rounded-lg hover:bg-oe-primary-hover transition-colors"
                 >
                   <i className="ri-refresh-line"></i>
                   Try Again
@@ -164,14 +164,14 @@ export default function LibraryPage() {
             /* Empty Library */
             <div className="text-center py-16">
               <div className="bg-white rounded-xl shadow-sm p-12 max-w-md mx-auto">
-                <i className="ri-book-line text-6xl text-[#6B6B6B] mb-4"></i>
-                <h3 className="text-xl font-semibold text-[#2A2A2A] mb-2">No products yet</h3>
-                <p className="text-[#6B6B6B] mb-6">
+                <i className="ri-book-line text-6xl text-oe-muted mb-4"></i>
+                <h3 className="text-xl font-semibold text-oe-ink mb-2">No products yet</h3>
+                <p className="text-oe-muted mb-6">
                   Start building your library by purchasing products from our store.
                 </p>
                 <Link
                   to="/ebook-store"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-[#0096FF] text-white rounded-lg hover:bg-[#0077CC] transition-colors"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-oe-primary text-white rounded-lg hover:bg-oe-primary-hover transition-colors"
                 >
                   <i className="ri-shopping-bag-line"></i>
                   Browse Store
@@ -188,27 +188,27 @@ export default function LibraryPage() {
                     {ebook.cover_image_url ? (
                       <img src={ebook.cover_image_url} alt={ebook.title} className="w-full h-full object-cover" loading="lazy" />
                     ) : (
-                      <i className="ri-book-line text-4xl text-[#6B6B6B]"></i>
+                      <i className="ri-book-line text-4xl text-oe-muted"></i>
                     )}
                   </div>
 
                   {/* Book Info */}
-                  <h3 className="font-semibold text-[#2A2A2A] mb-2 line-clamp-2">
+                  <h3 className="font-semibold text-oe-ink mb-2 line-clamp-2">
                     {ebook.title}
                   </h3>
 
                   {ebook.author && (
-                    <p className="text-sm text-[#6B6B6B] mb-4">
+                    <p className="text-sm text-oe-muted mb-4">
                       by {ebook.author}
                     </p>
                   )}
 
                   {/* File Info */}
-                  <div className="space-y-2 mb-4 text-xs text-[#6B6B6B]">
+                  <div className="space-y-2 mb-4 text-xs text-oe-muted">
                     {ebook.file_format && (
                       <div className="flex justify-between">
                         <span>Format:</span>
-                        <span className="bg-[#E6F5FF] text-[#0096FF] px-2 py-0.5 rounded-full">
+                        <span className="bg-oe-primary-tint text-oe-primary px-2 py-0.5 rounded-full">
                           {ebook.file_format}
                         </span>
                       </div>
@@ -228,7 +228,7 @@ export default function LibraryPage() {
                     <button
                       onClick={() => void handleDownload(ebook)}
                       disabled={downloadingId === ebook.id}
-                      className="w-full px-4 py-2 bg-[#0096FF] text-white rounded-lg hover:bg-[#0077CC] transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full px-4 py-2 bg-oe-primary text-white rounded-lg hover:bg-oe-primary-hover transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {downloadingId === ebook.id ? (
                         <>
@@ -244,7 +244,7 @@ export default function LibraryPage() {
                     </button>
                     <Link
                       to={`/ebook/${ebook.id}`}
-                      className="block w-full text-center px-4 py-2 border border-[#0096FF] text-[#0096FF] rounded-lg hover:bg-[#E6F5FF] transition-colors"
+                      className="block w-full text-center px-4 py-2 border border-oe-primary text-oe-primary rounded-lg hover:bg-oe-primary-tint transition-colors"
                     >
                       View Details
                     </Link>
@@ -259,7 +259,7 @@ export default function LibraryPage() {
             <div className="mt-12 text-center">
               <Link
                 to="/purchase-history"
-                className="inline-flex items-center gap-2 text-[#0096FF] hover:text-[#0077CC] transition-colors"
+                className="inline-flex items-center gap-2 text-oe-primary hover:text-oe-primary-hover transition-colors"
               >
                 <i className="ri-history-line"></i>
                 View Purchase History

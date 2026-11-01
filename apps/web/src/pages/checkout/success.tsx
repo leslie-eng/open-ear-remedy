@@ -92,7 +92,7 @@ export default function CheckoutSuccessPage() {
   const needsSignIn = !!reference && !authLoading && !user;
 
   const shell = (content: React.ReactNode) => (
-    <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]">
+    <div className="min-h-screen bg-oe-bg">
       <Navbar />
       <div className="pt-24 pb-16">
         <div className="max-w-4xl mx-auto px-6 md:px-12 lg:px-20">
@@ -105,16 +105,16 @@ export default function CheckoutSuccessPage() {
   if (needsSignIn) {
     return shell(
       <div className="bg-white rounded-xl shadow-sm p-12 max-w-md mx-auto">
-        <i className="ri-lock-line text-6xl text-[#6B6B6B] mb-4"></i>
-        <h3 className="text-xl font-semibold text-[#2A2A2A] mb-2">Sign in to view your order</h3>
-        <p className="text-[#6B6B6B] mb-6">
+        <i className="ri-lock-line text-6xl text-oe-muted mb-4"></i>
+        <h3 className="text-xl font-semibold text-oe-ink mb-2">Sign in to view your order</h3>
+        <p className="text-oe-muted mb-6">
           Please sign in with the account you used to purchase.
         </p>
         <button
           onClick={() =>
             navigate('/signin', { state: { returnTo: `${location.pathname}${location.search}` } })
           }
-          className="inline-flex items-center gap-2 px-6 py-3 bg-[#0096FF] text-white rounded-lg hover:bg-[#0077CC] transition-colors"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-oe-primary text-white rounded-lg hover:bg-oe-primary-hover transition-colors"
         >
           <i className="ri-login-box-line"></i>
           Sign In
@@ -126,9 +126,9 @@ export default function CheckoutSuccessPage() {
   if (view === 'checking' || (authLoading && !!reference)) {
     return shell(
       <div className="py-16">
-        <div className="w-16 h-16 border-4 border-[#0096FF] border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
-        <h1 className="text-2xl md:text-3xl font-bold text-[#2A2A2A] mb-2">Confirming your payment...</h1>
-        <p className="text-[#6B6B6B]">This usually takes just a few seconds. Please don&apos;t close this page.</p>
+        <div className="w-16 h-16 border-4 border-oe-primary border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+        <h1 className="text-2xl md:text-3xl font-bold text-oe-ink mb-2">Confirming your payment...</h1>
+        <p className="text-oe-muted">This usually takes just a few seconds. Please don&apos;t close this page.</p>
       </div>,
     );
   }
@@ -138,7 +138,7 @@ export default function CheckoutSuccessPage() {
       missing: {
         icon: 'ri-question-line',
         iconWrap: 'bg-gray-100',
-        iconColor: 'text-[#6B6B6B]',
+        iconColor: 'text-oe-muted',
         title: 'No order to show',
         body: 'We could not find an order reference in this link. If you just paid, check your library or purchase history.',
       },
@@ -170,18 +170,18 @@ export default function CheckoutSuccessPage() {
         <div className={`w-24 h-24 ${config.iconWrap} rounded-full flex items-center justify-center mx-auto mb-8`}>
           <i className={`${config.icon} text-4xl ${config.iconColor}`}></i>
         </div>
-        <h1 className="text-3xl md:text-4xl font-bold text-[#2A2A2A] mb-4">{config.title}</h1>
-        <p className="text-lg text-[#6B6B6B] mb-8 max-w-2xl mx-auto">{config.body}</p>
+        <h1 className="text-3xl md:text-4xl font-bold text-oe-ink mb-4">{config.title}</h1>
+        <p className="text-lg text-oe-muted mb-8 max-w-2xl mx-auto">{config.body}</p>
         {reference && (
-          <p className="text-sm text-[#6B6B6B] mb-8">
-            Reference: <span className="font-mono text-[#2A2A2A]">{reference}</span>
+          <p className="text-sm text-oe-muted mb-8">
+            Reference: <span className="font-mono text-oe-ink">{reference}</span>
           </p>
         )}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           {view === 'processing' && (
             <button
               onClick={() => setPollKey((k) => k + 1)}
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#0096FF] text-white rounded-lg hover:bg-[#0077CC] transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-oe-primary text-white rounded-lg hover:bg-oe-primary-hover transition-colors"
             >
               <i className="ri-refresh-line"></i>
               Check Again
@@ -190,7 +190,7 @@ export default function CheckoutSuccessPage() {
           {view === 'failed' && (
             <Link
               to="/checkout"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#0096FF] text-white rounded-lg hover:bg-[#0077CC] transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-oe-primary text-white rounded-lg hover:bg-oe-primary-hover transition-colors"
             >
               <i className="ri-bank-card-line"></i>
               Try Again
@@ -198,14 +198,14 @@ export default function CheckoutSuccessPage() {
           )}
           <Link
             to="/library"
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-[#0096FF] text-[#0096FF] rounded-lg hover:bg-[#E6F5FF] transition-colors"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-oe-primary text-oe-primary rounded-lg hover:bg-oe-primary-tint transition-colors"
           >
             <i className="ri-book-open-line"></i>
             Go to Library
           </Link>
           <Link
             to="/contact"
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-gray-300 text-[#6B6B6B] rounded-lg hover:bg-gray-50 transition-colors"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-gray-300 text-oe-muted rounded-lg hover:bg-gray-50 transition-colors"
           >
             <i className="ri-customer-service-line"></i>
             Contact Support
@@ -217,40 +217,40 @@ export default function CheckoutSuccessPage() {
 
   // view === 'completed'
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]">
+    <div className="min-h-screen bg-oe-bg">
       <Navbar />
 
       <div className="pt-24 pb-16">
         <div className="max-w-4xl mx-auto px-6 md:px-12 lg:px-20">
           <div className="text-center">
             {/* Success Icon */}
-            <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-8">
-              <i className="ri-check-line text-4xl text-green-600"></i>
+            <div className="w-24 h-24 bg-forest-100 rounded-full flex items-center justify-center mx-auto mb-8">
+              <i className="ri-check-line text-4xl text-forest-600"></i>
             </div>
 
             {/* Success Message */}
-            <h1 className="text-3xl md:text-4xl font-bold text-[#2A2A2A] mb-4">
+            <h1 className="text-3xl md:text-4xl font-bold text-oe-ink mb-4">
               Purchase Successful!
             </h1>
-            <p className="text-lg text-[#6B6B6B] mb-8 max-w-2xl mx-auto">
+            <p className="text-lg text-oe-muted mb-8 max-w-2xl mx-auto">
               Thank you for your purchase! Your ebooks have been added to your library and you should receive a confirmation email shortly.
             </p>
 
             {order && (
               <div className="bg-white rounded-xl shadow-sm p-6 max-w-2xl mx-auto mb-12 text-left">
-                <div className="flex justify-between text-sm text-[#6B6B6B] mb-4">
+                <div className="flex justify-between text-sm text-oe-muted mb-4">
                   <span>Reference</span>
-                  <span className="font-mono text-[#2A2A2A]">{order.reference}</span>
+                  <span className="font-mono text-oe-ink">{order.reference}</span>
                 </div>
                 <div className="space-y-2 mb-4">
                   {order.items.map((item) => (
                     <div key={item.ebook_id} className="flex justify-between text-sm">
-                      <span className="text-[#2A2A2A]">{item.title}</span>
-                      <span className="text-[#6B6B6B]">{formatMoney(item.price, order.currency)}</span>
+                      <span className="text-oe-ink">{item.title}</span>
+                      <span className="text-oe-muted">{formatMoney(item.price, order.currency)}</span>
                     </div>
                   ))}
                 </div>
-                <div className="flex justify-between font-semibold text-[#2A2A2A] pt-3 border-t border-gray-200">
+                <div className="flex justify-between font-semibold text-oe-ink pt-3 border-t border-gray-200">
                   <span>Total</span>
                   <span>{formatMoney(order.total, order.currency)}</span>
                 </div>
@@ -263,13 +263,13 @@ export default function CheckoutSuccessPage() {
                 to="/library"
                 className="bg-white rounded-xl shadow-sm p-8 hover:shadow-md transition-shadow text-center group"
               >
-                <div className="w-16 h-16 bg-[#E6F5FF] rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-[#D6EFFF] transition-colors">
-                  <i className="ri-book-open-line text-2xl text-[#0096FF]"></i>
+                <div className="w-16 h-16 bg-oe-primary-tint rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-oe-primary-soft transition-colors">
+                  <i className="ri-book-open-line text-2xl text-oe-primary"></i>
                 </div>
-                <h3 className="text-lg font-semibold text-[#2A2A2A] mb-2">
+                <h3 className="text-lg font-semibold text-oe-ink mb-2">
                   Access Your Library
                 </h3>
-                <p className="text-sm text-[#6B6B6B]">
+                <p className="text-sm text-oe-muted">
                   Download and read your purchased ebooks
                 </p>
               </Link>
@@ -278,13 +278,13 @@ export default function CheckoutSuccessPage() {
                 to="/ebook-store"
                 className="bg-white rounded-xl shadow-sm p-8 hover:shadow-md transition-shadow text-center group"
               >
-                <div className="w-16 h-16 bg-[#E6F5FF] rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-[#D6EFFF] transition-colors">
-                  <i className="ri-shopping-bag-line text-2xl text-[#0096FF]"></i>
+                <div className="w-16 h-16 bg-oe-primary-tint rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-oe-primary-soft transition-colors">
+                  <i className="ri-shopping-bag-line text-2xl text-oe-primary"></i>
                 </div>
-                <h3 className="text-lg font-semibold text-[#2A2A2A] mb-2">
+                <h3 className="text-lg font-semibold text-oe-ink mb-2">
                   Continue Shopping
                 </h3>
-                <p className="text-sm text-[#6B6B6B]">
+                <p className="text-sm text-oe-muted">
                   Discover more mental wellness ebooks
                 </p>
               </Link>
@@ -292,32 +292,32 @@ export default function CheckoutSuccessPage() {
 
             {/* Order Details */}
             <div className="bg-white rounded-xl shadow-sm p-8 max-w-2xl mx-auto">
-              <h2 className="text-xl font-semibold text-[#2A2A2A] mb-6">What happens next?</h2>
+              <h2 className="text-xl font-semibold text-oe-ink mb-6">What happens next?</h2>
 
               <div className="space-y-4 text-left">
                 <div className="flex items-start gap-4">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <i className="ri-mail-line text-green-600"></i>
+                  <div className="w-8 h-8 bg-forest-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <i className="ri-mail-line text-forest-600"></i>
                   </div>
                   <div>
-                    <h4 className="font-medium text-[#2A2A2A] mb-1">
+                    <h4 className="font-medium text-oe-ink mb-1">
                       Confirmation Email
                     </h4>
-                    <p className="text-sm text-[#6B6B6B]">
+                    <p className="text-sm text-oe-muted">
                       You'll receive a confirmation email with your purchase details and download instructions.
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <i className="ri-download-line text-blue-600"></i>
+                  <div className="w-8 h-8 bg-forest-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <i className="ri-download-line text-forest-600"></i>
                   </div>
                   <div>
-                    <h4 className="font-medium text-[#2A2A2A] mb-1">
+                    <h4 className="font-medium text-oe-ink mb-1">
                       Instant Access
                     </h4>
-                    <p className="text-sm text-[#6B6B6B]">
+                    <p className="text-sm text-oe-muted">
                       Your ebooks are now available in your library for unlimited downloads.
                     </p>
                   </div>
@@ -328,10 +328,10 @@ export default function CheckoutSuccessPage() {
                     <i className="ri-customer-service-line text-purple-600"></i>
                   </div>
                   <div>
-                    <h4 className="font-medium text-[#2A2A2A] mb-1">
+                    <h4 className="font-medium text-oe-ink mb-1">
                       Support Available
                     </h4>
-                    <p className="text-sm text-[#6B6B6B]">
+                    <p className="text-sm text-oe-muted">
                       Need help? Our support team is here to assist you with any questions.
                     </p>
                   </div>
@@ -343,14 +343,14 @@ export default function CheckoutSuccessPage() {
             <div className="mt-12 flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 to="/purchase-history"
-                className="inline-flex items-center gap-2 px-6 py-3 border border-[#0096FF] text-[#0096FF] rounded-lg hover:bg-[#E6F5FF] transition-colors"
+                className="inline-flex items-center gap-2 px-6 py-3 border border-oe-primary text-oe-primary rounded-lg hover:bg-oe-primary-tint transition-colors"
               >
                 <i className="ri-history-line"></i>
                 View Purchase History
               </Link>
               <Link
                 to="/contact"
-                className="inline-flex items-center gap-2 px-6 py-3 border border-gray-300 text-[#6B6B6B] rounded-lg hover:bg-gray-50 transition-colors"
+                className="inline-flex items-center gap-2 px-6 py-3 border border-gray-300 text-oe-muted rounded-lg hover:bg-gray-50 transition-colors"
               >
                 <i className="ri-customer-service-line"></i>
                 Contact Support

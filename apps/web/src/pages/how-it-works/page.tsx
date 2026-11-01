@@ -52,18 +52,18 @@ export default function HowItWorksPage() {
 
       {/* Hero Section */}
       <section className="relative pt-24 md:pt-28 pb-12 md:pb-16 px-4 md:px-8 lg:px-14 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]/30"></div>
+        <div className="absolute inset-0 bg-oe-bg"></div>
         <div className="max-w-4xl mx-auto text-center relative z-10">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#0096FF]/10 rounded-full mb-4">
-            <i className="ri-lightbulb-flash-fill text-[#0096FF] text-sm"></i>
-            <span className="text-xs font-medium text-[#0096FF]">Simple Process</span>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-oe-primary/10 rounded-full mb-4">
+            <i className="ri-lightbulb-flash-fill text-oe-primary text-sm"></i>
+            <span className="text-xs font-medium text-oe-primary">Simple Process</span>
           </div>
           
-          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-[#2A2A2A] mb-4 leading-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-oe-ink mb-4 leading-tight">
             Getting Support<br />Is Simple &amp; Fast
           </h1>
           
-          <p className="text-sm md:text-base text-[#6B6B6B] mb-6 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-sm md:text-base text-oe-muted mb-6 max-w-2xl mx-auto leading-relaxed">
             No complicated sign-ups or long wait times. Connect with emotional support in just a few clicks, whenever you need it.
           </p>
         </div>
@@ -73,10 +73,10 @@ export default function HowItWorksPage() {
       <section className="py-10 md:py-16 px-4 md:px-8 lg:px-14">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8 md:mb-12">
-            <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-[#0096FF] mb-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
+            <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-oe-primary mb-2">
               Your Journey to Support
             </h2>
-            <p className="text-xs md:text-sm text-[#6B6B6B] max-w-xl mx-auto">
+            <p className="text-xs md:text-sm text-oe-muted max-w-xl mx-auto">
               From first visit to feeling supported, here's how Open Ear works
             </p>
           </div>
@@ -85,34 +85,34 @@ export default function HowItWorksPage() {
           <div className="grid md:grid-cols-2 gap-8 md:gap-10 items-center mb-12 md:mb-16">
             <div className="order-2 md:order-1">
               <div className="inline-flex items-center gap-2 mb-4">
-                <div className="w-10 h-10 bg-[#0096FF] text-white rounded-full flex items-center justify-center text-base font-bold">
+                <div className="w-10 h-10 bg-oe-primary text-white rounded-full flex items-center justify-center text-base font-bold">
                   1
                 </div>
-                <span className="text-xs font-semibold text-[#0096FF] uppercase tracking-wider">Choose Your Method</span>
+                <span className="text-xs font-semibold text-oe-primary uppercase tracking-wider">Choose Your Method</span>
               </div>
-              <h3 className="text-xl md:text-2xl font-bold text-[#2A2A2A] mb-4">
+              <h3 className="text-xl md:text-2xl font-bold text-oe-ink mb-4">
                 Pick What Feels Right
               </h3>
-              <p className="text-xs md:text-sm text-[#6B6B6B] leading-relaxed mb-5">
+              <p className="text-xs md:text-sm text-oe-muted leading-relaxed mb-5">
                 Start by choosing how you'd like to connect. Prefer talking things through? Select a voice call. More comfortable typing? Choose our AI chat. Both options provide the same level of support.
               </p>
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-[#0096FF]/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <i className="ri-phone-fill text-[#0096FF] text-sm"></i>
+                  <div className="w-8 h-8 bg-oe-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <i className="ri-phone-fill text-oe-primary text-sm"></i>
                   </div>
                   <div>
-                    <p className="font-semibold text-[#2A2A2A] text-xs mb-0.5">Voice Call Support</p>
-                    <p className="text-xs text-[#6B6B6B]">Real-time conversation with empathetic AI</p>
+                    <p className="font-semibold text-oe-ink text-xs mb-0.5">Voice Call Support</p>
+                    <p className="text-xs text-oe-muted">Real-time conversation with empathetic AI</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-[#0096FF]/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <i className="ri-message-3-fill text-[#0096FF] text-sm"></i>
+                  <div className="w-8 h-8 bg-oe-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <i className="ri-message-3-fill text-oe-primary text-sm"></i>
                   </div>
                   <div>
-                    <p className="font-semibold text-[#2A2A2A] text-xs mb-0.5">AI Chat Assistant</p>
-                    <p className="text-xs text-[#6B6B6B]">Text-based support available instantly</p>
+                    <p className="font-semibold text-oe-ink text-xs mb-0.5">AI Chat Assistant</p>
+                    <p className="text-xs text-oe-muted">Text-based support available instantly</p>
                   </div>
                 </div>
               </div>
@@ -123,7 +123,7 @@ export default function HowItWorksPage() {
                 alt="Choose your method"
                 className="w-full h-full object-cover object-top"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0096FF]/10 to-transparent"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-oe-primary/10 to-transparent"></div>
             </div>
           </div>
 
@@ -135,27 +135,27 @@ export default function HowItWorksPage() {
                 alt="Connect instantly"
                 className="w-full h-full object-cover object-top"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0096FF]/10 to-transparent"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-oe-primary/10 to-transparent"></div>
             </div>
             <div>
               <div className="inline-flex items-center gap-2 mb-4">
-                <div className="w-10 h-10 bg-[#0096FF] text-white rounded-full flex items-center justify-center text-base font-bold">
+                <div className="w-10 h-10 bg-oe-primary text-white rounded-full flex items-center justify-center text-base font-bold">
                   2
                 </div>
-                <span className="text-xs font-semibold text-[#0096FF] uppercase tracking-wider">Connect Instantly</span>
+                <span className="text-xs font-semibold text-oe-primary uppercase tracking-wider">Connect Instantly</span>
               </div>
-              <h3 className="text-xl md:text-2xl font-bold text-[#2A2A2A] mb-4">
+              <h3 className="text-xl md:text-2xl font-bold text-oe-ink mb-4">
                 No Waiting Required
               </h3>
-              <p className="text-xs md:text-sm text-[#6B6B6B] leading-relaxed mb-5">
+              <p className="text-xs md:text-sm text-oe-muted leading-relaxed mb-5">
                 Once you've chosen your preferred method, you're ready to connect. No appointment scheduling, no waiting rooms, no forms to fill out. Click to start and you'll be connected within seconds.
               </p>
-              <div className="bg-[#E6F5FF] rounded-xl p-4">
+              <div className="bg-oe-primary-tint rounded-xl p-4">
                 <div className="flex items-start gap-3">
-                  <i className="ri-time-line text-[#0096FF] text-lg"></i>
+                  <i className="ri-time-line text-oe-primary text-lg"></i>
                   <div>
-                    <p className="font-semibold text-[#2A2A2A] text-xs mb-1">Available 24/7</p>
-                    <p className="text-xs text-[#6B6B6B]">Whether it's 3 AM or 3 PM, support is always just a click away.</p>
+                    <p className="font-semibold text-oe-ink text-xs mb-1">Available 24/7</p>
+                    <p className="text-xs text-oe-muted">Whether it's 3 AM or 3 PM, support is always just a click away.</p>
                   </div>
                 </div>
               </div>
@@ -166,29 +166,29 @@ export default function HowItWorksPage() {
           <div className="grid md:grid-cols-2 gap-8 md:gap-10 items-center mb-12 md:mb-16">
             <div className="order-2 md:order-1">
               <div className="inline-flex items-center gap-2 mb-4">
-                <div className="w-10 h-10 bg-[#0096FF] text-white rounded-full flex items-center justify-center text-base font-bold">
+                <div className="w-10 h-10 bg-oe-primary text-white rounded-full flex items-center justify-center text-base font-bold">
                   3
                 </div>
-                <span className="text-xs font-semibold text-[#0096FF] uppercase tracking-wider">Share Freely</span>
+                <span className="text-xs font-semibold text-oe-primary uppercase tracking-wider">Share Freely</span>
               </div>
-              <h3 className="text-xl md:text-2xl font-bold text-[#2A2A2A] mb-4">
+              <h3 className="text-xl md:text-2xl font-bold text-oe-ink mb-4">
                 Express Without Judgment
               </h3>
-              <p className="text-xs md:text-sm text-[#6B6B6B] leading-relaxed mb-5">
+              <p className="text-xs md:text-sm text-oe-muted leading-relaxed mb-5">
                 This is your safe space. Share what's on your mind, talk about your feelings, express your concerns—whatever you need to get off your chest.
               </p>
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <i className="ri-shield-check-line text-[#0096FF] text-base"></i>
-                  <span className="text-[#2A2A2A] text-xs">Completely confidential and private</span>
+                  <i className="ri-shield-check-line text-oe-primary text-base"></i>
+                  <span className="text-oe-ink text-xs">Completely confidential and private</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <i className="ri-heart-3-line text-[#0096FF] text-base"></i>
-                  <span className="text-[#2A2A2A] text-xs">Empathetic and understanding responses</span>
+                  <i className="ri-heart-3-line text-oe-primary text-base"></i>
+                  <span className="text-oe-ink text-xs">Empathetic and understanding responses</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <i className="ri-chat-smile-3-line text-[#0096FF] text-base"></i>
-                  <span className="text-[#2A2A2A] text-xs">Zero judgment, just support</span>
+                  <i className="ri-chat-smile-3-line text-oe-primary text-base"></i>
+                  <span className="text-oe-ink text-xs">Zero judgment, just support</span>
                 </div>
               </div>
             </div>
@@ -198,7 +198,7 @@ export default function HowItWorksPage() {
                 alt="Share freely"
                 className="w-full h-full object-cover object-top"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0096FF]/10 to-transparent"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-oe-primary/10 to-transparent"></div>
             </div>
           </div>
 
@@ -210,34 +210,34 @@ export default function HowItWorksPage() {
                 alt="Feel supported"
                 className="w-full h-full object-cover object-top"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0096FF]/10 to-transparent"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-oe-primary/10 to-transparent"></div>
             </div>
             <div>
               <div className="inline-flex items-center gap-2 mb-4">
-                <div className="w-10 h-10 bg-[#0096FF] text-white rounded-full flex items-center justify-center text-base font-bold">
+                <div className="w-10 h-10 bg-oe-primary text-white rounded-full flex items-center justify-center text-base font-bold">
                   4
                 </div>
-                <span className="text-xs font-semibold text-[#0096FF] uppercase tracking-wider">Feel Supported</span>
+                <span className="text-xs font-semibold text-oe-primary uppercase tracking-wider">Feel Supported</span>
               </div>
-              <h3 className="text-xl md:text-2xl font-bold text-[#2A2A2A] mb-4">
+              <h3 className="text-xl md:text-2xl font-bold text-oe-ink mb-4">
                 Leave Feeling Lighter
               </h3>
-              <p className="text-xs md:text-sm text-[#6B6B6B] leading-relaxed mb-5">
+              <p className="text-xs md:text-sm text-oe-muted leading-relaxed mb-5">
                 After your session, you'll feel heard, understood, and emotionally lighter. You can end the session whenever you're ready, and return anytime you need support again.
               </p>
-              <div className="bg-[#E6F5FF] rounded-xl p-4">
-                <p className="text-[#2A2A2A] font-semibold text-xs mb-2">What happens after?</p>
-                <ul className="space-y-1.5 text-xs text-[#6B6B6B]">
+              <div className="bg-oe-primary-tint rounded-xl p-4">
+                <p className="text-oe-ink font-semibold text-xs mb-2">What happens after?</p>
+                <ul className="space-y-1.5 text-xs text-oe-muted">
                   <li className="flex items-start gap-2">
-                    <i className="ri-check-line text-[#0096FF] text-sm mt-0.5"></i>
+                    <i className="ri-check-line text-oe-primary text-sm mt-0.5"></i>
                     <span>Your conversation remains completely private</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <i className="ri-check-line text-[#0096FF] text-sm mt-0.5"></i>
+                    <i className="ri-check-line text-oe-primary text-sm mt-0.5"></i>
                     <span>Return anytime for more support</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <i className="ri-check-line text-[#0096FF] text-sm mt-0.5"></i>
+                    <i className="ri-check-line text-oe-primary text-sm mt-0.5"></i>
                     <span>No follow-up required unless you want it</span>
                   </li>
                 </ul>
@@ -248,13 +248,13 @@ export default function HowItWorksPage() {
       </section>
 
       {/* Features Comparison */}
-      <section className="py-10 md:py-16 px-4 md:px-8 lg:px-14 bg-[#F8FCFF]">
+      <section className="py-10 md:py-16 px-4 md:px-8 lg:px-14 bg-oe-primary-tint">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8 md:mb-10">
-            <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-[#0096FF] mb-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
+            <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-oe-primary mb-2">
               Voice Call vs AI Chat
             </h2>
-            <p className="text-xs md:text-sm text-[#6B6B6B] max-w-xl mx-auto">
+            <p className="text-xs md:text-sm text-oe-muted max-w-xl mx-auto">
               Both methods provide excellent support. Choose based on your preference.
             </p>
           </div>
@@ -262,38 +262,38 @@ export default function HowItWorksPage() {
           <div className="grid md:grid-cols-2 gap-5">
             {/* Voice Call */}
             <div className="bg-white rounded-2xl p-5 md:p-6 shadow-sm">
-              <div className="w-12 h-12 bg-[#0096FF]/10 rounded-full flex items-center justify-center mb-4">
-                <i className="ri-phone-fill text-xl text-[#0096FF]"></i>
+              <div className="w-12 h-12 bg-oe-primary/10 rounded-full flex items-center justify-center mb-4">
+                <i className="ri-phone-fill text-xl text-oe-primary"></i>
               </div>
-              <h3 className="text-lg md:text-xl font-bold text-[#2A2A2A] mb-3">Voice Call Support</h3>
-              <p className="text-[#6B6B6B] text-xs mb-4 leading-relaxed">
+              <h3 className="text-lg md:text-xl font-bold text-oe-ink mb-3">Voice Call Support</h3>
+              <p className="text-oe-muted text-xs mb-4 leading-relaxed">
                 Perfect for when you need to talk things through out loud.
               </p>
               <div className="space-y-3">
                 <div className="flex items-start gap-2">
-                  <i className="ri-check-line text-[#0096FF] text-base mt-0.5"></i>
+                  <i className="ri-check-line text-oe-primary text-base mt-0.5"></i>
                   <div>
-                    <p className="font-semibold text-[#2A2A2A] text-xs">Real-time conversation</p>
-                    <p className="text-xs text-[#6B6B6B]">Natural back-and-forth dialogue</p>
+                    <p className="font-semibold text-oe-ink text-xs">Real-time conversation</p>
+                    <p className="text-xs text-oe-muted">Natural back-and-forth dialogue</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
-                  <i className="ri-check-line text-[#0096FF] text-base mt-0.5"></i>
+                  <i className="ri-check-line text-oe-primary text-base mt-0.5"></i>
                   <div>
-                    <p className="font-semibold text-[#2A2A2A] text-xs">Vocal expression</p>
-                    <p className="text-xs text-[#6B6B6B]">Express emotions through tone</p>
+                    <p className="font-semibold text-oe-ink text-xs">Vocal expression</p>
+                    <p className="text-xs text-oe-muted">Express emotions through tone</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
-                  <i className="ri-check-line text-[#0096FF] text-base mt-0.5"></i>
+                  <i className="ri-check-line text-oe-primary text-base mt-0.5"></i>
                   <div>
-                    <p className="font-semibold text-[#2A2A2A] text-xs">Credit-based pricing</p>
-                    <p className="text-xs text-[#6B6B6B]">Pay per minute of conversation</p>
+                    <p className="font-semibold text-oe-ink text-xs">Credit-based pricing</p>
+                    <p className="text-xs text-oe-muted">Pay per minute of conversation</p>
                   </div>
                 </div>
               </div>
               <Link to="/call">
-                <button className="w-full mt-5 px-6 py-3 bg-[#0096FF] text-white rounded-xl text-sm font-semibold hover:bg-[#0077CC] transition-all whitespace-nowrap cursor-pointer">
+                <button className="w-full mt-5 px-6 py-3 bg-oe-primary text-white rounded-xl text-sm font-semibold hover:bg-oe-primary-hover transition-all whitespace-nowrap cursor-pointer">
                   Try Voice Call
                 </button>
               </Link>
@@ -301,38 +301,38 @@ export default function HowItWorksPage() {
 
             {/* AI Chat */}
             <div className="bg-white rounded-2xl p-5 md:p-6 shadow-sm">
-              <div className="w-12 h-12 bg-[#0096FF]/10 rounded-full flex items-center justify-center mb-4">
-                <i className="ri-message-3-fill text-xl text-[#0096FF]"></i>
+              <div className="w-12 h-12 bg-oe-primary/10 rounded-full flex items-center justify-center mb-4">
+                <i className="ri-message-3-fill text-xl text-oe-primary"></i>
               </div>
-              <h3 className="text-lg md:text-xl font-bold text-[#2A2A2A] mb-3">AI Chat Assistant</h3>
-              <p className="text-[#6B6B6B] text-xs mb-4 leading-relaxed">
+              <h3 className="text-lg md:text-xl font-bold text-oe-ink mb-3">AI Chat Assistant</h3>
+              <p className="text-oe-muted text-xs mb-4 leading-relaxed">
                 Ideal for when you prefer typing or need support quietly.
               </p>
               <div className="space-y-3">
                 <div className="flex items-start gap-2">
-                  <i className="ri-check-line text-[#0096FF] text-base mt-0.5"></i>
+                  <i className="ri-check-line text-oe-primary text-base mt-0.5"></i>
                   <div>
-                    <p className="font-semibold text-[#2A2A2A] text-xs">Text-based support</p>
-                    <p className="text-xs text-[#6B6B6B]">Type at your own pace</p>
+                    <p className="font-semibold text-oe-ink text-xs">Text-based support</p>
+                    <p className="text-xs text-oe-muted">Type at your own pace</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
-                  <i className="ri-check-line text-[#0096FF] text-base mt-0.5"></i>
+                  <i className="ri-check-line text-oe-primary text-base mt-0.5"></i>
                   <div>
-                    <p className="font-semibold text-[#2A2A2A] text-xs">Discreet and quiet</p>
-                    <p className="text-xs text-[#6B6B6B]">Perfect for public spaces</p>
+                    <p className="font-semibold text-oe-ink text-xs">Discreet and quiet</p>
+                    <p className="text-xs text-oe-muted">Perfect for public spaces</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
-                  <i className="ri-check-line text-[#0096FF] text-base mt-0.5"></i>
+                  <i className="ri-check-line text-oe-primary text-base mt-0.5"></i>
                   <div>
-                    <p className="font-semibold text-[#2A2A2A] text-xs">Flexible pricing</p>
-                    <p className="text-xs text-[#6B6B6B]">Multiple subscription options</p>
+                    <p className="font-semibold text-oe-ink text-xs">Flexible pricing</p>
+                    <p className="text-xs text-oe-muted">Multiple subscription options</p>
                   </div>
                 </div>
               </div>
               <Link to="/chat">
-                <button className="w-full mt-5 px-6 py-3 bg-white text-[#0096FF] border-2 border-[#0096FF] rounded-xl text-sm font-semibold hover:bg-[#0096FF] hover:text-white transition-all whitespace-nowrap cursor-pointer">
+                <button className="w-full mt-5 px-6 py-3 bg-white text-oe-primary border-2 border-oe-primary rounded-xl text-sm font-semibold hover:bg-oe-primary hover:text-white transition-all whitespace-nowrap cursor-pointer">
                   Try AI Chat
                 </button>
               </Link>
@@ -345,22 +345,22 @@ export default function HowItWorksPage() {
       <section className="py-10 md:py-16 px-4 md:px-8 lg:px-14">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-8 md:mb-10">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#0096FF]/10 rounded-full mb-4">
-              <i className="ri-question-line text-[#0096FF] text-sm"></i>
-              <span className="text-xs font-medium text-[#0096FF]">Common Questions</span>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-oe-primary/10 rounded-full mb-4">
+              <i className="ri-question-line text-oe-primary text-sm"></i>
+              <span className="text-xs font-medium text-oe-primary">Common Questions</span>
             </div>
-            <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-[#0096FF]" style={{ fontFamily: 'Poppins, sans-serif' }}>
+            <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-oe-primary">
               Frequently Asked Questions
             </h2>
           </div>
 
           <div className="space-y-4">
             {faqData.map((faq, index) => (
-              <div key={index} className="bg-[#E6F5FF] rounded-xl p-4 md:p-5">
-                <h3 className="text-sm font-bold text-[#2A2A2A] mb-2">
+              <div key={index} className="bg-oe-primary-tint rounded-xl p-4 md:p-5">
+                <h3 className="text-sm font-bold text-oe-ink mb-2">
                   {faq.question}
                 </h3>
-                <p className="text-[#6B6B6B] text-xs leading-relaxed">
+                <p className="text-oe-muted text-xs leading-relaxed">
                   {faq.answer}
                 </p>
               </div>
@@ -370,40 +370,40 @@ export default function HowItWorksPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-10 md:py-14 px-4 md:px-8 lg:px-14 bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]/30">
+      <section className="py-10 md:py-14 px-4 md:px-8 lg:px-14 bg-oe-bg">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-[#0096FF] mb-4" style={{ fontFamily: 'Poppins, sans-serif' }}>
+          <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-oe-primary mb-4">
             Ready to Get Started?
           </h2>
-          <p className="text-xs md:text-sm text-[#6B6B6B] mb-6 leading-relaxed max-w-xl mx-auto">
+          <p className="text-xs md:text-sm text-oe-muted mb-6 leading-relaxed max-w-xl mx-auto">
             Join thousands who've found comfort and support through Open Ear.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link to="/call">
-              <button className="w-full sm:w-auto px-6 py-3 bg-[#0096FF] text-white rounded-xl text-sm font-semibold hover:bg-[#0077CC] transition-all shadow-lg flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer">
+              <button className="w-full sm:w-auto px-6 py-3 bg-oe-primary text-white rounded-xl text-sm font-semibold hover:bg-oe-primary-hover transition-all shadow-lg flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer">
                 <i className="ri-phone-fill text-base"></i>
                 Start a Call
               </button>
             </Link>
             <Link to="/chat">
-              <button className="w-full sm:w-auto px-6 py-3 bg-white text-[#0096FF] border-2 border-[#0096FF] rounded-xl text-sm font-semibold hover:bg-[#0096FF] hover:text-white transition-all flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer">
+              <button className="w-full sm:w-auto px-6 py-3 bg-white text-oe-primary border-2 border-oe-primary rounded-xl text-sm font-semibold hover:bg-oe-primary hover:text-white transition-all flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer">
                 <i className="ri-message-3-fill text-base"></i>
                 Open Chat
               </button>
             </Link>
           </div>
-          <p className="text-xs text-[#6B6B6B] mt-4">
+          <p className="text-xs text-oe-muted mt-4">
             No credit card required to start • Cancel anytime
           </p>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-[#0096FF] text-white py-10 md:py-12 px-4 md:px-8 lg:px-14">
+      <footer className="bg-oe-primary text-white py-10 md:py-12 px-4 md:px-8 lg:px-14">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8 mb-8">
             <div className="md:col-span-2">
-              <h3 className="text-xl md:text-2xl font-bold mb-4" style={{ fontFamily: 'Poppins, sans-serif' }}>
+              <h3 className="text-xl md:text-2xl font-bold mb-4">
                 Open Ear
               </h3>
               <p className="text-xs text-white/80 leading-relaxed mb-4">

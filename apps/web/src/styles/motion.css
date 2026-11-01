@@ -72,7 +72,7 @@
   width: 10px;
   height: 10px;
   border-radius: 9999px;
-  background: var(--oe-available);
+  background: rgb(var(--oe-available));
 }
 
 .oe-breathe::after {
@@ -94,9 +94,9 @@
   position: absolute;
   inset: -15%;
   background:
-    radial-gradient(40% 45% at 20% 25%, var(--oe-sage-soft) 0%, transparent 70%),
-    radial-gradient(45% 50% at 80% 30%, var(--oe-mist) 0%, transparent 70%),
-    radial-gradient(50% 50% at 55% 85%, var(--oe-sand) 0%, transparent 70%);
+    radial-gradient(40% 45% at 20% 25%, rgb(var(--oe-primary-soft)) 0%, transparent 70%),
+    radial-gradient(45% 50% at 80% 30%, rgb(var(--oe-surface)) 0%, transparent 70%),
+    radial-gradient(50% 50% at 55% 85%, rgb(var(--oe-accent-tint)) 0%, transparent 70%);
   animation: oe-drift 18s var(--ease-in-out) infinite alternate;
   will-change: transform;
 }
@@ -111,7 +111,7 @@
   position: absolute;
   inset: 0;
   border-radius: 9999px;
-  border: 2px solid var(--oe-blue);
+  border: 2px solid rgb(var(--oe-primary));
   animation: oe-ring 3.2s var(--ease-out) infinite;
 }
 
@@ -144,7 +144,7 @@
 .oe-skeleton {
   position: relative;
   overflow: hidden;
-  background: var(--oe-skeleton);
+  background: rgb(var(--oe-skeleton));
   border-radius: var(--oe-radius-sm);
 }
 

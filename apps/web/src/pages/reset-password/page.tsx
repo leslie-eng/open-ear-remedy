@@ -78,11 +78,11 @@ export default function ResetPasswordPage() {
   const checking = tokenState === 'checking';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50 flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-oe-bg flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link to="/" className="inline-block">
-            <div className="w-16 h-16 bg-gradient-to-br from-teal-500 to-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <div className="w-16 h-16 bg-oe-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
               <i className="ri-phone-line text-3xl text-white"></i>
             </div>
           </Link>
@@ -95,7 +95,7 @@ export default function ResetPasswordPage() {
         <div className="bg-white rounded-2xl shadow-xl p-8">
           {checking && !success ? (
             <div className="text-center py-8 space-y-4">
-              <div className="w-12 h-12 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto" />
+              <div className="w-12 h-12 border-4 border-forest-500 border-t-transparent rounded-full animate-spin mx-auto" />
               <p className="text-gray-600 text-sm">Verifying your reset link…</p>
             </div>
           ) : tokenState === 'invalid' ? (
@@ -109,21 +109,21 @@ export default function ResetPasswordPage() {
               </div>
               <Link
                 to="/forgot-password"
-                className="inline-block bg-gradient-to-r from-teal-500 to-teal-600 text-white px-6 py-3 rounded-lg font-medium"
+                className="inline-block bg-oe-primary text-white px-6 py-3 rounded-lg font-medium"
               >
                 Request New Link
               </Link>
             </div>
           ) : success ? (
             <div className="text-center space-y-6">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-                <i className="ri-check-line text-3xl text-green-600"></i>
+              <div className="w-16 h-16 bg-forest-100 rounded-full flex items-center justify-center mx-auto">
+                <i className="ri-check-line text-3xl text-forest-600"></i>
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Password Updated!</h3>
                 <p className="text-gray-600 text-sm">Redirecting to sign in...</p>
               </div>
-              <Link to="/signin" className="inline-block bg-gradient-to-r from-teal-500 to-teal-600 text-white px-6 py-3 rounded-lg font-medium">
+              <Link to="/signin" className="inline-block bg-oe-primary text-white px-6 py-3 rounded-lg font-medium">
                 Go to Sign In
               </Link>
             </div>
@@ -141,7 +141,7 @@ export default function ResetPasswordPage() {
                   id="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 text-sm"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-forest-500 text-sm"
                   required
                   minLength={6}
                 />
@@ -155,7 +155,7 @@ export default function ResetPasswordPage() {
                   id="confirmPassword"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 text-sm"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-forest-500 text-sm"
                   required
                   minLength={6}
                 />
@@ -163,7 +163,7 @@ export default function ResetPasswordPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-teal-500 to-teal-600 text-white py-3 rounded-lg font-medium disabled:opacity-50"
+                className="w-full bg-oe-primary text-white py-3 rounded-lg font-medium disabled:opacity-50"
               >
                 {loading ? 'Updating...' : 'Update Password'}
               </button>

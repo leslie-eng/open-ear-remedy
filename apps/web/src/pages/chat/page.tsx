@@ -300,27 +300,27 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF] flex flex-col">
+    <div className="min-h-screen bg-oe-bg flex flex-col">
       <Navbar />
       
       <div className="flex-1 pt-20 md:pt-24 px-4 md:px-6 pb-4 flex flex-col max-w-4xl mx-auto w-full">
         {/* Header */}
         <div className="text-center mb-4 md:mb-6">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#0096FF]/10 rounded-full mb-3">
-            <i className="ri-message-3-fill text-[#0096FF] text-sm"></i>
-            <span className="text-xs font-medium text-[#0096FF]">AI Chat Support</span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-oe-primary/10 rounded-full mb-3">
+            <i className="ri-message-3-fill text-oe-primary text-sm"></i>
+            <span className="text-xs font-medium text-oe-primary">AI Chat Support</span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-bold text-[#2A2A2A] mb-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
+          <h1 className="text-2xl md:text-3xl font-bold text-oe-ink mb-2">
             Chat with Our AI Assistant
           </h1>
-          <p className="text-sm text-[#6B6B6B]">
+          <p className="text-sm text-oe-muted">
             Available 24/7 • {PER_MESSAGE} per message
           </p>
           {user && (
             <div className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-md">
-              <i className="ri-copper-coin-fill text-[#0096FF]"></i>
-              <span className="font-semibold text-[#2A2A2A]">{credits} Credits</span>
-              <span className="text-xs text-[#6B6B6B]">
+              <i className="ri-copper-coin-fill text-oe-primary"></i>
+              <span className="font-semibold text-oe-ink">{credits} Credits</span>
+              <span className="text-xs text-oe-muted">
                 {balance.pass
                   ? `(+ ${balance.pass.aiMessagesLeftToday} Monthly Pass messages left today)`
                   : `(${Math.floor(credits / CREDITS_PER_CHAT_MESSAGE)} messages)`}
@@ -407,19 +407,19 @@ export default function ChatPage() {
         <div className="flex-1 bg-white rounded-3xl shadow-xl flex flex-col overflow-hidden">
           {/* Chat Header */}
           <div className="px-4 md:px-6 py-3 md:py-4 border-b border-gray-100 flex items-center gap-3">
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-[#0096FF] to-[#0077CC] rounded-full flex items-center justify-center">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-oe-primary rounded-full flex items-center justify-center">
               <i className="ri-robot-fill text-white text-lg md:text-xl"></i>
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-[#2A2A2A] text-sm md:text-base">Open Ear Assistant</h3>
+              <h3 className="font-semibold text-oe-ink text-sm md:text-base">Open Ear Assistant</h3>
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                <span className="text-xs text-[#6B6B6B]">Online • {PER_MESSAGE}/msg</span>
+                <span className="w-2 h-2 bg-forest-500 rounded-full"></span>
+                <span className="text-xs text-oe-muted">Online • {PER_MESSAGE}/msg</span>
               </div>
             </div>
             <button
               onClick={() => navigate('/call')}
-              className="px-3 md:px-4 py-2 bg-[#0096FF]/10 text-[#0096FF] rounded-full text-xs md:text-sm font-medium hover:bg-[#0096FF]/20 transition-all cursor-pointer whitespace-nowrap flex items-center gap-2"
+              className="px-3 md:px-4 py-2 bg-oe-primary/10 text-oe-primary rounded-full text-xs md:text-sm font-medium hover:bg-oe-primary/20 transition-all cursor-pointer whitespace-nowrap flex items-center gap-2"
             >
               <i className="ri-phone-fill"></i>
               <span className="hidden sm:inline">Switch to Call</span>
@@ -435,30 +435,30 @@ export default function ChatPage() {
               >
                 <div className={`flex items-end gap-2 max-w-[85%] md:max-w-[75%] ${message.sender === 'user' ? 'flex-row-reverse' : ''}`}>
                   {message.sender === 'ai' && (
-                    <div className="w-8 h-8 bg-gradient-to-br from-[#0096FF] to-[#0077CC] rounded-full flex items-center justify-center flex-shrink-0">
+                    <div className="w-8 h-8 bg-oe-primary rounded-full flex items-center justify-center flex-shrink-0">
                       <i className="ri-robot-fill text-white text-sm"></i>
                     </div>
                   )}
                   <div
                     className={`px-4 py-3 rounded-2xl ${
                       message.sender === 'user'
-                        ? 'bg-[#0096FF] text-white rounded-br-md'
-                        : 'bg-[#F5F5F5] text-[#2A2A2A] rounded-bl-md'
+                        ? 'bg-oe-primary text-white rounded-br-md'
+                        : 'bg-oe-surface text-oe-ink rounded-bl-md'
                     }`}
                   >
                     <p className="text-sm leading-relaxed">{message.content}</p>
                     {message.crisisHelp && (
                       <div role="alert" className="mt-3 rounded-xl border border-oe-crisis bg-white px-3 py-2 text-sm">
-                        <p className="text-[#2A2A2A] mb-1">If you are in danger or thinking of ending your life, please reach a person now.</p>
+                        <p className="text-oe-ink mb-1">If you are in danger or thinking of ending your life, please reach a person now.</p>
                         <CrisisLink />
                       </div>
                     )}
                     {message.sources && message.sources.length > 0 && (
-                      <p className="text-xs mt-2 text-[#6B6B6B]">
+                      <p className="text-xs mt-2 text-oe-muted">
                         Drawing on: {message.sources.map((s) => (s.author ? `${s.title} (${s.author})` : s.title)).join('; ')}
                       </p>
                     )}
-                    <p className={`text-xs mt-1 ${message.sender === 'user' ? 'text-white/70' : 'text-[#6B6B6B]'}`}>
+                    <p className={`text-xs mt-1 ${message.sender === 'user' ? 'text-white/70' : 'text-oe-muted'}`}>
                       {formatTime(message.timestamp)}
                     </p>
                   </div>
@@ -469,11 +469,11 @@ export default function ChatPage() {
             {isTyping && (
               <div className="flex justify-start">
                 <div className="flex items-end gap-2">
-                  <div className="w-8 h-8 bg-gradient-to-br from-[#0096FF] to-[#0077CC] rounded-full flex items-center justify-center">
+                  <div className="w-8 h-8 bg-oe-primary rounded-full flex items-center justify-center">
                     <i className="ri-robot-fill text-white text-sm"></i>
                   </div>
-                  <div className="bg-[#F5F5F5] px-4 py-3 rounded-2xl rounded-bl-md">
-                    <TypingIndicator label="Open Ear is typing" className="text-[#0096FF]" />
+                  <div className="bg-oe-surface px-4 py-3 rounded-2xl rounded-bl-md">
+                    <TypingIndicator label="Open Ear is typing" className="text-oe-primary" />
                   </div>
                 </div>
               </div>
@@ -485,13 +485,13 @@ export default function ChatPage() {
           {/* Suggestions */}
           {showSuggestions && messages.length <= 1 && (
             <div className="px-4 md:px-6 pb-3">
-              <p className="text-xs text-[#6B6B6B] mb-2">Suggested topics ({PER_MESSAGE} each):</p>
+              <p className="text-xs text-oe-muted mb-2">Suggested topics ({PER_MESSAGE} each):</p>
               <div className="flex flex-wrap gap-2">
                 {suggestions.map((suggestion, index) => (
                   <button
                     key={index}
                     onClick={() => handleSuggestionClick(suggestion)}
-                    className="px-3 py-1.5 bg-[#E6F5FF] text-[#0096FF] rounded-full text-xs font-medium hover:bg-[#0096FF] hover:text-white transition-all cursor-pointer whitespace-nowrap"
+                    className="px-3 py-1.5 bg-oe-primary-tint text-oe-primary rounded-full text-xs font-medium hover:bg-oe-primary hover:text-white transition-all cursor-pointer whitespace-nowrap"
                   >
                     {suggestion}
                   </button>
@@ -512,19 +512,19 @@ export default function ChatPage() {
                   placeholder={user ? `Type your message (${PER_MESSAGE})...` : "Sign in to start chatting..."}
                   rows={1}
                   maxLength={500}
-                  className="w-full px-4 py-3 bg-[#F5F5F5] rounded-2xl resize-none focus:outline-none focus:ring-2 focus:ring-[#0096FF]/30 text-sm"
+                  className="w-full px-4 py-3 bg-oe-surface rounded-2xl resize-none focus:outline-none focus:ring-2 focus:ring-oe-primary/30 text-sm"
                   style={{ minHeight: '44px', maxHeight: '120px' }}
                 />
               </div>
               <button
                 onClick={handleSendMessage}
                 disabled={!inputMessage.trim() || isTyping || (user && !canSendChatMessage(balance))}
-                className="w-11 h-11 bg-[#0096FF] text-white rounded-full flex items-center justify-center hover:bg-[#0077CC] transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex-shrink-0"
+                className="w-11 h-11 bg-oe-primary text-white rounded-full flex items-center justify-center hover:bg-oe-primary-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex-shrink-0"
               >
                 <i className="ri-send-plane-fill text-lg"></i>
               </button>
             </div>
-            <p className="text-xs text-[#6B6B6B] mt-2 text-center">
+            <p className="text-xs text-oe-muted mt-2 text-center">
               Press Enter to send • {PER_MESSAGE} per message
             </p>
           </div>
@@ -533,16 +533,16 @@ export default function ChatPage() {
         {/* Info Cards */}
         <div className="grid grid-cols-3 gap-3 mt-4">
           <div className="bg-white rounded-xl p-3 text-center shadow-sm">
-            <i className="ri-shield-check-fill text-xl text-[#0096FF] mb-1 block"></i>
-            <p className="text-xs font-medium text-[#2A2A2A]">Private</p>
+            <i className="ri-shield-check-fill text-xl text-oe-primary mb-1 block"></i>
+            <p className="text-xs font-medium text-oe-ink">Private</p>
           </div>
           <div className="bg-white rounded-xl p-3 text-center shadow-sm">
-            <i className="ri-time-fill text-xl text-[#0096FF] mb-1 block"></i>
-            <p className="text-xs font-medium text-[#2A2A2A]">24/7</p>
+            <i className="ri-time-fill text-xl text-oe-primary mb-1 block"></i>
+            <p className="text-xs font-medium text-oe-ink">24/7</p>
           </div>
           <div className="bg-white rounded-xl p-3 text-center shadow-sm">
-            <i className="ri-copper-coin-fill text-xl text-[#0096FF] mb-1 block"></i>
-            <p className="text-xs font-medium text-[#2A2A2A]">{CREDITS_PER_CHAT_MESSAGE} Credits/Msg</p>
+            <i className="ri-copper-coin-fill text-xl text-oe-primary mb-1 block"></i>
+            <p className="text-xs font-medium text-oe-ink">{CREDITS_PER_CHAT_MESSAGE} Credits/Msg</p>
           </div>
         </div>
       </div>
@@ -554,21 +554,21 @@ export default function ChatPage() {
             {/* Verification Sent State */}
             {verificationSent ? (
               <div className="text-center">
-                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <i className="ri-mail-check-fill text-4xl text-green-600"></i>
+                <div className="w-20 h-20 bg-forest-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <i className="ri-mail-check-fill text-4xl text-forest-600"></i>
                 </div>
-                <h2 className="text-2xl md:text-3xl font-bold text-[#2A2A2A] mb-3">
+                <h2 className="text-2xl md:text-3xl font-bold text-oe-ink mb-3">
                   Verify Your Email
                 </h2>
-                <p className="text-sm md:text-base text-[#6B6B6B] mb-2">
+                <p className="text-sm md:text-base text-oe-muted mb-2">
                   We've sent a verification link to:
                 </p>
-                <p className="text-sm md:text-base font-semibold text-[#0096FF] mb-6">
+                <p className="text-sm md:text-base font-semibold text-oe-primary mb-6">
                   {email}
                 </p>
-                <div className="bg-[#E6F5FF] rounded-xl p-4 mb-6">
-                  <p className="text-sm text-[#2A2A2A]">
-                    <i className="ri-information-fill text-[#0096FF] mr-2"></i>
+                <div className="bg-oe-primary-tint rounded-xl p-4 mb-6">
+                  <p className="text-sm text-oe-ink">
+                    <i className="ri-information-fill text-oe-primary mr-2"></i>
                     Click the link in your email to activate your account and start using Open Ear.
                   </p>
                 </div>
@@ -576,8 +576,8 @@ export default function ChatPage() {
                 {authError && (
                   <div className={`mb-4 px-4 py-3 rounded-xl text-sm ${
                     authError.includes('resent')
-                      ? 'bg-green-50 border border-green-200 text-green-700'
-                      : 'bg-[#FFE6E6] border border-[#FF4444] text-[#FF4444]'
+                      ? 'bg-forest-50 border border-forest-200 text-forest-700'
+                      : 'bg-oe-crisis-tint border border-oe-crisis text-oe-crisis'
                   }`}>
                     {authError}
                   </div>
@@ -587,7 +587,7 @@ export default function ChatPage() {
                   <button
                     onClick={handleResendVerification}
                     disabled={resendingVerification}
-                    className="w-full px-6 py-3 bg-white border-2 border-[#0096FF] text-[#0096FF] rounded-xl font-semibold hover:bg-[#E6F5FF] transition-all disabled:opacity-50 whitespace-nowrap cursor-pointer"
+                    className="w-full px-6 py-3 bg-white border-2 border-oe-primary text-oe-primary rounded-xl font-semibold hover:bg-oe-primary-tint transition-all disabled:opacity-50 whitespace-nowrap cursor-pointer"
                   >
                     {resendingVerification ? (
                       <span className="flex items-center justify-center gap-2">
@@ -608,26 +608,26 @@ export default function ChatPage() {
                       setIsSignUp(false);
                       setAuthError('');
                     }}
-                    className="w-full px-6 py-3 bg-[#0096FF] text-white rounded-xl font-semibold hover:bg-[#0077CC] transition-all whitespace-nowrap cursor-pointer"
+                    className="w-full px-6 py-3 bg-oe-primary text-white rounded-xl font-semibold hover:bg-oe-primary-hover transition-all whitespace-nowrap cursor-pointer"
                   >
                     Back to Sign In
                   </button>
                 </div>
                 
-                <p className="text-xs text-[#6B6B6B] mt-6">
+                <p className="text-xs text-oe-muted mt-6">
                   Didn't receive the email? Check your spam folder or try a different email address.
                 </p>
               </div>
             ) : (
               <>
                 <div className="text-center mb-6">
-                  <div className="w-16 h-16 md:w-20 md:h-20 bg-[#0096FF]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i className={`${forgotPassword ? 'ri-lock-unlock-fill' : 'ri-user-fill'} text-3xl md:text-4xl text-[#0096FF]`}></i>
+                  <div className="w-16 h-16 md:w-20 md:h-20 bg-oe-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i className={`${forgotPassword ? 'ri-lock-unlock-fill' : 'ri-user-fill'} text-3xl md:text-4xl text-oe-primary`}></i>
                   </div>
-                  <h2 className="text-2xl md:text-3xl font-bold text-[#2A2A2A] mb-2">
+                  <h2 className="text-2xl md:text-3xl font-bold text-oe-ink mb-2">
                     {forgotPassword ? 'Reset Password' : isSignUp ? 'Create Account' : 'Welcome Back'}
                   </h2>
-                  <p className="text-sm md:text-base text-[#6B6B6B]">
+                  <p className="text-sm md:text-base text-oe-muted">
                     {forgotPassword ? 'Enter your email to receive a reset link' : isSignUp ? 'Sign up to start chatting' : 'Sign in to continue'}
                   </p>
                 </div>
@@ -636,9 +636,9 @@ export default function ChatPage() {
                   <>
                     {/* Divider */}
                     <div className="flex items-center gap-3 mb-5">
-                      <div className="flex-1 h-px bg-[#E5E5E5]"></div>
-                      <span className="text-xs text-[#6B6B6B]">Sign in with email</span>
-                      <div className="flex-1 h-px bg-[#E5E5E5]"></div>
+                      <div className="flex-1 h-px bg-oe-line"></div>
+                      <span className="text-xs text-oe-muted">Sign in with email</span>
+                      <div className="flex-1 h-px bg-oe-line"></div>
                     </div>
                   </>
                 )}
@@ -646,12 +646,12 @@ export default function ChatPage() {
                 <form onSubmit={handleAuth} className="space-y-4">
                   {isSignUp && !forgotPassword && (
                     <div>
-                      <label className="block text-sm font-medium text-[#2A2A2A] mb-2">Full Name</label>
+                      <label className="block text-sm font-medium text-oe-ink mb-2">Full Name</label>
                       <input
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="w-full px-4 py-3 border-2 border-[#E5E5E5] rounded-xl focus:border-[#0096FF] focus:outline-none text-sm md:text-base"
+                        className="w-full px-4 py-3 border-2 border-oe-line rounded-xl focus:border-oe-primary focus:outline-none text-sm md:text-base"
                         placeholder="Enter your name"
                         required
                       />
@@ -659,12 +659,12 @@ export default function ChatPage() {
                   )}
                   
                   <div>
-                    <label className="block text-sm font-medium text-[#2A2A2A] mb-2">Email</label>
+                    <label className="block text-sm font-medium text-oe-ink mb-2">Email</label>
                     <input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full px-4 py-3 border-2 border-[#E5E5E5] rounded-xl focus:border-[#0096FF] focus:outline-none text-sm md:text-base"
+                      className="w-full px-4 py-3 border-2 border-oe-line rounded-xl focus:border-oe-primary focus:outline-none text-sm md:text-base"
                       placeholder="your@email.com"
                       required
                     />
@@ -672,12 +672,12 @@ export default function ChatPage() {
                   
                   {!forgotPassword && (
                     <div>
-                      <label className="block text-sm font-medium text-[#2A2A2A] mb-2">Password</label>
+                      <label className="block text-sm font-medium text-oe-ink mb-2">Password</label>
                       <input
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full px-4 py-3 border-2 border-[#E5E5E5] rounded-xl focus:border-[#0096FF] focus:outline-none text-sm md:text-base"
+                        className="w-full px-4 py-3 border-2 border-oe-line rounded-xl focus:border-oe-primary focus:outline-none text-sm md:text-base"
                         placeholder={isSignUp ? 'Min. 6 characters' : '••••••••'}
                         required
                       />
@@ -693,7 +693,7 @@ export default function ChatPage() {
                           setForgotPassword(true);
                           setAuthError('');
                         }}
-                        className="text-sm text-[#0096FF] font-medium hover:underline cursor-pointer"
+                        className="text-sm text-oe-primary font-medium hover:underline cursor-pointer"
                       >
                         Forgot password?
                       </button>
@@ -703,8 +703,8 @@ export default function ChatPage() {
                   {authError && (
                     <div className={`px-4 py-3 rounded-xl text-sm ${
                       authError.includes('Check your email') || authError.includes('reset link sent') || authError.includes('resent')
-                        ? 'bg-[#E6F5FF] border border-[#0096FF] text-[#0096FF]'
-                        : 'bg-[#FFE6E6] border border-[#FF4444] text-[#FF4444]'
+                        ? 'bg-oe-primary-tint border border-oe-primary text-oe-primary'
+                        : 'bg-oe-crisis-tint border border-oe-crisis text-oe-crisis'
                     }`}>
                       {authError}
                     </div>
@@ -713,7 +713,7 @@ export default function ChatPage() {
                   <button
                     type="submit"
                     disabled={isAuthLoading}
-                    className="w-full px-6 py-3 md:py-4 bg-[#0096FF] text-white rounded-xl text-base md:text-lg font-semibold hover:bg-[#0077CC] transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
+                    className="w-full px-6 py-3 md:py-4 bg-oe-primary text-white rounded-xl text-base md:text-lg font-semibold hover:bg-oe-primary-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
                   >
                     {isAuthLoading 
                       ? 'Please wait...' 
@@ -732,7 +732,7 @@ export default function ChatPage() {
                         setForgotPassword(false);
                         setAuthError('');
                       }}
-                      className="text-sm md:text-base text-[#0096FF] font-semibold hover:underline cursor-pointer flex items-center justify-center gap-1 mx-auto"
+                      className="text-sm md:text-base text-oe-primary font-semibold hover:underline cursor-pointer flex items-center justify-center gap-1 mx-auto"
                     >
                       <i className="ri-arrow-left-line"></i>
                       Back to Sign In
@@ -743,7 +743,7 @@ export default function ChatPage() {
                         setIsSignUp(!isSignUp);
                         setAuthError('');
                       }}
-                      className="text-sm md:text-base text-[#0096FF] font-semibold hover:underline cursor-pointer"
+                      className="text-sm md:text-base text-oe-primary font-semibold hover:underline cursor-pointer"
                     >
                       {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
                     </button>
@@ -759,7 +759,7 @@ export default function ChatPage() {
                 setVerificationSent(false);
                 setAuthError('');
               }}
-              className="absolute top-4 right-4 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-[#6B6B6B] hover:text-[#2A2A2A] transition-colors cursor-pointer"
+              className="absolute top-4 right-4 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-oe-muted hover:text-oe-ink transition-colors cursor-pointer"
             >
               <i className="ri-close-line text-xl md:text-2xl"></i>
             </button>

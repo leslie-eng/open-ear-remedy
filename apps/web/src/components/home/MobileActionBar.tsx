@@ -16,14 +16,14 @@ export default function MobileActionBar({ visible }: MobileActionBarProps) {
       <nav aria-label="Quick actions" className="grid grid-cols-2 gap-3">
         <Link
           to="/chat"
-          className="oe-btn inline-flex items-center justify-center gap-2 rounded-oe-sm bg-oe-sage hover:bg-oe-sage-hover py-3 text-body font-semibold text-white"
+          className="oe-btn inline-flex items-center justify-center gap-2 rounded-oe-sm bg-oe-primary hover:bg-oe-primary-hover py-3 text-body font-semibold text-white"
         >
           <i className="ri-message-3-line" aria-hidden="true" />
           Chat
         </Link>
         <Link
           to="/call"
-          className="oe-btn inline-flex items-center justify-center gap-2 rounded-oe-sm bg-oe-blue hover:bg-oe-blue-hover py-3 text-body font-semibold text-white"
+          className="oe-btn inline-flex items-center justify-center gap-2 rounded-oe-sm bg-oe-primary hover:bg-oe-primary-hover py-3 text-body font-semibold text-white"
         >
           <i className="ri-phone-line" aria-hidden="true" />
           Call

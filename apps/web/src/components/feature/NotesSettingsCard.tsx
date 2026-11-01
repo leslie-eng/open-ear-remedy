@@ -44,8 +44,8 @@ export default function NotesSettingsCard() {
 
   return (
     <div className="pt-6 border-t border-gray-100">
-      <h3 className="text-lg font-semibold text-[#2A2A2A] mb-2">Listener notes</h3>
-      <p className="text-sm text-[#6B6B6B] mb-4">
+      <h3 className="text-lg font-semibold text-oe-ink mb-2">Listener notes</h3>
+      <p className="text-sm text-oe-muted mb-4">
         After a call or text chat, a Listener may keep a brief private note so the next Listener doesn&apos;t ask you to
         repeat yourself. Only Listeners you talk to and Open Ear admins can read them, and they are deleted after 12
         months. You never need to keep them.
@@ -56,7 +56,7 @@ export default function NotesSettingsCard() {
             onClick={() => void toggle()}
             disabled={busy}
             aria-pressed={!settings.optedOut}
-            className="px-6 py-3 rounded-xl text-sm font-semibold border-2 border-[#0096FF] text-[#0096FF] hover:bg-[#E6F5FF] disabled:opacity-50 cursor-pointer"
+            className="px-6 py-3 rounded-xl text-sm font-semibold border-2 border-oe-primary text-oe-primary hover:bg-oe-primary-tint disabled:opacity-50 cursor-pointer"
           >
             {settings.optedOut ? 'Turn notes back on' : 'Turn notes off'}
           </button>
@@ -80,7 +80,7 @@ export default function NotesSettingsCard() {
         </div>
       )}
       {message && (
-        <p role="status" className="mt-3 text-sm text-[#2A2A2A]">
+        <p role="status" className="mt-3 text-sm text-oe-ink">
           {message}
         </p>
       )}

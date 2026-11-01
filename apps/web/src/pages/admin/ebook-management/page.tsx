@@ -238,13 +238,13 @@ export default function EbookManagementPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]">
+      <div className="min-h-screen bg-oe-bg">
         <Navbar />
         <div className="pt-24 pb-16">
           <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20">
             <div className="text-center py-16">
-              <div className="w-16 h-16 border-4 border-[#0096FF] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-[#6B6B6B]">Loading ebooks...</p>
+              <div className="w-16 h-16 border-4 border-oe-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-oe-muted">Loading ebooks...</p>
             </div>
           </div>
         </div>
@@ -253,7 +253,7 @@ export default function EbookManagementPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]">
+    <div className="min-h-screen bg-oe-bg">
       <Navbar />
 
       <div className="pt-24 pb-16">
@@ -261,10 +261,10 @@ export default function EbookManagementPage() {
           {/* Header */}
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-[#2A2A2A] mb-2">
+              <h1 className="text-3xl md:text-4xl font-bold text-oe-ink mb-2">
                 Ebook Management
               </h1>
-              <p className="text-[#6B6B6B]">
+              <p className="text-oe-muted">
                 Manage your ebook catalog - add, edit, and organize your digital library
               </p>
             </div>
@@ -274,7 +274,7 @@ export default function EbookManagementPage() {
                 setEditingEbook(null);
                 resetForm();
               }}
-              className="px-6 py-3 bg-[#0096FF] text-white rounded-lg hover:bg-[#0077CC] transition-colors flex items-center gap-2"
+              className="px-6 py-3 bg-oe-primary text-white rounded-lg hover:bg-oe-primary-hover transition-colors flex items-center gap-2"
             >
               <i className="ri-add-line"></i>
               Add New Ebook
@@ -298,7 +298,7 @@ export default function EbookManagementPage() {
           {/* Add/Edit Form */}
           {showAddForm && (
             <div className="bg-white rounded-xl shadow-sm p-8 mb-8">
-              <h2 className="text-xl font-semibold text-[#2A2A2A] mb-6">
+              <h2 className="text-xl font-semibold text-oe-ink mb-6">
                 {editingEbook ? 'Edit Ebook' : 'Add New Ebook'}
               </h2>
               {formError && (
@@ -310,7 +310,7 @@ export default function EbookManagementPage() {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
+                    <label className="block text-sm font-medium text-oe-ink mb-2">
                       Title *
                     </label>
                     <input
@@ -319,11 +319,11 @@ export default function EbookManagementPage() {
                       required
                       value={formData.title}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0096FF] focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-oe-primary focus:border-transparent"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
+                    <label className="block text-sm font-medium text-oe-ink mb-2">
                       Author *
                     </label>
                     <input
@@ -332,13 +332,13 @@ export default function EbookManagementPage() {
                       required
                       value={formData.author}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0096FF] focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-oe-primary focus:border-transparent"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
+                  <label className="block text-sm font-medium text-oe-ink mb-2">
                     Short Description *
                   </label>
                   <input
@@ -347,13 +347,13 @@ export default function EbookManagementPage() {
                     required
                     value={formData.short_description}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0096FF] focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-oe-primary focus:border-transparent"
                     placeholder="Brief description for card display"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
+                  <label className="block text-sm font-medium text-oe-ink mb-2">
                     Full Description *
                   </label>
                   <textarea
@@ -362,14 +362,14 @@ export default function EbookManagementPage() {
                     rows={4}
                     value={formData.description}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0096FF] focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-oe-primary focus:border-transparent"
                     placeholder="Detailed description for the ebook detail page"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
+                    <label className="block text-sm font-medium text-oe-ink mb-2">
                       Price (e.g. 29.99) *
                     </label>
                     <input
@@ -380,11 +380,11 @@ export default function EbookManagementPage() {
                       required
                       value={formData.price}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0096FF] focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-oe-primary focus:border-transparent"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
+                    <label className="block text-sm font-medium text-oe-ink mb-2">
                       Category *
                     </label>
                     <select
@@ -392,7 +392,7 @@ export default function EbookManagementPage() {
                       required
                       value={formData.category}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0096FF] focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-oe-primary focus:border-transparent"
                     >
                       {categories.map(cat => (
                         <option key={cat.id} value={cat.id}>{cat.name}</option>
@@ -400,7 +400,7 @@ export default function EbookManagementPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
+                    <label className="block text-sm font-medium text-oe-ink mb-2">
                       File Format *
                     </label>
                     <select
@@ -408,7 +408,7 @@ export default function EbookManagementPage() {
                       required
                       value={formData.file_format}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0096FF] focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-oe-primary focus:border-transparent"
                     >
                       <option value="PDF">PDF</option>
                       <option value="EPUB">EPUB</option>
@@ -418,30 +418,30 @@ export default function EbookManagementPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
+                    <label className="block text-sm font-medium text-oe-ink mb-2">
                       Upload Ebook (PDF or EPUB)
                     </label>
                     <input
                       type="file"
                       accept=".pdf,.epub,application/pdf,application/epub+zip"
                       onChange={(e) => setEbookFile(e.target.files?.[0] || null)}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0096FF] focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-oe-primary focus:border-transparent"
                     />
-                    <p className="text-xs text-[#6B6B6B] mt-1">
+                    <p className="text-xs text-oe-muted mt-1">
                       If selected, this uploads to private storage and sets the file, size and format.
                     </p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
+                    <label className="block text-sm font-medium text-oe-ink mb-2">
                       Upload Cover Image
                     </label>
                     <input
                       type="file"
                       accept="image/*"
                       onChange={(e) => setCoverFile(e.target.files?.[0] || null)}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0096FF] focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-oe-primary focus:border-transparent"
                     />
-                    <p className="text-xs text-[#6B6B6B] mt-1">
+                    <p className="text-xs text-oe-muted mt-1">
                       Optional. If selected, this uploads and auto-fills Cover Image URL.
                     </p>
                   </div>
@@ -449,7 +449,7 @@ export default function EbookManagementPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
+                    <label className="block text-sm font-medium text-oe-ink mb-2">
                       Stored File (set by upload)
                     </label>
                     <input
@@ -457,12 +457,12 @@ export default function EbookManagementPage() {
                       name="file_url"
                       value={formData.file_url}
                       readOnly
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 text-[#6B6B6B] focus:outline-none"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 text-oe-muted focus:outline-none"
                       placeholder={ebookFile ? ebookFile.name : 'Upload a file above'}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
+                    <label className="block text-sm font-medium text-oe-ink mb-2">
                       Cover Image URL
                     </label>
                     <input
@@ -470,7 +470,7 @@ export default function EbookManagementPage() {
                       name="cover_image_url"
                       value={formData.cover_image_url}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0096FF] focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-oe-primary focus:border-transparent"
                       placeholder="https://openearemedy.com/images/cover.jpg"
                     />
                   </div>
@@ -478,7 +478,7 @@ export default function EbookManagementPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
+                    <label className="block text-sm font-medium text-oe-ink mb-2">
                       File Size (bytes)
                     </label>
                     <input
@@ -486,12 +486,12 @@ export default function EbookManagementPage() {
                       name="file_size"
                       value={formData.file_size}
                       readOnly
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 text-[#6B6B6B] focus:outline-none"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 text-oe-muted focus:outline-none"
                       placeholder={ebookFile ? String(ebookFile.size) : ''}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
+                    <label className="block text-sm font-medium text-oe-ink mb-2">
                       Publication Date
                     </label>
                     <input
@@ -499,7 +499,7 @@ export default function EbookManagementPage() {
                       name="publication_date"
                       value={formData.publication_date}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0096FF] focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-oe-primary focus:border-transparent"
                     />
                   </div>
                 </div>
@@ -511,9 +511,9 @@ export default function EbookManagementPage() {
                     name="is_active"
                     checked={formData.is_active}
                     onChange={handleInputChange}
-                    className="w-4 h-4 text-[#0096FF] border-gray-300 rounded focus:ring-[#0096FF]"
+                    className="w-4 h-4 text-oe-primary border-gray-300 rounded focus:ring-oe-primary"
                   />
-                  <label htmlFor="ebook-is-active" className="text-sm font-medium text-[#2A2A2A]">
+                  <label htmlFor="ebook-is-active" className="text-sm font-medium text-oe-ink">
                     Active (visible in store)
                   </label>
                 </div>
@@ -522,7 +522,7 @@ export default function EbookManagementPage() {
                   <button
                     type="submit"
                     disabled={uploading}
-                    className="px-6 py-3 bg-[#0096FF] text-white rounded-lg hover:bg-[#0077CC] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-6 py-3 bg-oe-primary text-white rounded-lg hover:bg-oe-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {uploading
                       ? 'Uploading...'
@@ -537,7 +537,7 @@ export default function EbookManagementPage() {
                       setEditingEbook(null);
                       resetForm();
                     }}
-                    className="px-6 py-3 border border-gray-300 text-[#6B6B6B] rounded-lg hover:bg-gray-50 transition-colors"
+                    className="px-6 py-3 border border-gray-300 text-oe-muted rounded-lg hover:bg-gray-50 transition-colors"
                   >
                     Cancel
                   </button>
@@ -549,35 +549,35 @@ export default function EbookManagementPage() {
           {/* Ebooks List */}
           <div className="bg-white rounded-xl shadow-sm overflow-hidden">
             <div className="p-6 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-[#2A2A2A]">
+              <h2 className="text-lg font-semibold text-oe-ink">
                 Current Ebooks ({ebooks.length})
               </h2>
             </div>
 
             {ebooks.length === 0 ? (
               <div className="p-12 text-center">
-                <i className="ri-book-line text-6xl text-[#6B6B6B] mb-4"></i>
-                <h3 className="text-xl font-semibold text-[#2A2A2A] mb-2">No products yet</h3>
-                <p className="text-[#6B6B6B]">Add your first product to get started.</p>
+                <i className="ri-book-line text-6xl text-oe-muted mb-4"></i>
+                <h3 className="text-xl font-semibold text-oe-ink mb-2">No products yet</h3>
+                <p className="text-oe-muted">Add your first product to get started.</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-[#6B6B6B] uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-oe-muted uppercase tracking-wider">
                         Ebook
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-[#6B6B6B] uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-oe-muted uppercase tracking-wider">
                         Category
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-[#6B6B6B] uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-oe-muted uppercase tracking-wider">
                         Price
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-[#6B6B6B] uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-oe-muted uppercase tracking-wider">
                         Status
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-[#6B6B6B] uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-oe-muted uppercase tracking-wider">
                         Actions
                       </th>
                     </tr>
@@ -591,30 +591,30 @@ export default function EbookManagementPage() {
                               {ebook.cover_image_url ? (
                                 <img src={ebook.cover_image_url} alt={ebook.title} className="w-full h-full object-cover" />
                               ) : (
-                                <i className="ri-book-line text-[#6B6B6B]"></i>
+                                <i className="ri-book-line text-oe-muted"></i>
                               )}
                             </div>
                             <div className="ml-4">
-                              <div className="text-sm font-medium text-[#2A2A2A]">
+                              <div className="text-sm font-medium text-oe-ink">
                                 {ebook.title}
                               </div>
                               {ebook.author && (
-                                <div className="text-sm text-[#6B6B6B]">
+                                <div className="text-sm text-oe-muted">
                                   by {ebook.author}
                                 </div>
                               )}
-                              <div className="text-xs text-[#6B6B6B]">
+                              <div className="text-xs text-oe-muted">
                                 {ebook.file_format || 'No file'} • {formatFileSize(ebook.file_size)} • {ebook.purchase_count ?? 0} sold
                               </div>
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-[#E6F5FF] text-[#0096FF]">
+                          <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-oe-primary-tint text-oe-primary">
                             {categories.find(c => c.id === ebook.category)?.name || ebook.category}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-[#2A2A2A]">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-oe-ink">
                           {formatMoney(ebook.price, ebook.currency)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -623,7 +623,7 @@ export default function EbookManagementPage() {
                             disabled={busyId === ebook.id}
                             className={`disabled:opacity-50 inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                               ebook.is_active
-                                ? 'bg-green-100 text-green-800'
+                                ? 'bg-forest-100 text-forest-800'
                                 : 'bg-red-100 text-red-800'
                             }`}
                           >
@@ -634,7 +634,7 @@ export default function EbookManagementPage() {
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => handleEdit(ebook)}
-                              className="text-[#0096FF] hover:text-[#0077CC] transition-colors"
+                              className="text-oe-primary hover:text-oe-primary-hover transition-colors"
                             >
                               <i className="ri-edit-line"></i>
                             </button>

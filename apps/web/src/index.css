@@ -4,43 +4,54 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Design tokens: warm, calm palette. Exposed to Tailwind as `oe-*` (tailwind.config.ts). */
+/* Design tokens: Terra, "rooted warmth" (design_flow/terra/DESIGN.md). Colours are RGB channels so
+ * Tailwind opacity modifiers work (`bg-oe-primary/10`); in plain CSS use `rgb(var(--oe-primary))`.
+ * Exposed to Tailwind as `oe-*` (tailwind.config.ts). */
 :root {
-  --oe-blue: #0a6eb4;          /* primary actions: 5.4:1 on white (AA) */
-  --oe-blue-hover: #085a94;
-  --oe-blue-bright: #0096ff;   /* brand accent: decorative use only (3:1 on white) */
-  --oe-blue-tint: #e8f3fb;
-  --oe-deep: #0b4a75;          /* footer / dark surfaces: 8.9:1 with white */
-  --oe-mist: #d6e6f2;          /* muted blue */
-  --oe-sage: #5f7f6b;          /* text-safe sage: 4.6:1 on white */
-  --oe-sage-hover: #4f6b5a;
-  --oe-sage-soft: #dbe7dd;
-  --oe-sand: #f3e7d6;
-  --oe-cream: #fbf8f3;
-  --oe-ink: #2a2a2a;
-  --oe-muted: #5c5c5c;         /* 6.7:1 on white */
-  --oe-line: #e7e2da;
-  --oe-available: #2f8f5b;
-  --oe-skeleton: #ece8e1;
-  --oe-crisis: #b3261e;
+  --oe-primary: 74 124 89;        /* #4a7c59 forest green: actions. White text 4.9:1 (AA) */
+  --oe-primary-hover: 58 102 72;  /* #3a6648 */
+  --oe-primary-deep: 42 96 56;    /* #2a6038 text on primary tints */
+  --oe-primary-soft: 200 232 208; /* #c8e8d0 */
+  --oe-primary-tint: 233 242 234; /* #e9f2ea */
+  --oe-accent: 112 92 48;         /* #705c30 warm amber: highlights, badges */
+  --oe-accent-tint: 246 236 214;  /* #f6ecd6 */
+  --oe-bg: 250 246 240;           /* #faf6f0 warm cream page background */
+  --oe-surface-low: 245 241 234;  /* #f5f1ea */
+  --oe-surface: 240 236 228;      /* #f0ece4 tonal cards and wells */
+  --oe-deep: 30 43 35;            /* #1e2b23 dark surfaces */
+  --oe-ink: 46 50 48;             /* #2e3230 */
+  --oe-muted: 74 78 74;           /* #4a4e4a 7.6:1 on cream */
+  --oe-faint: 116 121 110;        /* #74796e decorative only */
+  --oe-line: 228 224 216;         /* #e4e0d8 */
+  --oe-available: 74 124 89;
+  --oe-skeleton: 234 230 222;
+  --oe-crisis: 184 50 48;         /* #b83230 */
+  --oe-crisis-tint: 251 233 231;  /* #fbe9e7 */
 
   --oe-radius-sm: 12px;
   --oe-radius-md: 16px;
 
-  --oe-shadow-sm: 0 1px 2px rgba(42, 42, 42, .06), 0 2px 6px rgba(42, 42, 42, .05);
-  --oe-shadow-md: 0 4px 12px rgba(42, 42, 42, .08), 0 12px 28px rgba(42, 42, 42, .06);
+  /* Terra prefers tonal separation; shadows stay very soft. */
+  --oe-shadow-sm: 0 1px 2px rgba(46, 50, 48, .04), 0 2px 8px rgba(46, 50, 48, .04);
+  --oe-shadow-md: 0 4px 20px rgba(46, 50, 48, .06);
 }
 
 @layer base {
   body {
     line-height: 1.6;
-    color: var(--oe-ink);
+    color: rgb(var(--oe-ink));
+    background-color: rgb(var(--oe-bg));
     -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3 {
+    font-family: Literata, Georgia, serif;
+    letter-spacing: -0.01em;
   }
 
   /* Never remove focus outlines; give keyboard users a clear, calm ring. */
   :focus-visible {
-    outline: 3px solid var(--oe-blue);
+    outline: 3px solid rgb(var(--oe-primary));
     outline-offset: 3px;
     border-radius: 4px;
   }

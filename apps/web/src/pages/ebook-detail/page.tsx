@@ -93,13 +93,13 @@ export default function EbookDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]">
+      <div className="min-h-screen bg-oe-bg">
         <Navbar />
         <div className="pt-24 pb-16">
           <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20">
             <div className="text-center py-16">
-              <div className="w-16 h-16 border-4 border-[#0096FF] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-[#6B6B6B]">Loading ebook details...</p>
+              <div className="w-16 h-16 border-4 border-oe-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-oe-muted">Loading ebook details...</p>
             </div>
           </div>
         </div>
@@ -109,25 +109,25 @@ export default function EbookDetailPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]">
+      <div className="min-h-screen bg-oe-bg">
         <Navbar />
         <div className="pt-24 pb-16">
           <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20">
             <div className="text-center py-16">
               <i className="ri-error-warning-line text-6xl text-red-500 mb-4"></i>
-              <h3 className="text-xl font-semibold text-[#2A2A2A] mb-2">Couldn&apos;t load this ebook</h3>
-              <p className="text-[#6B6B6B] mb-6">{error}</p>
+              <h3 className="text-xl font-semibold text-oe-ink mb-2">Couldn&apos;t load this ebook</h3>
+              <p className="text-oe-muted mb-6">{error}</p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <button
                   onClick={() => void loadEbook()}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#0096FF] text-white rounded-lg hover:bg-[#0077CC] transition-colors"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-oe-primary text-white rounded-lg hover:bg-oe-primary-hover transition-colors"
                 >
                   <i className="ri-refresh-line"></i>
                   Try Again
                 </button>
                 <Link
                   to="/ebook-store"
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-[#0096FF] text-[#0096FF] rounded-lg hover:bg-[#E6F5FF] transition-colors"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-oe-primary text-oe-primary rounded-lg hover:bg-oe-primary-tint transition-colors"
                 >
                   <i className="ri-arrow-left-line"></i>
                   Back to Store
@@ -142,17 +142,17 @@ export default function EbookDetailPage() {
 
   if (!ebook) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]">
+      <div className="min-h-screen bg-oe-bg">
         <Navbar />
         <div className="pt-24 pb-16">
           <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20">
             <div className="text-center py-16">
-              <i className="ri-book-line text-6xl text-[#6B6B6B] mb-4"></i>
-              <h3 className="text-xl font-semibold text-[#2A2A2A] mb-2">Ebook not found</h3>
-              <p className="text-[#6B6B6B] mb-6">The ebook you're looking for doesn't exist.</p>
+              <i className="ri-book-line text-6xl text-oe-muted mb-4"></i>
+              <h3 className="text-xl font-semibold text-oe-ink mb-2">Ebook not found</h3>
+              <p className="text-oe-muted mb-6">The ebook you're looking for doesn't exist.</p>
               <Link
                 to="/ebook-store"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-[#0096FF] text-white rounded-lg hover:bg-[#0077CC] transition-colors"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-oe-primary text-white rounded-lg hover:bg-oe-primary-hover transition-colors"
               >
                 <i className="ri-arrow-left-line"></i>
                 Back to Store
@@ -165,19 +165,19 @@ export default function EbookDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]">
+    <div className="min-h-screen bg-oe-bg">
       <Navbar />
       
       <div className="pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20">
           {/* Breadcrumb */}
           <div className="mb-8">
-            <nav className="flex items-center gap-2 text-sm text-[#6B6B6B]">
-              <Link to="/ebook-store" className="hover:text-[#0096FF] transition-colors">
+            <nav className="flex items-center gap-2 text-sm text-oe-muted">
+              <Link to="/ebook-store" className="hover:text-oe-primary transition-colors">
                 Store
               </Link>
               <i className="ri-arrow-right-s-line"></i>
-              <span className="text-[#2A2A2A]">{ebook.title}</span>
+              <span className="text-oe-ink">{ebook.title}</span>
             </nav>
           </div>
 
@@ -191,17 +191,17 @@ export default function EbookDetailPage() {
                     {ebook.cover_image_url ? (
                       <img src={ebook.cover_image_url} alt={ebook.title} className="w-full h-full object-cover" />
                     ) : (
-                      <i className="ri-book-line text-6xl text-[#6B6B6B]"></i>
+                      <i className="ri-book-line text-6xl text-oe-muted"></i>
                     )}
                   </div>
 
                   {/* Price and Format */}
                   <div className="flex items-center justify-between mb-6">
-                    <span className="text-2xl font-bold text-[#0096FF]">
+                    <span className="text-2xl font-bold text-oe-primary">
                       {ebook.price > 0 ? formatMoney(ebook.price, ebook.currency) : 'Free'}
                     </span>
                     {ebook.file_format && (
-                      <span className="bg-[#E6F5FF] text-[#0096FF] px-3 py-1 rounded-full text-sm font-medium">
+                      <span className="bg-oe-primary-tint text-oe-primary px-3 py-1 rounded-full text-sm font-medium">
                         {ebook.file_format}
                       </span>
                     )}
@@ -211,13 +211,13 @@ export default function EbookDetailPage() {
                   <div className="space-y-3">
                     {isOwned ? (
                       <div className="text-center">
-                        <div className="flex items-center justify-center gap-2 text-green-600 mb-3">
+                        <div className="flex items-center justify-center gap-2 text-forest-600 mb-3">
                           <i className="ri-check-line"></i>
                           <span className="font-medium">Already Owned</span>
                         </div>
                         <Link
                           to="/library"
-                          className="block w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-center"
+                          className="block w-full px-4 py-3 bg-forest-600 text-white rounded-lg hover:bg-forest-700 transition-colors text-center"
                         >
                           View in Library
                         </Link>
@@ -230,14 +230,14 @@ export default function EbookDetailPage() {
                           className={`w-full px-4 py-3 rounded-lg transition-colors font-medium ${
                             isInCart()
                               ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                              : 'bg-[#0096FF] text-white hover:bg-[#0077CC]'
+                              : 'bg-oe-primary text-white hover:bg-oe-primary-hover'
                           }`}
                         >
                           {isInCart() ? 'In Cart' : 'Add to Cart'}
                         </button>
                         <button
                           onClick={handleBuyNow}
-                          className="block w-full px-4 py-3 border border-[#0096FF] text-[#0096FF] rounded-lg hover:bg-[#E6F5FF] transition-colors font-medium text-center"
+                          className="block w-full px-4 py-3 border border-oe-primary text-oe-primary rounded-lg hover:bg-oe-primary-tint transition-colors font-medium text-center"
                         >
                           Buy Now
                         </button>
@@ -248,19 +248,19 @@ export default function EbookDetailPage() {
                   {/* File Info */}
                   <div className="mt-6 pt-6 border-t border-gray-100 space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-[#6B6B6B]">File Size:</span>
-                      <span className="text-[#2A2A2A]">{formatFileSize(ebook.file_size)}</span>
+                      <span className="text-oe-muted">File Size:</span>
+                      <span className="text-oe-ink">{formatFileSize(ebook.file_size)}</span>
                     </div>
                     {ebook.file_format && (
                       <div className="flex justify-between">
-                        <span className="text-[#6B6B6B]">Format:</span>
-                        <span className="text-[#2A2A2A]">{ebook.file_format}</span>
+                        <span className="text-oe-muted">Format:</span>
+                        <span className="text-oe-ink">{ebook.file_format}</span>
                       </div>
                     )}
                     {ebook.publication_date && (
                       <div className="flex justify-between">
-                        <span className="text-[#6B6B6B]">Published:</span>
-                        <span className="text-[#2A2A2A]">{formatDate(ebook.publication_date)}</span>
+                        <span className="text-oe-muted">Published:</span>
+                        <span className="text-oe-ink">{formatDate(ebook.publication_date)}</span>
                       </div>
                     )}
                   </div>
@@ -273,29 +273,29 @@ export default function EbookDetailPage() {
               <div className="bg-white rounded-xl shadow-sm p-8">
                 {/* Title and Author */}
                 <div className="mb-6">
-                  <h1 className="text-3xl md:text-4xl font-bold text-[#2A2A2A] mb-2">
+                  <h1 className="text-3xl md:text-4xl font-bold text-oe-ink mb-2">
                     {ebook.title}
                   </h1>
                   {ebook.author && (
-                    <p className="text-lg text-[#6B6B6B]">
-                      by <span className="font-medium text-[#2A2A2A]">{ebook.author}</span>
+                    <p className="text-lg text-oe-muted">
+                      by <span className="font-medium text-oe-ink">{ebook.author}</span>
                     </p>
                   )}
                 </div>
 
                 {/* Category */}
                 <div className="mb-6">
-                  <span className="inline-block bg-[#E6F5FF] text-[#0096FF] px-3 py-1 rounded-full text-sm font-medium capitalize">
+                  <span className="inline-block bg-oe-primary-tint text-oe-primary px-3 py-1 rounded-full text-sm font-medium capitalize">
                     {(ebook.category || '').replace('-', ' ')}
                   </span>
                 </div>
 
                 {/* Description */}
                 <div className="mb-8">
-                  <h2 className="text-xl font-semibold text-[#2A2A2A] mb-4">About This Book</h2>
+                  <h2 className="text-xl font-semibold text-oe-ink mb-4">About This Book</h2>
                   <div className="prose prose-gray max-w-none">
                     {(ebook.description || ebook.short_description || '').split('\n').map((paragraph, index) => (
-                      <p key={index} className="text-[#6B6B6B] leading-relaxed mb-4">
+                      <p key={index} className="text-oe-muted leading-relaxed mb-4">
                         {paragraph}
                       </p>
                     ))}
@@ -304,8 +304,8 @@ export default function EbookDetailPage() {
 
                 {/* Reviews Section (Placeholder) */}
                 <div>
-                  <h2 className="text-xl font-semibold text-[#2A2A2A] mb-4">Customer Reviews</h2>
-                  <div className="text-center py-8 text-[#6B6B6B]">
+                  <h2 className="text-xl font-semibold text-oe-ink mb-4">Customer Reviews</h2>
+                  <div className="text-center py-8 text-oe-muted">
                     <i className="ri-star-line text-4xl mb-2"></i>
                     <p>No reviews yet. Be the first to review this ebook!</p>
                   </div>

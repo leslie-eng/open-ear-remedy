@@ -58,17 +58,17 @@ export default function EbookStorePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF] font-['Poppins',sans-serif]">
+    <div className="min-h-screen bg-oe-bg">
       <Navbar />
       
       <div className="pt-28 pb-14 md:pt-32 md:pb-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-10 lg:px-14">
           {/* Header */}
           <div className="text-center mb-10 md:mb-12">
-            <h1 className="text-3xl sm:text-4xl md:text-[2.8rem] font-bold text-[#2A2A2A] mb-3">
+            <h1 className="text-3xl sm:text-4xl md:text-[2.8rem] font-bold text-oe-ink mb-3">
               Store
             </h1>
-            <p className="text-base md:text-lg text-[#6B6B6B] max-w-2xl mx-auto leading-relaxed">
+            <p className="text-base md:text-lg text-oe-muted max-w-2xl mx-auto leading-relaxed">
               Discover our collection of mental wellness and self-help ebooks to support your emotional journey.
             </p>
           </div>
@@ -77,13 +77,13 @@ export default function EbookStorePage() {
           <div className="mb-8 flex flex-col gap-3 sm:gap-4 md:flex-row">
             <div className="flex-1">
               <div className="relative">
-                <i className="ri-search-line absolute left-3 top-1/2 -translate-y-1/2 text-[#6B6B6B] text-sm sm:text-base"></i>
+                <i className="ri-search-line absolute left-3 top-1/2 -translate-y-1/2 text-oe-muted text-sm sm:text-base"></i>
                 <input
                   type="text"
                   placeholder="Search ebooks..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 sm:pl-11 pr-3 sm:pr-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0096FF] focus:border-transparent"
+                  className="w-full pl-10 sm:pl-11 pr-3 sm:pr-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-oe-primary focus:border-transparent"
                 />
               </div>
             </div>
@@ -91,7 +91,7 @@ export default function EbookStorePage() {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0096FF] focus:border-transparent"
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-oe-primary focus:border-transparent"
               >
                 {categories.map(category => (
                   <option key={category.id} value={category.id}>
@@ -105,8 +105,8 @@ export default function EbookStorePage() {
           {/* Loading State */}
           {loading && (
             <div className="text-center py-16">
-              <div className="w-16 h-16 border-4 border-[#0096FF] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-[#6B6B6B]">Loading ebooks...</p>
+              <div className="w-16 h-16 border-4 border-oe-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-oe-muted">Loading ebooks...</p>
             </div>
           )}
 
@@ -114,11 +114,11 @@ export default function EbookStorePage() {
           {!loading && error && (
             <div className="text-center py-16">
               <i className="ri-error-warning-line text-6xl text-red-500 mb-4"></i>
-              <h3 className="text-xl font-semibold text-[#2A2A2A] mb-2">Couldn't load the store</h3>
-              <p className="text-[#6B6B6B] mb-6">{error}</p>
+              <h3 className="text-xl font-semibold text-oe-ink mb-2">Couldn't load the store</h3>
+              <p className="text-oe-muted mb-6">{error}</p>
               <button
                 onClick={() => void loadEbooks()}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-[#0096FF] text-white rounded-lg hover:bg-[#0077CC] transition-colors"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-oe-primary text-white rounded-lg hover:bg-oe-primary-hover transition-colors"
               >
                 <i className="ri-refresh-line"></i>
                 Try Again
@@ -135,30 +135,30 @@ export default function EbookStorePage() {
                     {ebook.cover_image_url ? (
                       <img src={ebook.cover_image_url} alt={ebook.title} className="w-full h-full object-cover" loading="lazy" />
                     ) : (
-                      <i className="ri-book-line text-2xl sm:text-3xl text-[#6B6B6B]"></i>
+                      <i className="ri-book-line text-2xl sm:text-3xl text-oe-muted"></i>
                     )}
                   </div>
                   
-                  <h3 className="font-semibold text-[#2A2A2A] text-xs sm:text-sm mb-1 line-clamp-2 leading-snug">
+                  <h3 className="font-semibold text-oe-ink text-xs sm:text-sm mb-1 line-clamp-2 leading-snug">
                     {ebook.title}
                   </h3>
                   
                   {ebook.author && (
-                    <p className="text-[11px] sm:text-xs text-[#6B6B6B] mb-1">
+                    <p className="text-[11px] sm:text-xs text-oe-muted mb-1">
                       by {ebook.author}
                     </p>
                   )}
                   
-                  <p className="text-[11px] sm:text-xs text-[#6B6B6B] mb-2 line-clamp-2">
+                  <p className="text-[11px] sm:text-xs text-oe-muted mb-2 line-clamp-2">
                     {ebook.short_description}
                   </p>
                   
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm sm:text-base font-bold text-[#0096FF]">
+                    <span className="text-sm sm:text-base font-bold text-oe-primary">
                       {ebook.price > 0 ? formatMoney(ebook.price, ebook.currency) : 'Free'}
                     </span>
                     {ebook.file_format && (
-                      <span className="text-[10px] bg-[#E6F5FF] text-[#0096FF] px-1.5 py-0.5 rounded-full">
+                      <span className="text-[10px] bg-oe-primary-tint text-oe-primary px-1.5 py-0.5 rounded-full">
                         {ebook.file_format}
                       </span>
                     )}
@@ -167,7 +167,7 @@ export default function EbookStorePage() {
                   <div className="space-y-1.5">
                     <Link
                       to={`/ebook/${ebook.id}`}
-                      className="block w-full text-center px-2 py-1.5 text-[11px] sm:text-xs border border-[#0096FF] text-[#0096FF] rounded-md hover:bg-[#E6F5FF] transition-colors"
+                      className="block w-full text-center px-2 py-1.5 text-[11px] sm:text-xs border border-oe-primary text-oe-primary rounded-md hover:bg-oe-primary-tint transition-colors"
                     >
                       View Details
                     </Link>
@@ -177,7 +177,7 @@ export default function EbookStorePage() {
                       className={`w-full px-2 py-1.5 text-[11px] sm:text-xs rounded-md transition-colors ${
                         isInCart(ebook.id)
                           ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                          : 'bg-[#0096FF] text-white hover:bg-[#0077CC]'
+                          : 'bg-oe-primary text-white hover:bg-oe-primary-hover'
                       }`}
                     >
                       {isInCart(ebook.id) ? 'In Cart' : 'Add to Cart'}
@@ -191,9 +191,9 @@ export default function EbookStorePage() {
           {/* No Results */}
           {!loading && !error && filteredEbooks.length === 0 && (
             <div className="text-center py-16">
-              <i className="ri-search-line text-6xl text-[#6B6B6B] mb-4"></i>
-              <h3 className="text-xl font-semibold text-[#2A2A2A] mb-2">No products found</h3>
-              <p className="text-[#6B6B6B]">
+              <i className="ri-search-line text-6xl text-oe-muted mb-4"></i>
+              <h3 className="text-xl font-semibold text-oe-ink mb-2">No products found</h3>
+              <p className="text-oe-muted">
                 {ebooks.length === 0
                   ? 'The store is empty right now. Please check back soon.'
                   : 'Try adjusting your search or filter criteria.'}
