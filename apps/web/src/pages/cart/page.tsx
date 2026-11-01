@@ -1,168 +1,142 @@
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/feature/Navbar';
+import SiteFooter from '../../components/feature/SiteFooter';
 import { useCart } from '../../contexts/CartContext';
 import { formatMoney } from '../../lib/api';
 
 export default function CartPage() {
   const { items, removeItem, totalItems, totalPrice } = useCart();
-  const currency = items[0]?.ebook.currency || 'USD';
+  const currency = items[0]?.ebook.currency || 'KES';
 
   return (
-    <div className="min-h-screen bg-oe-bg">
+    <div className="min-h-screen bg-oe-bg text-oe-ink">
       <Navbar />
-      
-      <div className="pt-24 pb-16">
-        <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-oe-ink mb-2">
-              Shopping Cart
-            </h1>
-            <p className="text-oe-muted">
-              {items.length > 0 
-                ? `${totalItems} item${totalItems !== 1 ? 's' : ''} in your cart`
-                : 'Your cart is empty'
-              }
-            </p>
+
+      <main className="oe-route mx-auto max-w-[1120px] px-5 pb-20 pt-28 md:px-8">
+        {/* Header */}
+        <p className="inline-flex items-center gap-1.5 rounded-full bg-oe-accent-tint px-3 py-1 text-xs font-medium uppercase tracking-wide text-oe-accent">
+          <i className="ri-shopping-bag-line" aria-hidden="true" /> Your cart
+        </p>
+        <h1 className="mt-4 text-4xl font-bold md:text-5xl">Your reading pile.</h1>
+        <p className="mt-3 max-w-2xl text-lg text-oe-muted">
+          {items.length > 0
+            ? `${totalItems} book${totalItems !== 1 ? 's' : ''} in your cart`
+            : 'Your cart is empty'}
+        </p>
+
+        {items.length === 0 ? (
+          /* Empty cart */
+          <div className="mx-auto mt-10 max-w-md rounded-3xl border border-oe-line bg-white p-8 text-center">
+            <span aria-hidden="true" className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-oe-surface text-2xl text-oe-muted">
+              <i className="ri-shopping-bag-line" />
+            </span>
+            <h2 className="mt-4 text-2xl font-semibold">Nothing here yet</h2>
+            <p className="mt-2 text-oe-muted">Have a look through our self-help books to get started.</p>
+            <Link
+              to="/ebook-store"
+              className="oe-btn mt-6 inline-flex items-center gap-2 rounded-full bg-oe-primary px-6 py-3 font-semibold text-white hover:bg-oe-primary-hover"
+            >
+              <i className="ri-book-open-line" aria-hidden="true"></i>
+              Browse books
+            </Link>
           </div>
-
-          {items.length === 0 ? (
-            /* Empty Cart */
-            <div className="text-center py-16">
-              <div className="bg-white rounded-xl shadow-sm p-12 max-w-md mx-auto">
-                <i className="ri-shopping-cart-line text-6xl text-oe-muted mb-4"></i>
-                <h3 className="text-xl font-semibold text-oe-ink mb-2">Your cart is empty</h3>
-                <p className="text-oe-muted mb-6">
-                  Discover our collection of mental wellness ebooks to get started.
-                </p>
-                <Link
-                  to="/ebook-store"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-oe-primary text-white rounded-lg hover:bg-oe-primary-hover transition-colors"
-                >
-                  <i className="ri-book-line"></i>
-                  Browse Ebooks
-                </Link>
-              </div>
-            </div>
-          ) : (
-            /* Cart with Items */
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Cart Items */}
-              <div className="lg:col-span-2 space-y-4">
+        ) : (
+          <div className="mt-10 grid grid-cols-1 gap-8 lg:grid-cols-3">
+            {/* Items */}
+            <div className="space-y-4 lg:col-span-2">
+              <ul className="space-y-4">
                 {items.map(item => (
-                  <div key={item.ebook.id} className="bg-white rounded-xl shadow-sm p-6">
-                    <div className="flex gap-4">
-                      {/* Cover Image */}
-                      <div className="w-20 h-28 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
-                        {item.ebook.cover_image_url ? (
-                          <img src={item.ebook.cover_image_url} alt={item.ebook.title} className="w-full h-full object-cover" />
-                        ) : (
-                          <i className="ri-book-line text-2xl text-oe-muted"></i>
-                        )}
+                  <li key={item.ebook.id} className="flex gap-4 rounded-3xl border border-oe-line bg-white p-4 md:gap-5 md:p-5">
+                    <div className="flex h-28 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-oe-surface-low">
+                      {item.ebook.cover_image_url ? (
+                        <img src={item.ebook.cover_image_url} alt={item.ebook.title} className="h-full w-full object-cover" />
+                      ) : (
+                        <i className="ri-book-line text-2xl text-oe-muted" aria-hidden="true"></i>
+                      )}
+                    </div>
+
+                    <div className="flex min-w-0 flex-1 flex-col">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <h3 className="line-clamp-2 text-lg font-semibold leading-snug">{item.ebook.title}</h3>
+                          {item.ebook.author && <p className="mt-1 text-sm text-oe-muted">by {item.ebook.author}</p>}
+                        </div>
+                        <button
+                          onClick={() => removeItem(item.ebook.id)}
+                          className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full text-oe-muted transition-colors hover:bg-oe-crisis-tint hover:text-oe-crisis"
+                          title="Remove from cart"
+                          aria-label={`Remove ${item.ebook.title} from cart`}
+                        >
+                          <i className="ri-delete-bin-line text-lg" aria-hidden="true"></i>
+                        </button>
                       </div>
 
-                      {/* Item Details */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex justify-between items-start mb-2">
-                          <div className="flex-1 min-w-0 pr-4">
-                            <h3 className="font-semibold text-oe-ink mb-1 line-clamp-2">
-                              {item.ebook.title}
-                            </h3>
-                            {item.ebook.author && (
-                              <p className="text-sm text-oe-muted mb-2">
-                                by {item.ebook.author}
-                              </p>
-                            )}
-                            {item.ebook.file_format && (
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs bg-oe-primary-tint text-oe-primary px-2 py-1 rounded-full">
-                                  {item.ebook.file_format}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                          
-                          {/* Remove Button */}
-                          <button
-                            onClick={() => removeItem(item.ebook.id)}
-                            className="text-red-500 hover:text-red-700 transition-colors p-1"
-                            title="Remove from cart"
-                          >
-                            <i className="ri-delete-bin-line text-lg"></i>
-                          </button>
+                      <div className="mt-auto flex items-center justify-between gap-3 pt-3">
+                        <div className="flex items-center gap-2 text-sm text-oe-muted">
+                          {item.ebook.file_format && (
+                            <span className="rounded-full bg-oe-surface px-2.5 py-0.5 text-xs font-medium">{item.ebook.file_format}</span>
+                          )}
+                          <span>Qty: {item.quantity}</span>
                         </div>
-
-                        {/* Price and Quantity */}
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4">
-                            <span className="text-sm text-oe-muted">Qty: {item.quantity}</span>
-                          </div>
-                          <span className="text-lg font-bold text-oe-primary">
-                            {formatMoney(item.ebook.price, item.ebook.currency)}
-                          </span>
-                        </div>
+                        <span className="text-lg font-semibold text-oe-primary-deep">
+                          {formatMoney(item.ebook.price, item.ebook.currency)}
+                        </span>
                       </div>
                     </div>
-                  </div>
+                  </li>
                 ))}
+              </ul>
 
-                {/* Continue Shopping */}
-                <div className="pt-4">
-                  <Link
-                    to="/ebook-store"
-                    className="inline-flex items-center gap-2 text-oe-primary hover:text-oe-primary-hover transition-colors"
-                  >
-                    <i className="ri-arrow-left-line"></i>
-                    Continue Shopping
-                  </Link>
-                </div>
-              </div>
-
-              {/* Order Summary */}
-              <div className="lg:col-span-1">
-                <div className="bg-white rounded-xl shadow-sm p-6 sticky top-24">
-                  <h2 className="text-xl font-semibold text-oe-ink mb-6">Order Summary</h2>
-                  
-                  <div className="space-y-4 mb-6">
-                    <div className="flex justify-between text-oe-muted">
-                      <span>Subtotal ({totalItems} items)</span>
-                      <span>{formatMoney(totalPrice, currency)}</span>
-                    </div>
-                    <div className="flex justify-between text-oe-muted">
-                      <span>Tax</span>
-                      <span>{formatMoney(0, currency)}</span>
-                    </div>
-                    <div className="border-t border-gray-200 pt-4">
-                      <div className="flex justify-between text-lg font-semibold text-oe-ink">
-                        <span>Total</span>
-                        <span>{formatMoney(totalPrice, currency)}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <Link
-                    to="/checkout"
-                    className="block w-full px-6 py-3 bg-oe-primary text-white rounded-lg hover:bg-oe-primary-hover transition-colors font-medium mb-4 text-center"
-                  >
-                    Proceed to Checkout
-                  </Link>
-
-                  <div className="text-center">
-                    <div className="flex items-center justify-center gap-2 text-sm text-oe-muted mb-2">
-                      <i className="ri-shield-check-line text-forest-600"></i>
-                      <span>Secure checkout</span>
-                    </div>
-                    <div className="flex items-center justify-center gap-2 text-sm text-oe-muted">
-                      <i className="ri-download-line text-oe-primary"></i>
-                      <span>Instant digital delivery</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <Link to="/ebook-store" className="inline-flex items-center gap-2 pt-2 font-medium text-oe-primary hover:text-oe-primary-hover">
+                <i className="ri-arrow-left-line" aria-hidden="true"></i>
+                Keep browsing
+              </Link>
             </div>
-          )}
-        </div>
-      </div>
+
+            {/* Summary */}
+            <aside className="lg:col-span-1">
+              <div className="rounded-3xl border border-oe-line bg-white p-6 md:p-8 lg:sticky lg:top-28">
+                <h2 className="text-2xl font-semibold">Summary</h2>
+
+                <dl className="mt-6 space-y-3 rounded-2xl bg-oe-surface-low p-4 text-sm">
+                  <div className="flex justify-between text-oe-muted">
+                    <dt>Subtotal ({totalItems} {totalItems === 1 ? 'book' : 'books'})</dt>
+                    <dd>{formatMoney(totalPrice, currency)}</dd>
+                  </div>
+                  <div className="flex justify-between text-oe-muted">
+                    <dt>Tax</dt>
+                    <dd>{formatMoney(0, currency)}</dd>
+                  </div>
+                  <div className="flex justify-between border-t border-oe-line pt-3 text-base font-semibold text-oe-ink">
+                    <dt>Total</dt>
+                    <dd>{formatMoney(totalPrice, currency)}</dd>
+                  </div>
+                </dl>
+
+                <Link
+                  to="/checkout"
+                  className="oe-btn mt-6 block w-full rounded-full bg-oe-primary px-6 py-3 text-center font-semibold text-white hover:bg-oe-primary-hover"
+                >
+                  Go to checkout
+                </Link>
+
+                <ul className="mt-5 space-y-2 text-sm text-oe-muted">
+                  <li className="flex items-center gap-2">
+                    <i className="ri-smartphone-line text-oe-primary" aria-hidden="true"></i>
+                    Pay with M-Pesa
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <i className="ri-download-line text-oe-primary" aria-hidden="true"></i>
+                    Read or download right away from My Library
+                  </li>
+                </ul>
+              </div>
+            </aside>
+          </div>
+        )}
+      </main>
+
+      <SiteFooter />
     </div>
   );
 }

@@ -88,7 +88,7 @@ export default function HomePage() {
           <div className="oe-enter relative mt-10 overflow-hidden rounded-3xl shadow-oe-md">
             <img
               src="/images/campfire.jpg"
-              alt="Friends sitting quietly around a campfire by a lake at dusk"
+              alt="Four people of different ages sitting on logs around a campfire by a lake at dusk, holding warm drinks and talking"
               className="h-[320px] w-full object-cover md:h-[440px]"
             />
             <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
