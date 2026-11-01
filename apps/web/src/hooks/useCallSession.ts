@@ -3,7 +3,11 @@ import type { EndReason, ServerMessage, SignalPayload } from '@openear/shared/ca
 import { openCallSocket, type CallSocket } from '../lib/callSocket';
 import { callsSupported, createCallPeer, getMicrophone, type CallPeer } from '../lib/callPeer';
 
-export type CallPhase = 'idle' | 'preparing' | 'ringing' | 'connecting' | 'live' | 'ended';
+export type CallPhase = 'idle' | 'preparing' | 'waiting' | 'ringing' | 'connecting' | 'live' | 'ended';
+
+/** How often to try again while waiting for a booked Listener to arrive. */
+const BOOKED_RETRY_MS = 15_000;
+
 
 export interface CallState {
   phase: CallPhase;
@@ -42,12 +46,16 @@ export function useCallSession({ onEnded }: { onEnded?: () => void } = {}) {
   const startedAt = useRef<number | null>(null);
   const onEndedRef = useRef(onEnded);
   onEndedRef.current = onEnded;
+  const bookingId = useRef<string | null>(null);
+  const retryTimer = useRef<number | null>(null);
   const phaseRef = useRef<CallPhase>('idle');
   phaseRef.current = state.phase;
 
   const patch = (next: Partial<CallState>) => setState((s) => ({ ...s, ...next }));
 
   const teardown = useCallback(() => {
+    if (retryTimer.current) window.clearTimeout(retryTimer.current);
+    retryTimer.current = null;
     peer.current?.close();
     peer.current = null;
     mic.current?.getTracks().forEach((t) => t.stop());
@@ -73,6 +81,16 @@ export function useCallSession({ onEnded }: { onEnded?: () => void } = {}) {
     async (msg: ServerMessage) => {
       switch (msg.type) {
         case 'error':
+          // A booked Listener who hasn't arrived yet: wait here and keep trying.
+          if (msg.code === 'LISTENER_NOT_READY' && bookingId.current) {
+            patch({ phase: 'waiting', error: null });
+            const id = bookingId.current;
+            retryTimer.current = window.setTimeout(
+              () => socket.current?.send({ type: 'call:request', bookingId: id }),
+              BOOKED_RETRY_MS,
+            );
+            break;
+          }
           teardown();
           patch({ phase: 'idle', error: msg.message });
           break;
@@ -80,7 +98,7 @@ export function useCallSession({ onEnded }: { onEnded?: () => void } = {}) {
           patch({ phase: 'ringing', callId: msg.callId });
           break;
         case 'call:matched': {
-          patch({ phase: 'connecting' });
+          patch({ phase: 'connecting', callId: msg.callId });
           const callId = msg.callId;
           try {
             peer.current = await createCallPeer({
@@ -129,7 +147,8 @@ export function useCallSession({ onEnded }: { onEnded?: () => void } = {}) {
     [teardown],
   );
 
-  const start = useCallback(async () => {
+  /** Starts a call; with `booking`, joins that booked Conversation instead of ringing everyone. */
+  const start = useCallback(async (booking?: string) => {
     if (!callsSupported()) {
       patch({ error: 'This browser cannot make calls. Please use a recent Chrome, Safari, Edge or Firefox, or try our AI chat.' });
       return;
@@ -141,8 +160,9 @@ export function useCallSession({ onEnded }: { onEnded?: () => void } = {}) {
       patch({ phase: 'idle', error: 'Open Ear needs your microphone for a call. Allow microphone access and try again.' });
       return;
     }
+    bookingId.current = booking ?? null;
     socket.current = openCallSocket({ onMessage: (m) => void handleMessage(m) });
-    socket.current.send({ type: 'call:request' });
+    socket.current.send(booking ? { type: 'call:request', bookingId: booking } : { type: 'call:request' });
   }, [handleMessage]);
 
   const hangup = useCallback(() => {

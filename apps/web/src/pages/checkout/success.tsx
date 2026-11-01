@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import Navbar from '../../components/feature/Navbar';
+import SiteFooter from '../../components/feature/SiteFooter';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { apiFetch, ApiError, formatMoney, type EbookOrder } from '../../lib/api';
@@ -9,6 +10,11 @@ const MAX_ATTEMPTS = 10;
 const POLL_INTERVAL_MS = 2000;
 
 type ViewState = 'checking' | 'completed' | 'failed' | 'processing' | 'error' | 'missing';
+
+const primaryBtn =
+  'oe-btn inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-oe-primary px-6 py-3 font-semibold text-white hover:bg-oe-primary-hover';
+const secondaryBtn =
+  'inline-flex items-center justify-center gap-2 rounded-full border border-oe-line bg-white px-6 py-3 font-medium text-oe-ink hover:bg-oe-surface-low';
 
 export default function CheckoutSuccessPage() {
   const [searchParams] = useSearchParams();
@@ -92,32 +98,29 @@ export default function CheckoutSuccessPage() {
   const needsSignIn = !!reference && !authLoading && !user;
 
   const shell = (content: React.ReactNode) => (
-    <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]">
+    <div className="min-h-screen bg-oe-bg text-oe-ink">
       <Navbar />
-      <div className="pt-24 pb-16">
-        <div className="max-w-4xl mx-auto px-6 md:px-12 lg:px-20">
-          <div className="text-center">{content}</div>
-        </div>
-      </div>
+      <main className="oe-route mx-auto max-w-3xl px-5 pb-20 pt-28 md:px-8">{content}</main>
+      <SiteFooter />
     </div>
   );
 
   if (needsSignIn) {
     return shell(
-      <div className="bg-white rounded-xl shadow-sm p-12 max-w-md mx-auto">
-        <i className="ri-lock-line text-6xl text-[#6B6B6B] mb-4"></i>
-        <h3 className="text-xl font-semibold text-[#2A2A2A] mb-2">Sign in to view your order</h3>
-        <p className="text-[#6B6B6B] mb-6">
-          Please sign in with the account you used to purchase.
-        </p>
+      <div className="mx-auto max-w-md rounded-3xl border border-oe-line bg-white p-8 text-center">
+        <span aria-hidden="true" className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-oe-surface text-2xl text-oe-muted">
+          <i className="ri-lock-line" />
+        </span>
+        <h1 className="mt-4 text-2xl font-semibold">Sign in to see your order</h1>
+        <p className="mt-2 text-oe-muted">Please sign in with the account you used to buy.</p>
         <button
           onClick={() =>
             navigate('/signin', { state: { returnTo: `${location.pathname}${location.search}` } })
           }
-          className="inline-flex items-center gap-2 px-6 py-3 bg-[#0096FF] text-white rounded-lg hover:bg-[#0077CC] transition-colors"
+          className={`${primaryBtn} mt-6`}
         >
-          <i className="ri-login-box-line"></i>
-          Sign In
+          <i className="ri-login-box-line" aria-hidden="true"></i>
+          Sign in
         </button>
       </div>,
     );
@@ -125,10 +128,10 @@ export default function CheckoutSuccessPage() {
 
   if (view === 'checking' || (authLoading && !!reference)) {
     return shell(
-      <div className="py-16">
-        <div className="w-16 h-16 border-4 border-[#0096FF] border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
-        <h1 className="text-2xl md:text-3xl font-bold text-[#2A2A2A] mb-2">Confirming your payment...</h1>
-        <p className="text-[#6B6B6B]">This usually takes just a few seconds. Please don&apos;t close this page.</p>
+      <div className="rounded-3xl border border-oe-line bg-white p-10 text-center" role="status">
+        <div className="mx-auto mb-6 h-12 w-12 animate-spin rounded-full border-4 border-oe-primary border-t-transparent" aria-hidden="true"></div>
+        <h1 className="text-3xl font-bold">Confirming your payment…</h1>
+        <p className="mt-3 text-oe-muted">This usually takes a few seconds. Please don&rsquo;t close this page.</p>
       </div>,
     );
   }
@@ -137,228 +140,164 @@ export default function CheckoutSuccessPage() {
     const config = {
       missing: {
         icon: 'ri-question-line',
-        iconWrap: 'bg-gray-100',
-        iconColor: 'text-[#6B6B6B]',
+        tone: 'bg-oe-surface text-oe-muted',
         title: 'No order to show',
         body: 'We could not find an order reference in this link. If you just paid, check your library or purchase history.',
       },
       error: {
         icon: 'ri-error-warning-line',
-        iconWrap: 'bg-red-100',
-        iconColor: 'text-red-600',
+        tone: 'bg-oe-crisis-tint text-oe-crisis',
         title: 'We could not load your order',
         body: errorMessage || 'Something went wrong while checking your order.',
       },
       failed: {
         icon: 'ri-close-line',
-        iconWrap: 'bg-red-100',
-        iconColor: 'text-red-600',
-        title: 'Payment failed',
+        tone: 'bg-oe-crisis-tint text-oe-crisis',
+        title: 'Payment didn’t go through',
         body: 'Your payment was not completed and you have not been charged for this order. Your cart has been kept so you can try again.',
       },
       processing: {
         icon: 'ri-time-line',
-        iconWrap: 'bg-yellow-100',
-        iconColor: 'text-yellow-600',
-        title: 'Still processing',
-        body: 'Your payment is taking longer than usual to confirm. Your ebooks will appear in your library as soon as it goes through.',
+        tone: 'bg-oe-accent-tint text-oe-accent',
+        title: 'Still confirming',
+        body: 'Your payment is taking longer than usual to confirm. Your books will appear in your library as soon as it goes through.',
       },
     }[view];
 
     return shell(
-      <>
-        <div className={`w-24 h-24 ${config.iconWrap} rounded-full flex items-center justify-center mx-auto mb-8`}>
-          <i className={`${config.icon} text-4xl ${config.iconColor}`}></i>
-        </div>
-        <h1 className="text-3xl md:text-4xl font-bold text-[#2A2A2A] mb-4">{config.title}</h1>
-        <p className="text-lg text-[#6B6B6B] mb-8 max-w-2xl mx-auto">{config.body}</p>
+      <section className="rounded-3xl border border-oe-line bg-white p-8 text-center md:p-10">
+        <span aria-hidden="true" className={`mx-auto flex h-14 w-14 items-center justify-center rounded-full text-2xl ${config.tone}`}>
+          <i className={config.icon} />
+        </span>
+        <h1 className="mt-5 text-3xl font-bold md:text-4xl">{config.title}</h1>
+        <p className="mx-auto mt-3 max-w-xl text-lg text-oe-muted" role={view === 'error' || view === 'failed' ? 'alert' : undefined}>
+          {config.body}
+        </p>
         {reference && (
-          <p className="text-sm text-[#6B6B6B] mb-8">
-            Reference: <span className="font-mono text-[#2A2A2A]">{reference}</span>
+          <p className="mx-auto mt-6 inline-block rounded-2xl bg-oe-surface-low px-4 py-2 text-sm text-oe-muted">
+            Reference: <span className="font-mono text-oe-ink">{reference}</span>
           </p>
         )}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row sm:flex-wrap">
           {view === 'processing' && (
-            <button
-              onClick={() => setPollKey((k) => k + 1)}
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#0096FF] text-white rounded-lg hover:bg-[#0077CC] transition-colors"
-            >
-              <i className="ri-refresh-line"></i>
-              Check Again
+            <button onClick={() => setPollKey((k) => k + 1)} className={primaryBtn}>
+              <i className="ri-refresh-line" aria-hidden="true"></i>
+              Check again
             </button>
           )}
           {view === 'failed' && (
-            <Link
-              to="/checkout"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#0096FF] text-white rounded-lg hover:bg-[#0077CC] transition-colors"
-            >
-              <i className="ri-bank-card-line"></i>
-              Try Again
+            <Link to="/checkout" className={primaryBtn}>
+              <i className="ri-smartphone-line" aria-hidden="true"></i>
+              Try again
             </Link>
           )}
-          <Link
-            to="/library"
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-[#0096FF] text-[#0096FF] rounded-lg hover:bg-[#E6F5FF] transition-colors"
-          >
-            <i className="ri-book-open-line"></i>
-            Go to Library
+          <Link to="/library" className={secondaryBtn}>
+            <i className="ri-book-open-line" aria-hidden="true"></i>
+            Go to My Library
           </Link>
-          <Link
-            to="/contact"
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-gray-300 text-[#6B6B6B] rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            <i className="ri-customer-service-line"></i>
-            Contact Support
+          <Link to="/contact" className={secondaryBtn}>
+            <i className="ri-customer-service-line" aria-hidden="true"></i>
+            Contact us
           </Link>
         </div>
-      </>,
+      </section>,
     );
   }
 
   // view === 'completed'
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]">
-      <Navbar />
+  return shell(
+    <>
+      <section className="text-center" role="status">
+        <span aria-hidden="true" className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-oe-primary-soft text-2xl text-oe-primary-deep">
+          <i className="ri-check-line" />
+        </span>
+        <h1 className="mt-5 text-4xl font-bold md:text-5xl">Your books are ready.</h1>
+        <p className="mx-auto mt-3 max-w-xl text-lg text-oe-muted">
+          Thank you. Your books are now in My Library, ready to read or download whenever you like.
+        </p>
+      </section>
 
-      <div className="pt-24 pb-16">
-        <div className="max-w-4xl mx-auto px-6 md:px-12 lg:px-20">
-          <div className="text-center">
-            {/* Success Icon */}
-            <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-8">
-              <i className="ri-check-line text-4xl text-green-600"></i>
-            </div>
-
-            {/* Success Message */}
-            <h1 className="text-3xl md:text-4xl font-bold text-[#2A2A2A] mb-4">
-              Purchase Successful!
-            </h1>
-            <p className="text-lg text-[#6B6B6B] mb-8 max-w-2xl mx-auto">
-              Thank you for your purchase! Your ebooks have been added to your library and you should receive a confirmation email shortly.
-            </p>
-
-            {order && (
-              <div className="bg-white rounded-xl shadow-sm p-6 max-w-2xl mx-auto mb-12 text-left">
-                <div className="flex justify-between text-sm text-[#6B6B6B] mb-4">
-                  <span>Reference</span>
-                  <span className="font-mono text-[#2A2A2A]">{order.reference}</span>
-                </div>
-                <div className="space-y-2 mb-4">
-                  {order.items.map((item) => (
-                    <div key={item.ebook_id} className="flex justify-between text-sm">
-                      <span className="text-[#2A2A2A]">{item.title}</span>
-                      <span className="text-[#6B6B6B]">{formatMoney(item.price, order.currency)}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="flex justify-between font-semibold text-[#2A2A2A] pt-3 border-t border-gray-200">
-                  <span>Total</span>
-                  <span>{formatMoney(order.total, order.currency)}</span>
-                </div>
-              </div>
-            )}
-
-            {/* Action Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12 max-w-2xl mx-auto">
-              <Link
-                to="/library"
-                className="bg-white rounded-xl shadow-sm p-8 hover:shadow-md transition-shadow text-center group"
-              >
-                <div className="w-16 h-16 bg-[#E6F5FF] rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-[#D6EFFF] transition-colors">
-                  <i className="ri-book-open-line text-2xl text-[#0096FF]"></i>
-                </div>
-                <h3 className="text-lg font-semibold text-[#2A2A2A] mb-2">
-                  Access Your Library
-                </h3>
-                <p className="text-sm text-[#6B6B6B]">
-                  Download and read your purchased ebooks
-                </p>
-              </Link>
-
-              <Link
-                to="/ebook-store"
-                className="bg-white rounded-xl shadow-sm p-8 hover:shadow-md transition-shadow text-center group"
-              >
-                <div className="w-16 h-16 bg-[#E6F5FF] rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-[#D6EFFF] transition-colors">
-                  <i className="ri-shopping-bag-line text-2xl text-[#0096FF]"></i>
-                </div>
-                <h3 className="text-lg font-semibold text-[#2A2A2A] mb-2">
-                  Continue Shopping
-                </h3>
-                <p className="text-sm text-[#6B6B6B]">
-                  Discover more mental wellness ebooks
-                </p>
-              </Link>
-            </div>
-
-            {/* Order Details */}
-            <div className="bg-white rounded-xl shadow-sm p-8 max-w-2xl mx-auto">
-              <h2 className="text-xl font-semibold text-[#2A2A2A] mb-6">What happens next?</h2>
-
-              <div className="space-y-4 text-left">
-                <div className="flex items-start gap-4">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <i className="ri-mail-line text-green-600"></i>
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-[#2A2A2A] mb-1">
-                      Confirmation Email
-                    </h4>
-                    <p className="text-sm text-[#6B6B6B]">
-                      You'll receive a confirmation email with your purchase details and download instructions.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <i className="ri-download-line text-blue-600"></i>
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-[#2A2A2A] mb-1">
-                      Instant Access
-                    </h4>
-                    <p className="text-sm text-[#6B6B6B]">
-                      Your ebooks are now available in your library for unlimited downloads.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <i className="ri-customer-service-line text-purple-600"></i>
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-[#2A2A2A] mb-1">
-                      Support Available
-                    </h4>
-                    <p className="text-sm text-[#6B6B6B]">
-                      Need help? Our support team is here to assist you with any questions.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Additional Actions */}
-            <div className="mt-12 flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                to="/purchase-history"
-                className="inline-flex items-center gap-2 px-6 py-3 border border-[#0096FF] text-[#0096FF] rounded-lg hover:bg-[#E6F5FF] transition-colors"
-              >
-                <i className="ri-history-line"></i>
-                View Purchase History
-              </Link>
-              <Link
-                to="/contact"
-                className="inline-flex items-center gap-2 px-6 py-3 border border-gray-300 text-[#6B6B6B] rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <i className="ri-customer-service-line"></i>
-                Contact Support
-              </Link>
-            </div>
+      {order && (
+        <div className="mt-10 rounded-3xl border border-oe-line bg-white p-6 md:p-8">
+          <div className="flex justify-between gap-3 text-sm text-oe-muted">
+            <span>Reference</span>
+            <span className="font-mono text-oe-ink">{order.reference}</span>
+          </div>
+          <ul className="mt-4 space-y-2">
+            {order.items.map((item) => (
+              <li key={item.ebook_id} className="flex justify-between gap-3 text-sm">
+                <span>{item.title}</span>
+                <span className="text-oe-muted">{formatMoney(item.price, order.currency)}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-4 flex justify-between border-t border-oe-line pt-3 font-semibold">
+            <span>Total</span>
+            <span>{formatMoney(order.total, order.currency)}</span>
           </div>
         </div>
+      )}
+
+      <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+        <Link to="/library" className="group rounded-3xl border border-oe-line bg-white p-6 transition-shadow hover:shadow-oe-md">
+          <span aria-hidden="true" className="flex h-10 w-10 items-center justify-center rounded-full bg-oe-primary-soft text-oe-primary-deep">
+            <i className="ri-book-open-line" />
+          </span>
+          <h2 className="mt-4 text-xl font-semibold group-hover:text-oe-primary">Open My Library</h2>
+          <p className="mt-1 text-sm text-oe-muted">Read or download the books you&rsquo;ve bought.</p>
+        </Link>
+        <Link to="/ebook-store" className="group rounded-3xl border border-oe-line bg-white p-6 transition-shadow hover:shadow-oe-md">
+          <span aria-hidden="true" className="flex h-10 w-10 items-center justify-center rounded-full bg-oe-accent-tint text-oe-accent">
+            <i className="ri-shopping-bag-line" />
+          </span>
+          <h2 className="mt-4 text-xl font-semibold group-hover:text-oe-primary">Keep browsing</h2>
+          <p className="mt-1 text-sm text-oe-muted">Find more self-help books to read.</p>
+        </Link>
       </div>
-    </div>
+
+      <div className="mt-6 rounded-3xl border border-oe-line bg-oe-surface p-6 md:p-8">
+        <h2 className="text-2xl font-semibold">What happens next?</h2>
+        <ul className="mt-5 space-y-4">
+          <li className="flex items-start gap-4">
+            <span aria-hidden="true" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-oe-primary-soft text-oe-primary-deep">
+              <i className="ri-download-line" />
+            </span>
+            <div>
+              <p className="font-semibold">Read any time</p>
+              <p className="text-sm text-oe-muted">Your books stay in My Library, so you can download them again whenever you need.</p>
+            </div>
+          </li>
+          <li className="flex items-start gap-4">
+            <span aria-hidden="true" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-oe-primary-soft text-oe-primary-deep">
+              <i className="ri-history-line" />
+            </span>
+            <div>
+              <p className="font-semibold">Your receipt</p>
+              <p className="text-sm text-oe-muted">This order is saved in your purchase history.</p>
+            </div>
+          </li>
+          <li className="flex items-start gap-4">
+            <span aria-hidden="true" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-oe-accent-tint text-oe-accent">
+              <i className="ri-customer-service-line" />
+            </span>
+            <div>
+              <p className="font-semibold">Need a hand?</p>
+              <p className="text-sm text-oe-muted">If a download doesn&rsquo;t work, get in touch and we&rsquo;ll sort it out.</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+        <Link to="/purchase-history" className={secondaryBtn}>
+          <i className="ri-history-line" aria-hidden="true"></i>
+          View purchase history
+        </Link>
+        <Link to="/contact" className={secondaryBtn}>
+          <i className="ri-customer-service-line" aria-hidden="true"></i>
+          Contact us
+        </Link>
+      </div>
+    </>,
   );
 }

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { MAX_CHAT_MESSAGE_CHARS, MAX_NOTE_CHARS, type ListenerNote } from '@openear/shared/calls';
 import { Link } from 'react-router-dom';
+import ListenerSchedule from '../../components/feature/ListenerSchedule';
 import Navbar from '../../components/feature/Navbar';
 import { useAuth } from '../../contexts/AuthContext';
 import { useListenerSession } from '../../hooks/useListenerSession';
@@ -43,7 +44,7 @@ export default function ListenerConsolePage() {
   if (loading) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]">
+    <div className="min-h-screen bg-oe-bg">
       <Navbar />
       <main className="pt-24 md:pt-28 px-6 pb-12">
         <div className="max-w-3xl mx-auto">
@@ -51,9 +52,9 @@ export default function ListenerConsolePage() {
             <Console />
           ) : (
             <div className="bg-white rounded-3xl shadow-lg p-8 text-center">
-              <h1 className="text-2xl font-bold text-[#2A2A2A] mb-3">Listener console</h1>
-              <p className="text-[#6B6B6B] mb-6">Sign in with your listener account to take calls.</p>
-              <Link to="/signin" className="inline-block px-8 py-3 bg-[#0096FF] text-white rounded-2xl font-semibold hover:bg-[#0077CC]">
+              <h1 className="text-2xl font-bold text-oe-ink mb-3">Listener console</h1>
+              <p className="text-oe-muted mb-6">Sign in with your listener account to take calls.</p>
+              <Link to="/signin" className="inline-block px-8 py-3 bg-oe-primary text-white rounded-2xl font-semibold hover:bg-oe-primary-hover">
                 Sign in
               </Link>
             </div>
@@ -66,17 +67,17 @@ export default function ListenerConsolePage() {
 
 function NotesPanel({ notes }: { notes: ListenerNote[] }) {
   if (notes.length === 0) {
-    return <p className="text-sm text-[#6B6B6B]">No earlier notes about this person.</p>;
+    return <p className="text-sm text-oe-muted">No earlier notes about this person.</p>;
   }
   return (
     <ul className="space-y-2">
       {notes.map((n, i) => (
-        <li key={i} className="rounded-xl bg-[#FAFAFA] p-3 text-sm">
-          <p className="mb-1 text-xs text-[#6B6B6B]">
+        <li key={i} className="rounded-xl bg-oe-surface-low p-3 text-sm">
+          <p className="mb-1 text-xs text-oe-muted">
             {new Date(n.at).toLocaleDateString()} · {n.mode === 'text' ? 'Text chat' : 'Call'}
             {n.byYou && ' · your note'}
           </p>
-          <p className="whitespace-pre-wrap text-[#2A2A2A]">{n.body}</p>
+          <p className="whitespace-pre-wrap text-oe-ink">{n.body}</p>
         </li>
       ))}
     </ul>
@@ -111,8 +112,8 @@ function Console() {
   if (session.role === 'caller') {
     return (
       <div className="bg-white rounded-3xl shadow-lg p-8 text-center">
-        <h1 className="text-2xl font-bold text-[#2A2A2A] mb-3">Listener console</h1>
-        <p className="text-[#6B6B6B]">
+        <h1 className="text-2xl font-bold text-oe-ink mb-3">Listener console</h1>
+        <p className="text-oe-muted">
           This page is for Open Ear listeners. If you should be a listener, ask an admin to add your account.
         </p>
       </div>
@@ -124,8 +125,8 @@ function Console() {
       <div className="bg-white rounded-3xl shadow-lg p-6 md:p-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-[#2A2A2A]">Listener console</h1>
-            <p className="text-sm text-[#6B6B6B] mt-1" role="status" aria-live="polite">
+            <h1 className="text-2xl md:text-3xl font-bold text-oe-ink">Listener console</h1>
+            <p className="text-sm text-oe-muted mt-1" role="status" aria-live="polite">
               {session.connection !== 'ready'
                 ? session.connection === 'reconnecting'
                   ? 'Reconnecting…'
@@ -143,8 +144,8 @@ function Console() {
               disabled={session.connection !== 'ready'}
               className={`px-6 py-3 rounded-2xl font-semibold whitespace-nowrap cursor-pointer disabled:opacity-50 ${
                 session.online
-                  ? 'bg-white text-[#0096FF] border-2 border-[#0096FF] hover:bg-[#E6F5FF]'
-                  : 'bg-[#0096FF] text-white hover:bg-[#0077CC]'
+                  ? 'bg-white text-oe-primary border-2 border-oe-primary hover:bg-oe-primary-tint'
+                  : 'bg-oe-primary text-white hover:bg-oe-primary-hover'
               }`}
             >
               {session.online ? 'Go offline' : 'Go online'}
@@ -152,7 +153,7 @@ function Console() {
           )}
         </div>
         {session.error && (
-          <p role="alert" className="mt-4 px-4 py-3 rounded-xl text-sm bg-[#FFE6E6] border border-[#FF4444] text-[#C62828]">
+          <p role="alert" className="mt-4 px-4 py-3 rounded-xl text-sm bg-oe-crisis-tint border border-oe-crisis text-oe-crisis">
             {session.error}
           </p>
         )}
@@ -160,9 +161,9 @@ function Console() {
 
       {session.active && (
         <div className="bg-white rounded-3xl shadow-lg p-6 md:p-8 text-center">
-          <p className="text-sm text-[#6B6B6B] mb-1">{session.active.mode === 'text' ? 'Text chat with' : 'On a call with'}</p>
-          <h2 className="text-2xl font-bold text-[#2A2A2A] mb-4">{session.active.callerName}</h2>
-          <div className="text-3xl font-bold text-[#0096FF] mb-2">
+          <p className="text-sm text-oe-muted mb-1">{session.active.booked ? 'Booked ' : ''}{session.active.mode === 'text' ? (session.active.booked ? 'text chat with' : 'Text chat with') : session.active.booked ? 'call with' : 'On a call with'}</p>
+          <h2 className="text-2xl font-bold text-oe-ink mb-4">{session.active.callerName}</h2>
+          <div className="text-3xl font-bold text-oe-primary mb-2">
             {session.active.phase === 'live' ? formatTime(session.active.elapsed) : session.active.mode === 'text' ? 'Starting…' : 'Connecting audio…'}
           </div>
           {session.active.peerReconnecting && (
@@ -171,12 +172,12 @@ function Console() {
           {session.active.mode === 'text' && (
             <div className="mt-4 text-left">
               <div className="h-72 space-y-2 overflow-y-auto rounded-2xl border border-gray-100 p-3" aria-live="polite">
-                {session.active.lines.length === 0 && <p className="text-center text-sm text-[#6B6B6B]">No messages yet.</p>}
+                {session.active.lines.length === 0 && <p className="text-center text-sm text-oe-muted">No messages yet.</p>}
                 {session.active.lines.map((line) => (
                   <div key={line.id} className={`flex ${line.from === 'me' ? 'justify-end' : 'justify-start'}`}>
                     <p
                       className={`max-w-[80%] whitespace-pre-wrap rounded-2xl px-3 py-2 text-sm ${
-                        line.from === 'me' ? 'rounded-br-md bg-[#0096FF] text-white' : 'rounded-bl-md bg-[#F5F5F5] text-[#2A2A2A]'
+                        line.from === 'me' ? 'rounded-br-md bg-oe-primary text-white' : 'rounded-bl-md bg-oe-surface text-oe-ink'
                       }`}
                     >
                       {line.text}
@@ -203,16 +204,16 @@ function Console() {
                   disabled={session.active.phase !== 'live'}
                   placeholder="Type a message"
                   autoComplete="off"
-                  className="flex-1 rounded-xl border-2 border-[#E5E5E5] px-4 py-2 focus:border-[#0096FF] focus:outline-none"
+                  className="flex-1 rounded-xl border-2 border-oe-line px-4 py-2 focus:border-oe-primary focus:outline-none"
                 />
-                <button type="submit" disabled={!draft.trim()} className="cursor-pointer rounded-xl bg-[#0096FF] px-5 font-semibold text-white hover:bg-[#0077CC] disabled:opacity-50">
+                <button type="submit" disabled={!draft.trim()} className="cursor-pointer rounded-xl bg-oe-primary px-5 font-semibold text-white hover:bg-oe-primary-hover disabled:opacity-50">
                   Send
                 </button>
               </form>
             </div>
           )}
           <details className="mt-4 text-left" open={session.active.notes.length > 0}>
-            <summary className="cursor-pointer text-sm font-semibold text-[#2A2A2A]">
+            <summary className="cursor-pointer text-sm font-semibold text-oe-ink">
               Earlier notes about {session.active.callerName} ({session.active.notes.length})
             </summary>
             <div className="mt-2">
@@ -226,10 +227,10 @@ function Console() {
               aria-label={session.muted ? 'Unmute microphone' : 'Mute microphone'}
               aria-pressed={session.muted}
               className={`w-14 h-14 rounded-full flex items-center justify-center cursor-pointer ${
-                session.muted ? 'bg-red-500 hover:bg-red-600' : 'bg-[#F5F5F5] hover:bg-[#E6F5FF]'
+                session.muted ? 'bg-red-500 hover:bg-red-600' : 'bg-oe-surface hover:bg-oe-primary-tint'
               }`}
             >
-              <i className={`${session.muted ? 'ri-mic-off-fill text-white' : 'ri-mic-fill text-[#2A2A2A]'} text-2xl`}></i>
+              <i className={`${session.muted ? 'ri-mic-off-fill text-white' : 'ri-mic-fill text-oe-ink'} text-2xl`}></i>
             </button>
             )}
             <button
@@ -244,19 +245,19 @@ function Console() {
 
       {!session.active && session.incoming.length > 0 && (
         <div className="bg-white rounded-3xl shadow-lg p-6 md:p-8" role="alert">
-          <h2 className="text-xl font-bold text-[#2A2A2A] mb-4">Incoming {session.incoming.length === 1 ? 'call' : 'calls'}</h2>
+          <h2 className="text-xl font-bold text-oe-ink mb-4">Incoming {session.incoming.length === 1 ? 'call' : 'calls'}</h2>
           <ul className="space-y-3">
             {session.incoming.map((call) => (
-              <li key={call.callId} className="flex items-center justify-between gap-4 p-4 bg-[#E6F5FF] rounded-2xl">
-                <span className="font-semibold text-[#2A2A2A]">
+              <li key={call.callId} className="flex items-center justify-between gap-4 p-4 bg-oe-primary-tint rounded-2xl">
+                <span className="font-semibold text-oe-ink">
                   {call.callerName}
-                  <span className="ml-2 rounded-full bg-white px-2 py-0.5 text-xs font-medium text-[#0096FF]">
+                  <span className="ml-2 rounded-full bg-white px-2 py-0.5 text-xs font-medium text-oe-primary">
                     {call.mode === 'text' ? 'Text chat' : 'Call'}
                   </span>
                 </span>
                 <button
                   onClick={() => void session.accept(call)}
-                  className="px-6 py-2 bg-[#0096FF] text-white rounded-xl font-semibold hover:bg-[#0077CC] cursor-pointer"
+                  className="px-6 py-2 bg-oe-primary text-white rounded-xl font-semibold hover:bg-oe-primary-hover cursor-pointer"
                 >
                   Accept
                 </button>
@@ -270,23 +271,23 @@ function Console() {
         <div className="bg-white rounded-3xl shadow-lg p-6 md:p-8">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h2 className="text-lg font-bold text-[#2A2A2A]">{session.lastCall.mode === 'text' ? 'Last chat' : 'Last call'}: {session.lastCall.callerName}</h2>
-              <p className="text-sm text-[#6B6B6B]">
+              <h2 className="text-lg font-bold text-oe-ink">{session.lastCall.mode === 'text' ? 'Last chat' : 'Last call'}: {session.lastCall.callerName}</h2>
+              <p className="text-sm text-oe-muted">
                 {session.lastCall.mode === 'text' && session.lastCall.reason === 'hangup'
                   ? 'The chat ended.'
                   : (END_LABELS[session.lastCall.reason] ?? 'The call ended.')}{' '}
                 {session.lastCall.mode === 'text' ? 'Chat' : 'Talk'} time {formatTime(session.lastCall.billedSeconds)}.
               </p>
             </div>
-            <button onClick={session.dismissLastCall} aria-label="Dismiss" className="text-[#6B6B6B] hover:text-[#2A2A2A] cursor-pointer">
+            <button onClick={session.dismissLastCall} aria-label="Dismiss" className="text-oe-muted hover:text-oe-ink cursor-pointer">
               <i className="ri-close-line text-xl"></i>
             </button>
           </div>
           {session.lastCall.noteSaved ? (
-            <p className="mt-4 text-sm text-[#2A2A2A]">Note saved. The next Listener will see it.</p>
+            <p className="mt-4 text-sm text-oe-ink">Note saved. The next Listener will see it.</p>
           ) : (
             <form className="mt-4" onSubmit={(e) => void submitNote(e, session.lastCall!.callId)}>
-              <label htmlFor="listener-note" className="mb-2 block text-sm font-medium text-[#2A2A2A]">
+              <label htmlFor="listener-note" className="mb-2 block text-sm font-medium text-oe-ink">
                 Private note for the next Listener (optional)
               </label>
               <textarea
@@ -296,20 +297,20 @@ function Console() {
                 maxLength={MAX_NOTE_CHARS}
                 rows={3}
                 placeholder="What would help the next Listener? Avoid full names, addresses or anything not needed."
-                className="w-full rounded-xl border-2 border-[#E5E5E5] px-4 py-3 text-sm focus:border-[#0096FF] focus:outline-none"
+                className="w-full rounded-xl border-2 border-oe-line px-4 py-3 text-sm focus:border-oe-primary focus:outline-none"
               />
               {noteError && (
-                <p role="alert" className="mt-1 text-sm text-[#C62828]">
+                <p role="alert" className="mt-1 text-sm text-oe-crisis">
                   {noteError}
                 </p>
               )}
-              <button type="submit" disabled={!note.trim()} className="mt-2 cursor-pointer rounded-xl bg-[#0096FF] px-6 py-2 font-semibold text-white hover:bg-[#0077CC] disabled:opacity-50">
+              <button type="submit" disabled={!note.trim()} className="mt-2 cursor-pointer rounded-xl bg-oe-primary px-6 py-2 font-semibold text-white hover:bg-oe-primary-hover disabled:opacity-50">
                 Save note
               </button>
             </form>
           )}
           {session.lastCall.reported ? (
-            <p className="mt-4 text-sm text-[#2A2A2A]">Thank you. An admin will review your report.</p>
+            <p className="mt-4 text-sm text-oe-ink">Thank you. An admin will review your report.</p>
           ) : (
             <form
               className="mt-4"
@@ -320,7 +321,7 @@ function Console() {
                 setReportReason('');
               }}
             >
-              <label htmlFor="report-reason" className="block text-sm font-medium text-[#2A2A2A] mb-2">
+              <label htmlFor="report-reason" className="block text-sm font-medium text-oe-ink mb-2">
                 Report this caller (only if something was wrong)
               </label>
               <textarea
@@ -330,12 +331,12 @@ function Console() {
                 maxLength={1000}
                 rows={3}
                 placeholder="What happened?"
-                className="w-full px-4 py-3 border-2 border-[#E5E5E5] rounded-xl focus:border-[#0096FF] focus:outline-none text-sm"
+                className="w-full px-4 py-3 border-2 border-oe-line rounded-xl focus:border-oe-primary focus:outline-none text-sm"
               />
               <button
                 type="submit"
                 disabled={!reportReason.trim()}
-                className="mt-3 px-6 py-2 bg-white text-[#C62828] border-2 border-[#C62828] rounded-xl font-semibold hover:bg-[#FFE6E6] disabled:opacity-50 cursor-pointer"
+                className="mt-3 px-6 py-2 bg-white text-oe-crisis border-2 border-oe-crisis rounded-xl font-semibold hover:bg-oe-crisis-tint disabled:opacity-50 cursor-pointer"
               >
                 Send report
               </button>
@@ -343,6 +344,7 @@ function Console() {
           )}
         </div>
       )}
+      <ListenerSchedule refreshKey={session.lastCall?.callId ?? null} />
     </div>
   );
 }

@@ -1,12 +1,9 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { apiFetch } from '../../lib/api';
-import CrisisLink from '../ui/CrisisLink';
-
-const SCROLL_THRESHOLD = 40;
+import { siteConfig } from '../../config/site';
 
 // Cache the admin check per user id so navigating between pages doesn't refetch it.
 const adminCheckCache = new Map<string, Promise<boolean>>();
@@ -22,12 +19,27 @@ function checkIsAdmin(userId: string): Promise<boolean> {
   return pending;
 }
 
+const NAV_LINKS = [
+  { path: '/how-it-works', label: 'How it works' },
+  { path: '/pricing', label: 'Pricing' },
+];
+
+const ACCOUNT_LINKS = [
+  { path: '/dashboard', label: 'Dashboard', icon: 'ri-dashboard-line' },
+  { path: '/profile', label: 'My profile', icon: 'ri-user-line' },
+  { path: '/mood-tracker', label: 'Mood tracker', icon: 'ri-emotion-line' },
+  { path: '/ebook-store', label: 'Store', icon: 'ri-store-2-line' },
+  { path: '/library', label: 'My library', icon: 'ri-book-line' },
+];
+
 interface NavbarProps {
+  /** Kept for existing callers; the Terra header is always solid. */
   transparent?: boolean;
 }
 
-export default function Navbar({ transparent = false }: NavbarProps) {
-  const [isScrolled, setIsScrolled] = useState(false);
+/** Terra site header: logo, pill navigation, "Need urgent help?" and the account button. */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export default function Navbar(_props: NavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [adminUserId, setAdminUserId] = useState<string | null>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -35,20 +47,9 @@ export default function Navbar({ transparent = false }: NavbarProps) {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-
   const userMenuRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > SCROLL_THRESHOLD);
-    };
-    handleScroll();
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Close the user menu on outside click or Escape. (A fixed backdrop would break inside
-  // the transformed header row.)
+  // Close the user menu on outside click or Escape.
   useEffect(() => {
     if (!showUserMenu) return;
     const handlePointer = (e: PointerEvent) => {
@@ -66,16 +67,15 @@ export default function Navbar({ transparent = false }: NavbarProps) {
   }, [showUserMenu]);
 
   const userId = user?.id ?? null;
-  const isUserLoggedIn = !!user;
   const userEmail = user?.email || '';
   // Only trust the server's answer, and only for the currently signed-in user.
-  const isAdminLoggedIn = !!userId && adminUserId === userId;
+  const isAdmin = !!userId && adminUserId === userId;
 
   useEffect(() => {
     if (!userId) return;
     let cancelled = false;
-    void checkIsAdmin(userId).then((isAdmin) => {
-      if (!cancelled) setAdminUserId(isAdmin ? userId : null);
+    void checkIsAdmin(userId).then((admin) => {
+      if (!cancelled) setAdminUserId(admin ? userId : null);
     });
     return () => {
       cancelled = true;
@@ -85,327 +85,156 @@ export default function Navbar({ transparent = false }: NavbarProps) {
   const handleSignOut = () => {
     signOut();
     setShowUserMenu(false);
+    setIsMobileMenuOpen(false);
     navigate('/');
   };
 
-  const navLinks = [
-    { path: '/how-it-works', label: 'How It Works' },
-    { path: '/pricing', label: 'Pricing' },
-    { path: '/mood-tracker', label: 'Mood Tracker' },
-    { path: '/ebook-store', label: 'Store' },
-  ];
   const isStoreFlow =
     location.pathname === '/ebook-store' ||
     location.pathname.startsWith('/ebook/') ||
     location.pathname === '/cart' ||
-    location.pathname === '/checkout' ||
-    location.pathname === '/checkout/success';
+    location.pathname.startsWith('/checkout');
 
   const isActive = (path: string) => location.pathname === path;
-
-  const showBackground = !transparent || isScrolled || isMobileMenuOpen;
-  // The header "shrinks" by sliding its background up and the content half as far
-  // (transform only, so nothing reflows). Distance is --nav-shrink.
-  const shrink = isScrolled ? 'translateY(calc(var(--nav-shrink) * -1))' : 'none';
-  const shrinkHalf = isScrolled ? 'translateY(calc(var(--nav-shrink) / -2))' : 'none';
+  const pillLink = (path: string) =>
+    `rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+      isActive(path) ? 'bg-oe-primary-soft text-oe-primary-deep' : 'text-oe-muted hover:bg-oe-surface hover:text-oe-ink'
+    }`;
+  const accountLinks = isAdmin
+    ? [...ACCOUNT_LINKS, { path: '/admin-dashboard', label: 'Admin', icon: 'ri-shield-user-line' }]
+    : ACCOUNT_LINKS;
 
   return (
-    <nav aria-label="Main" className="fixed top-0 left-0 right-0 z-50 [--nav-shrink:8px] md:[--nav-shrink:16px]">
-      <div
-        aria-hidden="true"
-        style={{ transform: shrink }}
-        className={`absolute inset-0 border-b transition-[opacity,transform] duration-oe-base ease-oe-out ${
-          showBackground ? 'opacity-100' : 'opacity-0'
-        } ${
-          isScrolled
-            ? 'bg-white/75 backdrop-blur-[10px] border-oe-line shadow-oe-sm'
-            : 'bg-white/95 border-transparent'
-        }`}
-      />
-      <div
-        style={{ transform: shrinkHalf }}
-        className="relative max-w-7xl mx-auto px-6 md:px-12 lg:px-20 py-4 md:py-6 transition-transform duration-oe-base ease-oe-out"
-      >
-        <div className="flex items-center justify-between">
-          <Link
-            to="/"
-            style={{ fontFamily: 'Poppins, sans-serif', transform: isScrolled ? 'scale(0.92)' : 'none' }}
-            className="origin-left text-2xl md:text-3xl font-bold text-[#0096FF] hover:opacity-80 transition-[opacity,transform] duration-oe-base ease-oe-out"
-          >
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-oe-surface/80 bg-oe-bg/85 backdrop-blur-xl">
+      <nav aria-label="Main" className="mx-auto flex h-20 max-w-[1120px] items-center justify-between px-5 md:px-8">
+        <Link to="/" className="group flex items-center gap-2.5">
+          <span aria-hidden="true" className="flex h-8 w-8 items-center justify-center rounded-full bg-oe-primary-tint text-oe-primary">
+            <i className="ri-fire-line text-lg" />
+          </span>
+          <span className="font-heading text-xl font-semibold tracking-tight text-oe-ink transition-colors group-hover:text-oe-primary">
             Open Ear
-          </Link>
+          </span>
+        </Link>
 
-          <div className="md:hidden flex items-center gap-2">
-            <CrisisLink compact className="text-sm px-2 py-2" />
-            {/* Mobile Menu Button */}
-            <button
-              type="button"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
-              aria-expanded={isMobileMenuOpen}
-              aria-controls="mobile-menu"
-              className="w-11 h-11 flex items-center justify-center text-oe-blue cursor-pointer"
-            >
-              <i
-                aria-hidden="true"
-                className={`${
-                  isMobileMenuOpen ? 'ri-close-line' : 'ri-menu-line'
-                } text-2xl`}
-              ></i>
-            </button>
-          </div>
-
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-6 lg:gap-10">
-            <CrisisLink compact className="text-sm lg:text-base whitespace-nowrap" />
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`text-sm lg:text-base font-medium transition-colors cursor-pointer whitespace-nowrap ${
-                  isActive(link.path)
-                    ? 'text-[#0096FF]'
-                    : 'text-[#2A2A2A] hover:text-[#0096FF]'
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
-            
-            {/* Shopping Cart Widget */}
-            {isStoreFlow && (
-              <Link
-                to="/cart"
-                className="relative text-[#2A2A2A] hover:text-[#0096FF] transition-colors cursor-pointer"
-              >
-                <i className="ri-shopping-cart-line text-xl"></i>
-                {totalItems > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-[#0096FF] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {totalItems}
-                  </span>
-                )}
-              </Link>
-            )}
-            
-            {isAdminLoggedIn && (
-              <Link
-                to="/admin-dashboard"
-                className={`text-sm lg:text-base font-medium transition-colors cursor-pointer whitespace-nowrap flex items-center gap-2 ${
-                  isActive('/admin-dashboard')
-                    ? 'text-[#0096FF]'
-                    : 'text-[#2A2A2A] hover:text-[#0096FF]'
-                }`}
-              >
-                <i className="ri-shield-user-line"></i>
-                Admin
-              </Link>
-            )}
-            {isUserLoggedIn ? (
-              <div className="relative" ref={userMenuRef}>
-                <button
-                  type="button"
-                  onClick={() => setShowUserMenu(!showUserMenu)}
-                  aria-label="Account menu"
-                  aria-expanded={showUserMenu}
-                  className="flex items-center gap-2 cursor-pointer"
-                >
-                  <div className="w-8 h-8 bg-[#0096FF] rounded-full flex items-center justify-center">
-                    <span className="text-xs font-bold text-white">
-                      {userEmail.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                  <i className={`ri-arrow-${showUserMenu ? 'up' : 'down'}-s-line text-[#2A2A2A]`}></i>
-                </button>
-                
-                {/* User Dropdown Menu */}
-                {showUserMenu && (
-                  <>
-                    <div className="animate-fade-in absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
-                      <div className="px-4 py-3 border-b border-gray-100">
-                        <p className="text-xs text-[#6B6B6B]">Signed in as</p>
-                        <p className="text-sm font-medium text-[#2A2A2A] truncate">{userEmail}</p>
-                      </div>
-                      <Link
-                        to="/profile"
-                        onClick={() => setShowUserMenu(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#2A2A2A] hover:bg-[#E6F5FF] transition-colors cursor-pointer"
-                      >
-                        <i className="ri-user-line text-[#0096FF]"></i>
-                        My Profile
-                      </Link>
-                      <Link
-                        to="/dashboard"
-                        onClick={() => setShowUserMenu(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#2A2A2A] hover:bg-[#E6F5FF] transition-colors cursor-pointer"
-                      >
-                        <i className="ri-dashboard-line text-[#0096FF]"></i>
-                        Dashboard
-                      </Link>
-                      <Link
-                        to="/library"
-                        onClick={() => setShowUserMenu(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#2A2A2A] hover:bg-[#E6F5FF] transition-colors cursor-pointer"
-                      >
-                        <i className="ri-book-line text-[#0096FF]"></i>
-                        My Library
-                      </Link>
-                      <div className="border-t border-gray-100 my-2"></div>
-                      <button
-                        onClick={handleSignOut}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
-                      >
-                        <i className="ri-logout-box-line"></i>
-                        Sign Out
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            ) : (
-              <Link
-                to="/signin"
-                className={`text-sm lg:text-base font-medium transition-colors cursor-pointer whitespace-nowrap ${
-                  isActive('/signin')
-                    ? 'text-[#0096FF]'
-                    : 'text-[#2A2A2A] hover:text-[#0096FF]'
-                }`}
-              >
-                Sign In
-              </Link>
-            )}
-            <Link
-              to="/get-started"
-              className="oe-btn px-6 lg:px-8 py-2.5 lg:py-3 bg-oe-blue text-white rounded-full text-sm lg:text-base font-semibold hover:bg-oe-blue-hover whitespace-nowrap cursor-pointer"
-            >
-              Get Started
+        <div className="hidden items-center gap-1 rounded-full bg-oe-surface px-1.5 py-1 md:flex">
+          {NAV_LINKS.map((link) => (
+            <Link key={link.path} to={link.path} className={pillLink(link.path)}>
+              {link.label}
             </Link>
-          </div>
+          ))}
+          {!user && (
+            <Link to="/signin" className={pillLink('/signin')}>
+              Sign in
+            </Link>
+          )}
         </div>
 
-        {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <div id="mobile-menu" className="animate-fade-in md:hidden mt-6 pb-6 space-y-4 border-t border-gray-100 pt-6">
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={`block text-base font-medium transition-colors cursor-pointer ${
-                  isActive(link.path)
-                    ? 'text-[#0096FF]'
-                    : 'text-[#2A2A2A] hover:text-[#0096FF]'
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
-            
-            {/* Mobile Cart Link */}
-            {isStoreFlow && (
-              <Link
-                to="/cart"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={`block text-base font-medium transition-colors cursor-pointer flex items-center gap-2 ${
-                  isActive('/cart')
-                    ? 'text-[#0096FF]'
-                    : 'text-[#2A2A2A] hover:text-[#0096FF]'
-                }`}
-              >
-                <i className="ri-shopping-cart-line"></i>
-                Cart {totalItems > 0 && `(${totalItems})`}
-              </Link>
-            )}
-            
-            {isAdminLoggedIn && (
-              <Link
-                to="/admin-dashboard"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={`block text-base font-medium transition-colors cursor-pointer flex items-center gap-2 ${
-                  isActive('/admin-dashboard')
-                    ? 'text-[#0096FF]'
-                    : 'text-[#2A2A2A] hover:text-[#0096FF]'
-                }`}
-              >
-                <i className="ri-shield-user-line"></i>
-                Admin
-              </Link>
-            )}
-            {isUserLoggedIn ? (
-              <>
-                <Link
-                  to="/profile"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`block text-base font-medium transition-colors cursor-pointer flex items-center gap-2 ${
-                    isActive('/profile')
-                      ? 'text-[#0096FF]'
-                      : 'text-[#2A2A2A] hover:text-[#0096FF]'
-                  }`}
-                >
-                  <div className="w-6 h-6 bg-[#0096FF] rounded-full flex items-center justify-center">
-                    <span className="text-xs font-bold text-white">
-                      {userEmail.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                  My Profile
-                </Link>
-                <Link
-                  to="/dashboard"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`block text-base font-medium transition-colors cursor-pointer flex items-center gap-2 ${
-                    isActive('/dashboard')
-                      ? 'text-[#0096FF]'
-                      : 'text-[#2A2A2A] hover:text-[#0096FF]'
-                  }`}
-                >
-                  <i className="ri-dashboard-line"></i>
-                  Dashboard
-                </Link>
-                <Link
-                  to="/library"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`block text-base font-medium transition-colors cursor-pointer flex items-center gap-2 ${
-                    isActive('/library')
-                      ? 'text-[#0096FF]'
-                      : 'text-[#2A2A2A] hover:text-[#0096FF]'
-                  }`}
-                >
-                  <i className="ri-book-line"></i>
-                  My Library
-                </Link>
-                <button
-                  onClick={() => {
-                    handleSignOut();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="block w-full text-left text-base font-medium text-red-600 cursor-pointer flex items-center gap-2"
-                >
-                  <i className="ri-logout-box-line"></i>
-                  Sign Out
-                </button>
-              </>
-            ) : (
-              <Link
-                to="/signin"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={`block text-base font-medium transition-colors cursor-pointer ${
-                  isActive('/signin')
-                    ? 'text-[#0096FF]'
-                    : 'text-[#2A2A2A] hover:text-[#0096FF]'
-                }`}
-              >
-                Sign In
-              </Link>
-            )}
-            <Link
-              to="/get-started"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="block text-center px-6 py-3 bg-[#0096FF] text-white rounded-full font-semibold hover:bg-[#0077CC] transition-colors whitespace-nowrap cursor-pointer"
-            >
-              Get Started
+        <div className="flex items-center gap-2.5">
+          <Link
+            to={siteConfig.crisisPath}
+            className="flex items-center gap-2 rounded-full bg-oe-surface-low px-3 py-1.5 text-xs font-medium text-oe-muted transition-colors hover:bg-oe-surface hover:text-oe-ink sm:text-sm"
+          >
+            <span aria-hidden="true" className="h-2 w-2 rounded-full bg-oe-crisis" />
+            Need urgent help?
+          </Link>
+
+          {isStoreFlow && (
+            <Link to="/cart" aria-label={`Cart, ${totalItems} items`} className="relative hidden p-2 text-oe-ink hover:text-oe-primary md:block">
+              <i className="ri-shopping-cart-line text-xl" aria-hidden="true" />
+              {totalItems > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-oe-primary text-xs text-white">
+                  {totalItems}
+                </span>
+              )}
             </Link>
+          )}
+
+          <div className="relative hidden md:block" ref={userMenuRef}>
+            {user ? (
+              <button
+                type="button"
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                aria-label="Account menu"
+                aria-expanded={showUserMenu}
+                className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-oe-primary text-sm font-bold text-white shadow-oe-sm"
+              >
+                {userEmail.charAt(0).toUpperCase() || <i className="ri-user-line" aria-hidden="true" />}
+              </button>
+            ) : (
+              <Link to="/signin" aria-label="Sign in" className="flex h-9 w-9 items-center justify-center rounded-full bg-oe-primary text-white shadow-oe-sm">
+                <i className="ri-user-line" aria-hidden="true" />
+              </Link>
+            )}
+
+            {showUserMenu && user && (
+              <div className="animate-fade-in absolute right-0 top-full z-50 mt-3 w-60 rounded-2xl border border-oe-line bg-white py-2 shadow-oe-md">
+                <div className="border-b border-oe-line px-4 py-3">
+                  <p className="text-xs text-oe-muted">Signed in as</p>
+                  <p className="truncate text-sm font-medium text-oe-ink">{userEmail}</p>
+                </div>
+                {accountLinks.map((link) => (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    onClick={() => setShowUserMenu(false)}
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-oe-ink transition-colors hover:bg-oe-primary-tint"
+                  >
+                    <i className={`${link.icon} text-oe-primary`} aria-hidden="true" />
+                    {link.label}
+                  </Link>
+                ))}
+                <div className="my-2 border-t border-oe-line" />
+                <button
+                  onClick={handleSignOut}
+                  className="flex w-full cursor-pointer items-center gap-3 px-4 py-2.5 text-sm text-oe-crisis transition-colors hover:bg-oe-crisis-tint"
+                >
+                  <i className="ri-logout-box-line" aria-hidden="true" />
+                  Sign out
+                </button>
+              </div>
+            )}
           </div>
-        )}
-      </div>
-    </nav>
+
+          <button
+            type="button"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={isMobileMenuOpen}
+            aria-controls="mobile-menu"
+            className="flex h-11 w-11 cursor-pointer items-center justify-center text-oe-ink md:hidden"
+          >
+            <i aria-hidden="true" className={`${isMobileMenuOpen ? 'ri-close-line' : 'ri-menu-line'} text-2xl`} />
+          </button>
+        </div>
+      </nav>
+
+      {isMobileMenuOpen && (
+        <div id="mobile-menu" className="animate-fade-in border-t border-oe-line bg-oe-bg px-5 pb-6 pt-4 md:hidden">
+          {[...NAV_LINKS, ...(user ? accountLinks : []), ...(isStoreFlow ? [{ path: '/cart', label: `Cart (${totalItems})` }] : [])].map((link) => (
+            <Link
+              key={link.path}
+              to={link.path}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className={`block rounded-xl px-3 py-3 text-base font-medium ${isActive(link.path) ? 'bg-oe-primary-tint text-oe-primary-deep' : 'text-oe-ink'}`}
+            >
+              {link.label}
+            </Link>
+          ))}
+          {user ? (
+            <button onClick={handleSignOut} className="block w-full cursor-pointer rounded-xl px-3 py-3 text-left text-base font-medium text-oe-crisis">
+              Sign out
+            </button>
+          ) : (
+            <Link
+              to="/signin"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="mt-3 block rounded-xl bg-oe-primary px-6 py-3 text-center font-semibold text-white"
+            >
+              Sign in
+            </Link>
+          )}
+        </div>
+      )}
+    </header>
   );
 }

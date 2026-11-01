@@ -50,7 +50,8 @@ export type ClientMessage =
   | { type: 'auth'; token: string }
   | { type: 'listener:online' }
   | { type: 'listener:offline' }
-  | { type: 'call:request'; mode?: ConversationMode }
+  /** With bookingId: join that booked Conversation (its own mode applies). */
+  | { type: 'call:request'; mode?: ConversationMode; bookingId?: string }
   | { type: 'call:cancel'; callId: string }
   | { type: 'call:accept'; callId: string }
   | { type: 'call:connected'; callId: string }
@@ -75,6 +76,8 @@ export type ServerMessage =
       callerName?: string;
       /** Listener only: earlier notes about this person (empty if they turned notes off). */
       notes?: ListenerNote[];
+      /** Listener only: this is a booked Conversation. */
+      booked?: boolean;
     }
   | { type: 'call:started'; callId: string; maxSeconds: number }
   | { type: 'call:low-time'; callId: string; secondsLeft: number }

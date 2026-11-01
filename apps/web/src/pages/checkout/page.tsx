@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/feature/Navbar';
+import SiteFooter from '../../components/feature/SiteFooter';
 import MpesaPaymentModal from '../../components/feature/MpesaPaymentModal';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -21,7 +22,7 @@ export default function CheckoutPage() {
   const [paymentError, setPaymentError] = useState('');
   const [paying, setPaying] = useState(false);
   const orderReference = useRef<string | null>(null);
-  const currency = items[0]?.ebook.currency || 'USD';
+  const currency = items[0]?.ebook.currency || 'KES';
 
   const goToSignIn = () => {
     navigate('/signin', { state: { returnTo: '/checkout' } });
@@ -75,41 +76,38 @@ export default function CheckoutPage() {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]">
+      <div className="min-h-screen bg-oe-bg text-oe-ink">
         <Navbar />
-        <div className="pt-24 pb-16">
-          <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20">
-            <div className="text-center py-16">
-              <div className="bg-white rounded-xl shadow-sm p-12 max-w-md mx-auto">
-                <i className="ri-shopping-cart-line text-6xl text-[#6B6B6B] mb-4"></i>
-                <h3 className="text-xl font-semibold text-[#2A2A2A] mb-2">Your cart is empty</h3>
-                <p className="text-[#6B6B6B] mb-6">
-                  Add some ebooks to your cart before proceeding to checkout.
-                </p>
-                <Link
-                  to="/ebook-store"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-[#0096FF] text-white rounded-lg hover:bg-[#0077CC] transition-colors"
-                >
-                  <i className="ri-book-line"></i>
-                  Browse Ebooks
-                </Link>
-              </div>
-            </div>
+        <main className="oe-route mx-auto max-w-[1120px] px-5 pb-20 pt-28 md:px-8">
+          <div className="mx-auto max-w-md rounded-3xl border border-oe-line bg-white p-8 text-center">
+            <span aria-hidden="true" className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-oe-surface text-2xl text-oe-muted">
+              <i className="ri-shopping-bag-line" />
+            </span>
+            <h1 className="mt-4 text-2xl font-semibold">Your cart is empty</h1>
+            <p className="mt-2 text-oe-muted">Add a book or two to your cart before checking out.</p>
+            <Link
+              to="/ebook-store"
+              className="oe-btn mt-6 inline-flex items-center gap-2 rounded-full bg-oe-primary px-6 py-3 font-semibold text-white hover:bg-oe-primary-hover"
+            >
+              <i className="ri-book-open-line" aria-hidden="true"></i>
+              Browse books
+            </Link>
           </div>
-        </div>
+        </main>
+        <SiteFooter />
       </div>
     );
   }
 
   const buttonLabel = (() => {
     if (authLoading) return 'Loading...';
-    if (!user) return 'Sign in to Checkout';
-    if (totalPrice <= 0) return 'Get for Free';
+    if (!user) return 'Sign in to check out';
+    if (totalPrice <= 0) return 'Get it free';
     return `Pay ${formatMoney(totalPrice, currency)}`;
   })();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]">
+    <div className="min-h-screen bg-oe-bg text-oe-ink">
       <Navbar />
       {paying && (
         <MpesaPaymentModal
@@ -121,162 +119,147 @@ export default function CheckoutPage() {
         />
       )}
 
-      <div className="pt-24 pb-16">
-        <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-[#2A2A2A] mb-2">
-              Checkout
-            </h1>
-            <p className="text-[#6B6B6B]">
-              Complete your purchase to get instant access to your ebooks
-            </p>
-          </div>
+      <main className="oe-route mx-auto max-w-[1120px] px-5 pb-20 pt-28 md:px-8">
+        {/* Header */}
+        <p className="inline-flex items-center gap-1.5 rounded-full bg-oe-accent-tint px-3 py-1 text-xs font-medium uppercase tracking-wide text-oe-accent">
+          <i className="ri-lock-line" aria-hidden="true" /> Checkout
+        </p>
+        <h1 className="mt-4 text-4xl font-bold md:text-5xl">Almost there.</h1>
+        <p className="mt-3 max-w-2xl text-lg text-oe-muted">
+          Pay with M-Pesa and your books go straight into My Library, ready to read or download.
+        </p>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Checkout Details */}
-            <div className="lg:col-span-2">
-              <form id="checkout-form" onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm p-8">
-                <h2 className="text-xl font-semibold text-[#2A2A2A] mb-6">Account</h2>
+        <div className="mt-10 grid grid-cols-1 gap-8 lg:grid-cols-3">
+          {/* Details */}
+          <div className="lg:col-span-2">
+            <form id="checkout-form" onSubmit={handleSubmit} className="rounded-3xl border border-oe-line bg-white p-6 md:p-8">
+              <h2 className="text-2xl font-semibold">Your account</h2>
 
-                {/* Payment Error */}
-                {paymentError && (
-                  <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
-                    <div className="flex items-center gap-2">
-                      <i className="ri-error-warning-line text-red-600"></i>
-                      <p className="text-red-700 text-sm">{paymentError}</p>
-                    </div>
-                  </div>
-                )}
+              {paymentError && (
+                <p role="alert" className="mt-5 flex items-center gap-2 rounded-2xl bg-oe-crisis-tint px-5 py-3 text-sm text-oe-crisis">
+                  <i className="ri-error-warning-line" aria-hidden="true"></i>
+                  {paymentError}
+                </p>
+              )}
 
-                {authLoading ? (
-                  <div className="flex items-center gap-3 text-[#6B6B6B] mb-8">
-                    <div className="w-5 h-5 border-2 border-[#0096FF] border-t-transparent rounded-full animate-spin"></div>
-                    <span>Checking your account...</span>
-                  </div>
-                ) : user ? (
-                  <div className="mb-8 p-4 bg-[#E6F5FF] rounded-xl flex items-center gap-3">
-                    <i className="ri-user-line text-[#0096FF] text-xl"></i>
-                    <div className="min-w-0">
-                      <p className="text-sm text-[#6B6B6B]">Purchasing as</p>
-                      <p className="font-medium text-[#2A2A2A] truncate">{user.email}</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="mb-8 p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
-                    <p className="text-sm text-[#2A2A2A] mb-3">
-                      Please sign in so your ebooks can be added to your library.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={goToSignIn}
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-[#0096FF] text-white rounded-lg hover:bg-[#0077CC] transition-colors text-sm"
-                    >
-                      <i className="ri-login-box-line"></i>
-                      Sign In
-                    </button>
-                  </div>
-                )}
-
-                {/* Payment Section */}
-                <div className="border-t border-gray-200 pt-8">
-                  <h3 className="text-lg font-semibold text-[#2A2A2A] mb-4">Payment Method</h3>
-                  <div className="bg-[#E6F5FF] rounded-xl p-6 text-center">
-                    <i className="ri-secure-payment-line text-4xl text-[#0096FF] mb-2"></i>
-                    <p className="text-[#0096FF] font-medium mb-1">Secure Payment Processing</p>
-                    <p className="text-sm text-[#6B6B6B]">
-                      You&apos;ll pay with M-Pesa: we send a prompt to your phone and you confirm with your PIN. We never see your PIN.
-                    </p>
+              {authLoading ? (
+                <div className="mt-5 flex items-center gap-3 text-oe-muted" role="status">
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-oe-primary border-t-transparent" aria-hidden="true"></div>
+                  <span>Checking your account…</span>
+                </div>
+              ) : user ? (
+                <div className="mt-5 flex items-center gap-3 rounded-2xl bg-oe-surface-low p-4">
+                  <span aria-hidden="true" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-oe-primary-soft text-oe-primary-deep">
+                    <i className="ri-user-line" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-sm text-oe-muted">Buying as</p>
+                    <p className="truncate font-medium">{user.email}</p>
                   </div>
                 </div>
-              </form>
-            </div>
-
-            {/* Order Summary */}
-            <div className="lg:col-span-1">
-              <div className="bg-white rounded-xl shadow-sm p-6 sticky top-24">
-                <h2 className="text-xl font-semibold text-[#2A2A2A] mb-6">Order Summary</h2>
-
-                {/* Items */}
-                <div className="space-y-4 mb-6">
-                  {items.map(item => (
-                    <div key={item.ebook.id} className="flex gap-3">
-                      <div className="w-12 h-16 bg-gray-100 rounded flex items-center justify-center flex-shrink-0 overflow-hidden">
-                        {item.ebook.cover_image_url ? (
-                          <img src={item.ebook.cover_image_url} alt={item.ebook.title} className="w-full h-full object-cover" />
-                        ) : (
-                          <i className="ri-book-line text-[#6B6B6B]"></i>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-[#2A2A2A] text-sm line-clamp-2">
-                          {item.ebook.title}
-                        </h4>
-                        {item.ebook.author && (
-                          <p className="text-xs text-[#6B6B6B]">
-                            by {item.ebook.author}
-                          </p>
-                        )}
-                        <p className="text-sm font-semibold text-[#0096FF] mt-1">
-                          {formatMoney(item.ebook.price, item.ebook.currency)}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+              ) : (
+                <div className="mt-5 rounded-2xl bg-oe-accent-tint p-4">
+                  <p className="text-sm">Please sign in so your books can be added to your library.</p>
+                  <button
+                    type="button"
+                    onClick={goToSignIn}
+                    className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-full bg-oe-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-oe-primary-hover"
+                  >
+                    <i className="ri-login-box-line" aria-hidden="true"></i>
+                    Sign in
+                  </button>
                 </div>
+              )}
 
-                {/* Totals */}
-                <div className="space-y-3 mb-6 pt-4 border-t border-gray-200">
-                  <div className="flex justify-between text-[#6B6B6B]">
-                    <span>Subtotal</span>
-                    <span>{formatMoney(totalPrice, currency)}</span>
-                  </div>
-                  <div className="flex justify-between text-[#6B6B6B]">
-                    <span>Tax</span>
-                    <span>{formatMoney(0, currency)}</span>
-                  </div>
-                  <div className="flex justify-between text-lg font-semibold text-[#2A2A2A] pt-3 border-t border-gray-200">
-                    <span>Total</span>
-                    <span>{formatMoney(totalPrice, currency)}</span>
-                  </div>
-                  <p className="text-xs text-[#6B6B6B]">
-                    Final price is confirmed by our server before payment.
+              <h2 className="mt-10 text-2xl font-semibold">How you&rsquo;ll pay</h2>
+              <div className="mt-5 flex gap-4 rounded-2xl bg-oe-surface-low p-5">
+                <span aria-hidden="true" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-oe-primary-soft text-oe-primary-deep">
+                  <i className="ri-smartphone-line" />
+                </span>
+                <div>
+                  <p className="font-semibold">M-Pesa</p>
+                  <p className="mt-1 text-sm text-oe-muted">
+                    We send a prompt to your phone and you confirm with your PIN. We never see your PIN.
                   </p>
                 </div>
-
-                {/* Checkout Button */}
-                <button
-                  type="submit"
-                  form="checkout-form"
-                  disabled={isProcessing || authLoading}
-                  className="w-full px-6 py-3 bg-[#0096FF] text-white rounded-lg hover:bg-[#0077CC] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isProcessing ? (
-                    <div className="flex items-center justify-center gap-2">
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Redirecting...
-                    </div>
-                  ) : (
-                    buttonLabel
-                  )}
-                </button>
-
-                {/* Security Info */}
-                <div className="mt-4 text-center">
-                  <div className="flex items-center justify-center gap-2 text-sm text-[#6B6B6B] mb-2">
-                    <i className="ri-shield-check-line text-green-600"></i>
-                    <span>Pay securely with M-Pesa</span>
-                  </div>
-                  <div className="flex items-center justify-center gap-2 text-sm text-[#6B6B6B]">
-                    <i className="ri-download-line text-[#0096FF]"></i>
-                    <span>Instant digital delivery</span>
-                  </div>
-                </div>
               </div>
-            </div>
+            </form>
           </div>
+
+          {/* Summary */}
+          <aside className="lg:col-span-1">
+            <div className="rounded-3xl border border-oe-line bg-white p-6 md:p-8 lg:sticky lg:top-28">
+              <h2 className="text-2xl font-semibold">Your order</h2>
+
+              <ul className="mt-6 space-y-4">
+                {items.map(item => (
+                  <li key={item.ebook.id} className="flex gap-3">
+                    <div className="flex h-16 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-oe-surface-low">
+                      {item.ebook.cover_image_url ? (
+                        <img src={item.ebook.cover_image_url} alt={item.ebook.title} className="h-full w-full object-cover" />
+                      ) : (
+                        <i className="ri-book-line text-oe-muted" aria-hidden="true"></i>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="line-clamp-2 text-sm font-semibold">{item.ebook.title}</h3>
+                      {item.ebook.author && <p className="text-xs text-oe-muted">by {item.ebook.author}</p>}
+                      <p className="mt-1 text-sm font-semibold text-oe-primary-deep">
+                        {formatMoney(item.ebook.price, item.ebook.currency)}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+
+              <dl className="mt-6 space-y-3 rounded-2xl bg-oe-surface-low p-4 text-sm">
+                <div className="flex justify-between text-oe-muted">
+                  <dt>Subtotal</dt>
+                  <dd>{formatMoney(totalPrice, currency)}</dd>
+                </div>
+                <div className="flex justify-between text-oe-muted">
+                  <dt>Tax</dt>
+                  <dd>{formatMoney(0, currency)}</dd>
+                </div>
+                <div className="flex justify-between border-t border-oe-line pt-3 text-base font-semibold text-oe-ink">
+                  <dt>Total</dt>
+                  <dd>{formatMoney(totalPrice, currency)}</dd>
+                </div>
+              </dl>
+              <p className="mt-2 text-xs text-oe-muted">Final price is confirmed by our server before payment.</p>
+
+              <button
+                type="submit"
+                form="checkout-form"
+                disabled={isProcessing || authLoading}
+                className="oe-btn mt-6 w-full cursor-pointer rounded-full bg-oe-primary px-6 py-3 font-semibold text-white hover:bg-oe-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isProcessing ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" aria-hidden="true"></span>
+                    Redirecting…
+                  </span>
+                ) : (
+                  buttonLabel
+                )}
+              </button>
+
+              <ul className="mt-5 space-y-2 text-sm text-oe-muted">
+                <li className="flex items-center gap-2">
+                  <i className="ri-shield-check-line text-oe-primary" aria-hidden="true"></i>
+                  Pay securely with M-Pesa
+                </li>
+                <li className="flex items-center gap-2">
+                  <i className="ri-download-line text-oe-primary" aria-hidden="true"></i>
+                  Ready in My Library right after payment
+                </li>
+              </ul>
+            </div>
+          </aside>
         </div>
-      </div>
+      </main>
+
+      <SiteFooter />
     </div>
   );
 }

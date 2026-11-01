@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import Navbar from '../../components/feature/Navbar';
+import SiteFooter from '../../components/feature/SiteFooter';
 import { useAuth } from '../../contexts/AuthContext';
 import { apiFetch } from '../../lib/api';
 
@@ -78,84 +80,86 @@ export default function ResetPasswordPage() {
   const checking = tokenState === 'checking';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50 flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-block">
-            <div className="w-16 h-16 bg-gradient-to-br from-teal-500 to-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-              <i className="ri-phone-line text-3xl text-white"></i>
-            </div>
-          </Link>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Set New Password</h1>
-          <p className="text-gray-600">
-            {success ? 'Password updated successfully!' : 'Enter your new password below'}
+    <div className="min-h-screen bg-oe-bg text-oe-ink">
+      <Navbar />
+      <main className="oe-route mx-auto max-w-md px-5 pb-20 pt-28 md:px-8">
+        <div className="text-center">
+          <span aria-hidden="true" className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-oe-primary-soft text-2xl text-oe-primary-deep">
+            <i className="ri-lock-password-line" />
+          </span>
+          <h1 className="mt-4 text-3xl font-bold md:text-4xl">Set a new password.</h1>
+          <p className="mt-3 text-oe-muted">
+            {success ? 'Your password has been updated.' : 'Choose a password with at least 6 characters.'}
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <section className="mt-8 rounded-3xl border border-oe-line bg-white p-6 md:p-8">
           {checking && !success ? (
-            <div className="text-center py-8 space-y-4">
-              <div className="w-12 h-12 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto" />
-              <p className="text-gray-600 text-sm">Verifying your reset link…</p>
+            <div className="space-y-4 py-6 text-center" role="status">
+              <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-oe-primary border-t-transparent" aria-hidden="true" />
+              <p className="text-sm text-oe-muted">Checking your reset link…</p>
             </div>
           ) : tokenState === 'invalid' ? (
-            <div className="text-center space-y-6">
-              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto">
-                <i className="ri-error-warning-line text-3xl text-red-600"></i>
-              </div>
+            <div className="space-y-5 text-center">
+              <span aria-hidden="true" className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-oe-crisis-tint text-2xl text-oe-crisis">
+                <i className="ri-link-unlink" />
+              </span>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Invalid Reset Link</h3>
-                <p className="text-gray-600 text-sm">{error || 'This password reset link is invalid or has expired.'}</p>
+                <h2 className="text-xl font-semibold">This link has expired</h2>
+                <p role="alert" className="mt-2 text-sm text-oe-muted">
+                  {error || 'This password reset link is invalid or has expired.'}
+                </p>
               </div>
-              <Link
-                to="/forgot-password"
-                className="inline-block bg-gradient-to-r from-teal-500 to-teal-600 text-white px-6 py-3 rounded-lg font-medium"
-              >
-                Request New Link
+              <Link to="/forgot-password" className="oe-btn inline-flex items-center justify-center gap-2 rounded-full bg-oe-primary px-6 py-3 font-semibold text-white hover:bg-oe-primary-hover">
+                Request a new link
               </Link>
             </div>
           ) : success ? (
-            <div className="text-center space-y-6">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-                <i className="ri-check-line text-3xl text-green-600"></i>
-              </div>
+            <div className="space-y-5 text-center" role="status">
+              <span aria-hidden="true" className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-oe-primary-soft text-2xl text-oe-primary-deep">
+                <i className="ri-check-line" />
+              </span>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Password Updated!</h3>
-                <p className="text-gray-600 text-sm">Redirecting to sign in...</p>
+                <h2 className="text-xl font-semibold">Password updated</h2>
+                <p className="mt-2 text-sm text-oe-muted">Taking you to sign in…</p>
               </div>
-              <Link to="/signin" className="inline-block bg-gradient-to-r from-teal-500 to-teal-600 text-white px-6 py-3 rounded-lg font-medium">
-                Go to Sign In
+              <Link to="/signin" className="oe-btn inline-flex items-center justify-center gap-2 rounded-full bg-oe-primary px-6 py-3 font-semibold text-white hover:bg-oe-primary-hover">
+                Go to sign in
               </Link>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-5">
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{error}</div>
+                <p role="alert" className="rounded-2xl bg-oe-crisis-tint px-5 py-3 text-sm text-oe-crisis">
+                  {error}
+                </p>
               )}
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                  New Password
+                <label htmlFor="password" className="block text-sm font-medium">
+                  New password
                 </label>
                 <input
                   type="password"
                   id="password"
+                  autoComplete="new-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 text-sm"
+                  className="mt-2 w-full rounded-xl border border-oe-line bg-oe-surface-low px-4 py-3 focus:border-oe-primary focus:outline-none focus:ring-2 focus:ring-oe-primary/30"
                   required
                   minLength={6}
                 />
               </div>
               <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                  Confirm Password
+                <label htmlFor="confirmPassword" className="block text-sm font-medium">
+                  Confirm new password
                 </label>
                 <input
                   type="password"
                   id="confirmPassword"
+                  autoComplete="new-password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 text-sm"
+                  className="mt-2 w-full rounded-xl border border-oe-line bg-oe-surface-low px-4 py-3 focus:border-oe-primary focus:outline-none focus:ring-2 focus:ring-oe-primary/30"
                   required
                   minLength={6}
                 />
@@ -163,19 +167,21 @@ export default function ResetPasswordPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-teal-500 to-teal-600 text-white py-3 rounded-lg font-medium disabled:opacity-50"
+                className="oe-btn inline-flex items-center justify-center gap-2 rounded-full bg-oe-primary px-6 py-3 font-semibold text-white hover:bg-oe-primary-hover w-full cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {loading ? 'Updating...' : 'Update Password'}
+                {loading ? 'Updating…' : 'Update password'}
               </button>
-              <div className="text-center">
-                <Link to="/signin" className="text-sm text-gray-600">
-                  Back to Sign In
-                </Link>
-              </div>
             </form>
           )}
-        </div>
-      </div>
+        </section>
+
+        <p className="mt-6 text-center text-sm">
+          <Link to="/signin" className="inline-flex items-center gap-1 font-medium text-oe-primary hover:underline">
+            <i className="ri-arrow-left-line" aria-hidden="true" /> Back to sign in
+          </Link>
+        </p>
+      </main>
+      <SiteFooter />
     </div>
   );
 }

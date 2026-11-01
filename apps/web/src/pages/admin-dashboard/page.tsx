@@ -329,19 +329,19 @@ export default function AdminDashboardPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'Active':
-        return 'bg-green-100 text-green-700';
+        return 'bg-forest-100 text-forest-700';
       case 'Completed':
-        return 'bg-blue-100 text-blue-700';
+        return 'bg-forest-100 text-forest-700';
       case 'Cancelled':
         return 'bg-red-100 text-red-700';
       case 'pending':
         return 'bg-yellow-100 text-yellow-700';
       case 'confirmed':
-        return 'bg-green-100 text-green-700';
+        return 'bg-forest-100 text-forest-700';
       case 'cancelled':
         return 'bg-red-100 text-red-700';
       case 'completed':
-        return 'bg-blue-100 text-blue-700';
+        return 'bg-forest-100 text-forest-700';
       default:
         return 'bg-gray-100 text-gray-700';
     }
@@ -409,10 +409,10 @@ export default function AdminDashboardPage() {
   const getCallStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
       case 'completed':
-        return 'bg-green-100 text-green-700';
+        return 'bg-forest-100 text-forest-700';
       case 'active':
       case 'in-progress':
-        return 'bg-blue-100 text-blue-700';
+        return 'bg-forest-100 text-forest-700';
       case 'failed':
       case 'error':
         return 'bg-red-100 text-red-700';
@@ -440,12 +440,12 @@ export default function AdminDashboardPage() {
   const getTransactionTypeColor = (type: string) => {
     switch (type?.toLowerCase()) {
       case 'purchase':
-        return 'bg-green-100 text-green-700';
+        return 'bg-forest-100 text-forest-700';
       case 'usage':
       case 'deduction':
         return 'bg-orange-100 text-orange-700';
       case 'refund':
-        return 'bg-blue-100 text-blue-700';
+        return 'bg-forest-100 text-forest-700';
       case 'bonus':
       case 'reward':
         return 'bg-purple-100 text-purple-700';
@@ -458,7 +458,7 @@ export default function AdminDashboardPage() {
     switch (status?.toLowerCase()) {
       case 'completed':
       case 'success':
-        return 'bg-green-100 text-green-700';
+        return 'bg-forest-100 text-forest-700';
       case 'pending':
         return 'bg-yellow-100 text-yellow-700';
       case 'failed':
@@ -487,21 +487,21 @@ export default function AdminDashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]">
+    <div className="min-h-screen bg-oe-bg">
       {/* Admin Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md shadow-sm">
         <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20 py-4 md:py-6">
           <div className="flex items-center justify-between">
             <Link
               to="/"
-              className="text-2xl md:text-3xl font-bold text-[#0096FF] hover:opacity-80 transition-opacity"
-              style={{ fontFamily: 'Poppins, sans-serif' }}
+              className="text-2xl md:text-3xl font-bold text-oe-primary hover:opacity-80 transition-opacity"
+             
             >
               Open Ear
             </Link>
 
             <div className="flex items-center gap-6">
-              <span className="text-sm md:text-base font-medium text-[#2A2A2A]">
+              <span className="text-sm md:text-base font-medium text-oe-ink">
                 Admin Dashboard
               </span>
               <button
@@ -520,10 +520,10 @@ export default function AdminDashboardPage() {
       <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20 py-8 md:py-12 pt-32">
         {/* Header */}
         <div className="mb-8 md:mb-12">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#2A2A2A] mb-3" style={{ fontFamily: 'Poppins, sans-serif' }}>
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-oe-ink mb-3">
             Admin Dashboard
           </h1>
-          <p className="text-base md:text-lg text-[#6B6B6B]">
+          <p className="text-base md:text-lg text-oe-muted">
             Monitor platform performance and manage operations
           </p>
           <div className="flex flex-wrap gap-2 mt-4">
@@ -533,7 +533,7 @@ export default function AdminDashboardPage() {
                 type="button"
                 onClick={() => setTimeRange(range)}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium cursor-pointer ${
-                  timeRange === range ? 'bg-[#0096FF] text-white' : 'bg-white text-[#6B6B6B] hover:bg-[#E6F5FF]'
+                  timeRange === range ? 'bg-oe-primary text-white' : 'bg-white text-oe-muted hover:bg-oe-primary-tint'
                 }`}
               >
                 {range === 'all' ? 'All time' : range.toUpperCase()}
@@ -548,8 +548,8 @@ export default function AdminDashboardPage() {
             onClick={() => setActiveView('overview')}
             className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all whitespace-nowrap cursor-pointer ${
               activeView === 'overview' 
-                ? 'bg-[#0096FF] text-white' 
-                : 'bg-white text-[#2A2A2A] hover:bg-[#E6F5FF]'
+                ? 'bg-oe-primary text-white' 
+                : 'bg-white text-oe-ink hover:bg-oe-primary-tint'
             }`}
           >
             <i className="ri-dashboard-line text-lg"></i>
@@ -559,8 +559,8 @@ export default function AdminDashboardPage() {
             onClick={() => setActiveView('appointments')}
             className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all whitespace-nowrap cursor-pointer ${
               activeView === 'appointments' 
-                ? 'bg-[#0096FF] text-white' 
-                : 'bg-white text-[#2A2A2A] hover:bg-[#E6F5FF]'
+                ? 'bg-oe-primary text-white' 
+                : 'bg-white text-oe-ink hover:bg-oe-primary-tint'
             }`}
           >
             <i className="ri-calendar-check-line text-lg"></i>
@@ -570,8 +570,8 @@ export default function AdminDashboardPage() {
             onClick={() => setActiveView('sessions')}
             className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all whitespace-nowrap cursor-pointer ${
               activeView === 'sessions' 
-                ? 'bg-[#0096FF] text-white' 
-                : 'bg-white text-[#2A2A2A] hover:bg-[#E6F5FF]'
+                ? 'bg-oe-primary text-white' 
+                : 'bg-white text-oe-ink hover:bg-oe-primary-tint'
             }`}
           >
             <i className="ri-time-line text-lg"></i>
@@ -581,8 +581,8 @@ export default function AdminDashboardPage() {
             onClick={() => setActiveView('transactions')}
             className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all whitespace-nowrap cursor-pointer ${
               activeView === 'transactions' 
-                ? 'bg-[#0096FF] text-white' 
-                : 'bg-white text-[#2A2A2A] hover:bg-[#E6F5FF]'
+                ? 'bg-oe-primary text-white' 
+                : 'bg-white text-oe-ink hover:bg-oe-primary-tint'
             }`}
           >
             <i className="ri-exchange-dollar-line text-lg"></i>
@@ -592,8 +592,8 @@ export default function AdminDashboardPage() {
             onClick={() => setActiveView('clients')}
             className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all whitespace-nowrap cursor-pointer ${
               activeView === 'clients' 
-                ? 'bg-[#0096FF] text-white' 
-                : 'bg-white text-[#2A2A2A] hover:bg-[#E6F5FF]'
+                ? 'bg-oe-primary text-white' 
+                : 'bg-white text-oe-ink hover:bg-oe-primary-tint'
             }`}
           >
             <i className="ri-user-line text-lg"></i>
@@ -603,8 +603,8 @@ export default function AdminDashboardPage() {
             onClick={() => setActiveView('revenue')}
             className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all whitespace-nowrap cursor-pointer ${
               activeView === 'revenue' 
-                ? 'bg-[#0096FF] text-white' 
-                : 'bg-white text-[#2A2A2A] hover:bg-[#E6F5FF]'
+                ? 'bg-oe-primary text-white' 
+                : 'bg-white text-oe-ink hover:bg-oe-primary-tint'
             }`}
           >
             <i className="ri-line-chart-line text-lg"></i>
@@ -612,21 +612,21 @@ export default function AdminDashboardPage() {
           </button>
           <Link 
             to="/admin/ebook-management"
-            className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all whitespace-nowrap cursor-pointer bg-white text-[#2A2A2A] hover:bg-[#E6F5FF]"
+            className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all whitespace-nowrap cursor-pointer bg-white text-oe-ink hover:bg-oe-primary-tint"
           >
             <i className="ri-book-line text-lg"></i>
             Store
           </Link>
           <Link
             to="/admin/listeners"
-            className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all whitespace-nowrap cursor-pointer bg-white text-[#2A2A2A] hover:bg-[#E6F5FF]"
+            className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all whitespace-nowrap cursor-pointer bg-white text-oe-ink hover:bg-oe-primary-tint"
           >
             <i className="ri-headphone-line text-lg"></i>
             Listeners
           </Link>
           <Link
             to="/admin/knowledge"
-            className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all whitespace-nowrap cursor-pointer bg-white text-[#2A2A2A] hover:bg-[#E6F5FF]"
+            className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all whitespace-nowrap cursor-pointer bg-white text-oe-ink hover:bg-oe-primary-tint"
           >
             <i className="ri-book-open-line text-lg"></i>
             AI knowledge
@@ -650,13 +650,13 @@ export default function AdminDashboardPage() {
               ].map((card) => (
                 <div key={card.label} className="bg-white rounded-3xl p-6 md:p-8 shadow-lg">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-[#0096FF]/10 rounded-2xl flex items-center justify-center">
-                      <i className={`${card.icon} text-2xl text-[#0096FF]`}></i>
+                    <div className="w-12 h-12 bg-oe-primary/10 rounded-2xl flex items-center justify-center">
+                      <i className={`${card.icon} text-2xl text-oe-primary`}></i>
                     </div>
                     {card.trend !== undefined && (
                       <span
                         className={`text-xs font-medium px-2 py-1 rounded-full ${
-                          card.trend >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                          card.trend >= 0 ? 'bg-forest-100 text-forest-700' : 'bg-red-100 text-red-700'
                         }`}
                       >
                         {card.trend >= 0 ? '+' : ''}
@@ -667,47 +667,47 @@ export default function AdminDashboardPage() {
                   {analyticsLoading ? (
                     <div className="h-10 bg-gray-100 rounded animate-pulse" />
                   ) : (
-                    <p className="text-3xl font-bold text-[#2A2A2A]">{card.value}</p>
+                    <p className="text-3xl font-bold text-oe-ink">{card.value}</p>
                   )}
-                  <p className="text-sm text-[#6B6B6B] mt-1">{card.label}</p>
+                  <p className="text-sm text-oe-muted mt-1">{card.label}</p>
                 </div>
               ))}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-8 md:mb-12">
               <div className="bg-white rounded-3xl p-6 shadow-lg">
-                <p className="text-2xl font-bold text-[#0096FF]">{metrics.paidSessions}</p>
-                <p className="text-sm text-[#6B6B6B]">Completed call sessions</p>
+                <p className="text-2xl font-bold text-oe-primary">{metrics.paidSessions}</p>
+                <p className="text-sm text-oe-muted">Completed call sessions</p>
               </div>
               <div className="bg-white rounded-3xl p-6 shadow-lg">
-                <p className="text-2xl font-bold text-[#0096FF]">{analytics.totalSessions}</p>
-                <p className="text-sm text-[#6B6B6B]">Total call sessions</p>
+                <p className="text-2xl font-bold text-oe-primary">{analytics.totalSessions}</p>
+                <p className="text-sm text-oe-muted">Total call sessions</p>
               </div>
               <div className="bg-white rounded-3xl p-6 shadow-lg">
-                <p className="text-2xl font-bold text-[#0096FF]">{analytics.avgSessionDuration}</p>
-                <p className="text-sm text-[#6B6B6B]">Avg. call duration</p>
+                <p className="text-2xl font-bold text-oe-primary">{analytics.avgSessionDuration}</p>
+                <p className="text-sm text-oe-muted">Avg. call duration</p>
               </div>
             </div>
 
             <div className="bg-white rounded-3xl p-6 md:p-10 shadow-lg">
-              <h2 className="text-2xl font-bold text-[#2A2A2A] mb-6">Recent Sessions</h2>
+              <h2 className="text-2xl font-bold text-oe-ink mb-6">Recent Sessions</h2>
               {sessions.length === 0 ? (
-                <p className="text-[#6B6B6B] text-center py-8">No sessions yet. Activity appears here when users make calls.</p>
+                <p className="text-oe-muted text-center py-8">No sessions yet. Activity appears here when users make calls.</p>
               ) : (
                 <div className="space-y-3">
                   {sessions.map((session) => (
                     <div
                       key={session.id}
-                      className="flex flex-wrap items-center justify-between gap-2 p-4 bg-[#FAFAFA] rounded-xl"
+                      className="flex flex-wrap items-center justify-between gap-2 p-4 bg-oe-surface-low rounded-xl"
                     >
                       <div>
-                        <p className="font-semibold text-[#2A2A2A]">{session.clientId}</p>
-                        <p className="text-xs text-[#6B6B6B]">{session.time}</p>
+                        <p className="font-semibold text-oe-ink">{session.clientId}</p>
+                        <p className="text-xs text-oe-muted">{session.time}</p>
                       </div>
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(session.status)}`}>
                         {session.status}
                       </span>
-                      <span className="text-sm text-[#6B6B6B]">{session.duration}</span>
+                      <span className="text-sm text-oe-muted">{session.duration}</span>
                     </div>
                   ))}
                 </div>
@@ -723,63 +723,63 @@ export default function AdminDashboardPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-8 md:mb-12">
               <div className="bg-white rounded-3xl p-6 md:p-8 shadow-lg">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 md:w-14 md:h-14 bg-[#0096FF]/10 rounded-2xl flex items-center justify-center">
-                    <i className="ri-money-dollar-circle-fill text-2xl md:text-3xl text-[#0096FF]"></i>
+                  <div className="w-12 h-12 md:w-14 md:h-14 bg-oe-primary/10 rounded-2xl flex items-center justify-center">
+                    <i className="ri-money-dollar-circle-fill text-2xl md:text-3xl text-oe-primary"></i>
                   </div>
-                  <span className="text-xs md:text-sm font-medium text-green-600 bg-green-100 px-3 py-1 rounded-full">
+                  <span className="text-xs md:text-sm font-medium text-forest-600 bg-forest-100 px-3 py-1 rounded-full">
                     +{metrics.trend}%
                   </span>
                 </div>
-                <p className="text-3xl md:text-4xl font-bold text-[#2A2A2A] mb-2">
+                <p className="text-3xl md:text-4xl font-bold text-oe-ink mb-2">
                   ${metrics.totalRevenue.toLocaleString()}
                 </p>
-                <p className="text-sm md:text-base text-[#6B6B6B]">Total Revenue</p>
+                <p className="text-sm md:text-base text-oe-muted">Total Revenue</p>
               </div>
 
               <div className="bg-white rounded-3xl p-6 md:p-8 shadow-lg">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 md:w-14 md:h-14 bg-[#0096FF]/10 rounded-2xl flex items-center justify-center">
-                    <i className="ri-calendar-check-fill text-2xl md:text-3xl text-[#0096FF]"></i>
+                  <div className="w-12 h-12 md:w-14 md:h-14 bg-oe-primary/10 rounded-2xl flex items-center justify-center">
+                    <i className="ri-calendar-check-fill text-2xl md:text-3xl text-oe-primary"></i>
                   </div>
-                  <span className="text-xs md:text-sm font-medium text-[#0096FF] bg-[#0096FF]/10 px-3 py-1 rounded-full">
+                  <span className="text-xs md:text-sm font-medium text-oe-primary bg-oe-primary/10 px-3 py-1 rounded-full">
                     This Month
                   </span>
                 </div>
-                <p className="text-3xl md:text-4xl font-bold text-[#2A2A2A] mb-2">
+                <p className="text-3xl md:text-4xl font-bold text-oe-ink mb-2">
                   ${formatMoney(revenueStats.periodRevenue)}
                 </p>
-                <p className="text-sm md:text-base text-[#6B6B6B]">Revenue in period</p>
+                <p className="text-sm md:text-base text-oe-muted">Revenue in period</p>
               </div>
 
               <div className="bg-white rounded-3xl p-6 md:p-8 shadow-lg">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 md:w-14 md:h-14 bg-[#0096FF]/10 rounded-2xl flex items-center justify-center">
-                    <i className="ri-bar-chart-box-fill text-2xl md:text-3xl text-[#0096FF]"></i>
+                  <div className="w-12 h-12 md:w-14 md:h-14 bg-oe-primary/10 rounded-2xl flex items-center justify-center">
+                    <i className="ri-bar-chart-box-fill text-2xl md:text-3xl text-oe-primary"></i>
                   </div>
-                  <span className="text-xs md:text-sm font-medium text-[#0096FF] bg-[#0096FF]/10 px-3 py-1 rounded-full">
+                  <span className="text-xs md:text-sm font-medium text-oe-primary bg-oe-primary/10 px-3 py-1 rounded-full">
                     Average
                   </span>
                 </div>
-                <p className="text-3xl md:text-4xl font-bold text-[#2A2A2A] mb-2">
+                <p className="text-3xl md:text-4xl font-bold text-oe-ink mb-2">
                   ${formatMoney(revenueStats.avgPerSession)}
                 </p>
-                <p className="text-sm md:text-base text-[#6B6B6B]">Avg. revenue per completed session</p>
+                <p className="text-sm md:text-base text-oe-muted">Avg. revenue per completed session</p>
               </div>
             </div>
 
             {/* Revenue Chart */}
             <div className="bg-white rounded-3xl p-6 md:p-10 shadow-lg mb-8 md:mb-12">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 md:mb-8 gap-4">
-                <h2 className="text-2xl md:text-3xl font-bold text-[#2A2A2A]">Revenue Trend</h2>
+                <h2 className="text-2xl md:text-3xl font-bold text-oe-ink">Revenue Trend</h2>
                 
                 {/* Timeframe Toggle */}
-                <div className="flex items-center gap-2 bg-[#F5F5F5] p-1.5 rounded-xl">
+                <div className="flex items-center gap-2 bg-oe-surface p-1.5 rounded-xl">
                   <button
                     onClick={() => setRevenueTimeframe('day')}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer whitespace-nowrap ${
                       revenueTimeframe === 'day'
-                        ? 'bg-[#0096FF] text-white'
-                        : 'text-[#6B6B6B] hover:text-[#2A2A2A]'
+                        ? 'bg-oe-primary text-white'
+                        : 'text-oe-muted hover:text-oe-ink'
                     }`}
                   >
                     Daily
@@ -788,8 +788,8 @@ export default function AdminDashboardPage() {
                     onClick={() => setRevenueTimeframe('month')}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer whitespace-nowrap ${
                       revenueTimeframe === 'month'
-                        ? 'bg-[#0096FF] text-white'
-                        : 'text-[#6B6B6B] hover:text-[#2A2A2A]'
+                        ? 'bg-oe-primary text-white'
+                        : 'text-oe-muted hover:text-oe-ink'
                     }`}
                   >
                     Monthly
@@ -798,8 +798,8 @@ export default function AdminDashboardPage() {
                     onClick={() => setRevenueTimeframe('year')}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer whitespace-nowrap ${
                       revenueTimeframe === 'year'
-                        ? 'bg-[#0096FF] text-white'
-                        : 'text-[#6B6B6B] hover:text-[#2A2A2A]'
+                        ? 'bg-oe-primary text-white'
+                        : 'text-oe-muted hover:text-oe-ink'
                     }`}
                   >
                     Yearly
@@ -809,11 +809,11 @@ export default function AdminDashboardPage() {
 
               <div className="space-y-4">
                 {revenueLoading ? (
-                  <div className="py-12 text-center text-[#6B6B6B]">
-                    <i className="ri-loader-4-line animate-spin text-3xl text-[#0096FF]"></i>
+                  <div className="py-12 text-center text-oe-muted">
+                    <i className="ri-loader-4-line animate-spin text-3xl text-oe-primary"></i>
                   </div>
                 ) : getCurrentRevenueData().length === 0 ? (
-                  <p className="text-center py-8 text-[#6B6B6B]">No revenue data for this period yet.</p>
+                  <p className="text-center py-8 text-oe-muted">No revenue data for this period yet.</p>
                 ) : (
                 getCurrentRevenueData().map((item, index) => {
                   const maxAmount = getMaxAmount();
@@ -822,17 +822,17 @@ export default function AdminDashboardPage() {
                   return (
                     <div key={index} className="group">
                       <div className="flex items-center gap-4 mb-2">
-                        <span className="text-sm font-semibold text-[#2A2A2A] w-16">{item.label}</span>
+                        <span className="text-sm font-semibold text-oe-ink w-16">{item.label}</span>
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-1">
-                            <span className="text-xs text-[#6B6B6B]">{item.sessions} sessions</span>
-                            <span className="text-sm font-bold text-[#0096FF]">
+                            <span className="text-xs text-oe-muted">{item.sessions} sessions</span>
+                            <span className="text-sm font-bold text-oe-primary">
                               ${item.amount.toLocaleString()}
                             </span>
                           </div>
-                          <div className="relative bg-[#F5F5F5] rounded-full h-10 overflow-hidden">
+                          <div className="relative bg-oe-surface rounded-full h-10 overflow-hidden">
                             <div 
-                              className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#0096FF] to-[#0077CC] rounded-full transition-all duration-700 ease-out group-hover:opacity-90"
+                              className="absolute inset-y-0 left-0 bg-oe-primary rounded-full transition-all duration-700 ease-out group-hover:opacity-90"
                               style={{ width: `${percentage}%` }}
                             >
                               <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
@@ -846,21 +846,21 @@ export default function AdminDashboardPage() {
               </div>
 
               {/* Summary Stats */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-8 border-t-2 border-[#F5F5F5]">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-8 border-t-2 border-oe-surface">
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-[#0096FF]">
+                  <p className="text-2xl font-bold text-oe-primary">
                     ${getCurrentRevenueData().reduce((sum, item) => sum + item.amount, 0).toLocaleString()}
                   </p>
-                  <p className="text-xs text-[#6B6B6B] mt-1">Total Revenue</p>
+                  <p className="text-xs text-oe-muted mt-1">Total Revenue</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-[#0096FF]">
+                  <p className="text-2xl font-bold text-oe-primary">
                     {getCurrentRevenueData().reduce((sum, item) => sum + item.sessions, 0).toLocaleString()}
                   </p>
-                  <p className="text-xs text-[#6B6B6B] mt-1">Total Sessions</p>
+                  <p className="text-xs text-oe-muted mt-1">Total Sessions</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-[#0096FF]">
+                  <p className="text-2xl font-bold text-oe-primary">
                     ${formatMoney(
                       getCurrentRevenueData().length
                         ? getCurrentRevenueData().reduce((sum, item) => sum + item.amount, 0) /
@@ -868,13 +868,13 @@ export default function AdminDashboardPage() {
                         : 0,
                     )}
                   </p>
-                  <p className="text-xs text-[#6B6B6B] mt-1">Average</p>
+                  <p className="text-xs text-oe-muted mt-1">Average</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-[#0096FF]">
+                  <p className="text-2xl font-bold text-oe-primary">
                     ${Math.max(...getCurrentRevenueData().map(item => item.amount)).toLocaleString()}
                   </p>
-                  <p className="text-xs text-[#6B6B6B] mt-1">Peak</p>
+                  <p className="text-xs text-oe-muted mt-1">Peak</p>
                 </div>
               </div>
             </div>
@@ -882,20 +882,20 @@ export default function AdminDashboardPage() {
             {/* Revenue Breakdown */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
               <div className="bg-white rounded-3xl p-6 md:p-10 shadow-lg">
-                <h2 className="text-2xl md:text-3xl font-bold text-[#2A2A2A] mb-6 md:mb-8">Credits used by service</h2>
+                <h2 className="text-2xl md:text-3xl font-bold text-oe-ink mb-6 md:mb-8">Credits used by service</h2>
                 <div className="space-y-6">
                   {revenueBreakdown.usageByType.length === 0 ? (
-                    <p className="text-[#6B6B6B]">No usage recorded in this period.</p>
+                    <p className="text-oe-muted">No usage recorded in this period.</p>
                   ) : (
                     revenueBreakdown.usageByType.map((item) => (
                       <div key={item.type}>
                         <div className="flex items-center justify-between mb-3">
-                          <span className="font-semibold text-[#2A2A2A]">{item.type}</span>
-                          <span className="font-bold text-[#0096FF]">{item.credits} credits</span>
+                          <span className="font-semibold text-oe-ink">{item.type}</span>
+                          <span className="font-bold text-oe-primary">{item.credits} credits</span>
                         </div>
-                        <div className="w-full bg-[#F5F5F5] rounded-full h-3">
+                        <div className="w-full bg-oe-surface rounded-full h-3">
                           <div
-                            className="bg-[#0096FF] h-3 rounded-full"
+                            className="bg-oe-primary h-3 rounded-full"
                             style={{ width: `${item.percent}%` }}
                           ></div>
                         </div>
@@ -906,20 +906,20 @@ export default function AdminDashboardPage() {
               </div>
 
               <div className="bg-white rounded-3xl p-6 md:p-10 shadow-lg">
-                <h2 className="text-2xl md:text-3xl font-bold text-[#2A2A2A] mb-6 md:mb-8">Top earning days (purchases)</h2>
+                <h2 className="text-2xl md:text-3xl font-bold text-oe-ink mb-6 md:mb-8">Top earning days (purchases)</h2>
                 <div className="space-y-4">
                   {revenueBreakdown.topEarningDays.length === 0 ? (
-                    <p className="text-[#6B6B6B]">No purchases in this period.</p>
+                    <p className="text-oe-muted">No purchases in this period.</p>
                   ) : (
                     revenueBreakdown.topEarningDays.map((item, index) => (
-                      <div key={index} className="flex items-center justify-between p-4 bg-[#FAFAFA] rounded-2xl">
+                      <div key={index} className="flex items-center justify-between p-4 bg-oe-surface-low rounded-2xl">
                         <div className="flex items-center gap-3">
-                          <span className="w-8 h-8 bg-[#0096FF] text-white rounded-full flex items-center justify-center text-sm font-bold">
+                          <span className="w-8 h-8 bg-oe-primary text-white rounded-full flex items-center justify-center text-sm font-bold">
                             {index + 1}
                           </span>
-                          <span className="font-semibold text-[#2A2A2A]">{item.day}</span>
+                          <span className="font-semibold text-oe-ink">{item.day}</span>
                         </div>
-                        <span className="font-bold text-[#0096FF]">${formatMoney(item.amount)}</span>
+                        <span className="font-bold text-oe-primary">${formatMoney(item.amount)}</span>
                       </div>
                     ))
                   )}
@@ -933,11 +933,11 @@ export default function AdminDashboardPage() {
         {activeView === 'sessions' && (
           <div className="bg-white rounded-3xl p-6 md:p-10 shadow-lg">
             <div className="flex items-center justify-between mb-6 md:mb-8">
-              <h2 className="text-2xl md:text-3xl font-bold text-[#2A2A2A]">Call History</h2>
+              <h2 className="text-2xl md:text-3xl font-bold text-oe-ink">Call History</h2>
               <button
                 onClick={fetchCallHistory}
                 disabled={callHistoryLoading}
-                className="flex items-center gap-2 px-4 py-2 bg-[#0096FF] text-white rounded-xl font-medium hover:bg-[#0077CC] transition-all disabled:opacity-50 cursor-pointer whitespace-nowrap"
+                className="flex items-center gap-2 px-4 py-2 bg-oe-primary text-white rounded-xl font-medium hover:bg-oe-primary-hover transition-all disabled:opacity-50 cursor-pointer whitespace-nowrap"
               >
                 <i className={`ri-refresh-line ${callHistoryLoading ? 'animate-spin' : ''}`}></i>
                 Refresh
@@ -946,59 +946,59 @@ export default function AdminDashboardPage() {
 
             {callHistoryLoading ? (
               <div className="flex items-center justify-center py-12">
-                <i className="ri-loader-4-line animate-spin text-4xl text-[#0096FF]"></i>
+                <i className="ri-loader-4-line animate-spin text-4xl text-oe-primary"></i>
               </div>
             ) : callHistory.length === 0 ? (
               <div className="text-center py-12">
-                <i className="ri-phone-line text-6xl text-[#E5E5E5] mb-4 block"></i>
-                <p className="text-lg text-[#6B6B6B]">No call history yet</p>
-                <p className="text-sm text-[#9B9B9B] mt-2">Calls will appear here once users start making calls</p>
+                <i className="ri-phone-line text-6xl text-oe-line mb-4 block"></i>
+                <p className="text-lg text-oe-muted">No call history yet</p>
+                <p className="text-sm text-oe-faint mt-2">Calls will appear here once users start making calls</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b-2 border-[#E5E5E5]">
-                      <th className="text-left py-4 px-4 text-sm font-semibold text-[#6B6B6B]">Call ID</th>
-                      <th className="text-left py-4 px-4 text-sm font-semibold text-[#6B6B6B]">User ID</th>
-                      <th className="text-left py-4 px-4 text-sm font-semibold text-[#6B6B6B]">Time</th>
-                      <th className="text-left py-4 px-4 text-sm font-semibold text-[#6B6B6B]">Duration</th>
-                      <th className="text-left py-4 px-4 text-sm font-semibold text-[#6B6B6B]">Credits Used</th>
-                      <th className="text-left py-4 px-4 text-sm font-semibold text-[#6B6B6B]">Status</th>
+                    <tr className="border-b-2 border-oe-line">
+                      <th className="text-left py-4 px-4 text-sm font-semibold text-oe-muted">Call ID</th>
+                      <th className="text-left py-4 px-4 text-sm font-semibold text-oe-muted">User ID</th>
+                      <th className="text-left py-4 px-4 text-sm font-semibold text-oe-muted">Time</th>
+                      <th className="text-left py-4 px-4 text-sm font-semibold text-oe-muted">Duration</th>
+                      <th className="text-left py-4 px-4 text-sm font-semibold text-oe-muted">Credits Used</th>
+                      <th className="text-left py-4 px-4 text-sm font-semibold text-oe-muted">Status</th>
                     </tr>
                   </thead>
                   <tbody>
                     {callHistory.map((call) => (
-                      <tr key={call.id} className="border-b border-[#E5E5E5] hover:border-[#0096FF] transition-colors">
+                      <tr key={call.id} className="border-b border-oe-line hover:border-oe-primary transition-colors">
                         <td className="py-4 px-4">
                           <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-[#0096FF]/10 rounded-lg flex items-center justify-center">
-                              <i className="ri-phone-fill text-[#0096FF]"></i>
+                            <div className="w-8 h-8 bg-oe-primary/10 rounded-lg flex items-center justify-center">
+                              <i className="ri-phone-fill text-oe-primary"></i>
                             </div>
-                            <span className="text-sm font-medium text-[#2A2A2A] font-mono">
+                            <span className="text-sm font-medium text-oe-ink font-mono">
                               {call.id.slice(0, 8)}
                             </span>
                           </div>
                         </td>
-                        <td className="py-4 px-4 text-sm text-[#6B6B6B] font-mono">
+                        <td className="py-4 px-4 text-sm text-oe-muted font-mono">
                           {call.user_id.slice(0, 8)}...
                         </td>
                         <td className="py-4 px-4">
                           <div>
-                            <p className="text-sm text-[#2A2A2A]">{formatTimeAgo(call.started_at || call.created_at)}</p>
-                            <p className="text-xs text-[#9B9B9B]">
+                            <p className="text-sm text-oe-ink">{formatTimeAgo(call.started_at || call.created_at)}</p>
+                            <p className="text-xs text-oe-faint">
                               {new Date(call.started_at || call.created_at).toLocaleString()}
                             </p>
                           </div>
                         </td>
                         <td className="py-4 px-4">
-                          <span className="text-sm font-semibold text-[#2A2A2A]">
+                          <span className="text-sm font-semibold text-oe-ink">
                             {formatDuration(call.duration_seconds)}
                           </span>
                         </td>
                         <td className="py-4 px-4">
-                          <span className={`inline-flex items-center gap-1 px-3 py-1 bg-[#0096FF]/10 text-[#0096FF] rounded-full text-sm font-medium ${
-                            call.credits_used > 0 ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'
+                          <span className={`inline-flex items-center gap-1 px-3 py-1 bg-oe-primary/10 text-oe-primary rounded-full text-sm font-medium ${
+                            call.credits_used > 0 ? 'bg-forest-100 text-forest-700' : 'bg-orange-100 text-orange-700'
                           }`}>
                             <i className="ri-coin-fill text-xs"></i>
                             {call.credits_used > 0 ? '+' : ''}{call.credits_used}
@@ -1018,28 +1018,28 @@ export default function AdminDashboardPage() {
 
             {/* Call Stats Summary */}
             {callHistory.length > 0 && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-8 border-t-2 border-[#F5F5F5]">
-                <div className="text-center p-4 bg-[#FAFAFA] rounded-2xl">
-                  <p className="text-2xl font-bold text-[#0096FF]">{callHistory.length}</p>
-                  <p className="text-xs text-[#6B6B6B] mt-1">Total Calls</p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-8 border-t-2 border-oe-surface">
+                <div className="text-center p-4 bg-oe-surface-low rounded-2xl">
+                  <p className="text-2xl font-bold text-oe-primary">{callHistory.length}</p>
+                  <p className="text-xs text-oe-muted mt-1">Total Calls</p>
                 </div>
-                <div className="text-center p-4 bg-[#FAFAFA] rounded-2xl">
-                  <p className="text-2xl font-bold text-[#0096FF]">
+                <div className="text-center p-4 bg-oe-surface-low rounded-2xl">
+                  <p className="text-2xl font-bold text-oe-primary">
                     {formatDuration(callHistory.reduce((sum, call) => sum + (call.duration_seconds || 0), 0))}
                   </p>
-                  <p className="text-xs text-[#6B6B6B] mt-1">Total Duration</p>
+                  <p className="text-xs text-oe-muted mt-1">Total Duration</p>
                 </div>
-                <div className="text-center p-4 bg-[#FAFAFA] rounded-2xl">
-                  <p className="text-2xl font-bold text-[#0096FF]">
+                <div className="text-center p-4 bg-oe-surface-low rounded-2xl">
+                  <p className="text-2xl font-bold text-oe-primary">
                     {callHistory.reduce((sum, call) => sum + (call.credits_used || 0), 0)}
                   </p>
-                  <p className="text-xs text-[#6B6B6B] mt-1">Credits Used</p>
+                  <p className="text-xs text-oe-muted mt-1">Credits Used</p>
                 </div>
-                <div className="text-center p-4 bg-[#FAFAFA] rounded-2xl">
-                  <p className="text-2xl font-bold text-[#0096FF]">
+                <div className="text-center p-4 bg-oe-surface-low rounded-2xl">
+                  <p className="text-2xl font-bold text-oe-primary">
                     {callHistory.filter(c => c.status?.toLowerCase() === 'completed').length}
                   </p>
-                  <p className="text-xs text-[#6B6B6B] mt-1">Completed</p>
+                  <p className="text-xs text-oe-muted mt-1">Completed</p>
                 </div>
               </div>
             )}
@@ -1050,11 +1050,11 @@ export default function AdminDashboardPage() {
         {activeView === 'appointments' && (
           <div className="bg-white rounded-3xl p-6 md:p-10 shadow-lg">
             <div className="flex items-center justify-between mb-6 md:mb-8">
-              <h2 className="text-2xl md:text-3xl font-bold text-[#2A2A2A]">Appointment Requests</h2>
+              <h2 className="text-2xl md:text-3xl font-bold text-oe-ink">Appointment Requests</h2>
               <button
                 onClick={fetchAppointments}
                 disabled={appointmentsLoading}
-                className="flex items-center gap-2 px-4 py-2 bg-[#0096FF] text-white rounded-xl font-medium hover:bg-[#0077CC] transition-all disabled:opacity-50 cursor-pointer whitespace-nowrap"
+                className="flex items-center gap-2 px-4 py-2 bg-oe-primary text-white rounded-xl font-medium hover:bg-oe-primary-hover transition-all disabled:opacity-50 cursor-pointer whitespace-nowrap"
               >
                 <i className={`ri-refresh-line ${appointmentsLoading ? 'animate-spin' : ''}`}></i>
                 Refresh
@@ -1063,42 +1063,42 @@ export default function AdminDashboardPage() {
 
             {appointmentsLoading ? (
               <div className="flex items-center justify-center py-12">
-                <i className="ri-loader-4-line animate-spin text-4xl text-[#0096FF]"></i>
+                <i className="ri-loader-4-line animate-spin text-4xl text-oe-primary"></i>
               </div>
             ) : appointments.length === 0 ? (
               <div className="text-center py-12">
-                <i className="ri-calendar-line text-6xl text-[#E5E5E5] mb-4 block"></i>
-                <p className="text-lg text-[#6B6B6B]">No appointment requests yet</p>
+                <i className="ri-calendar-line text-6xl text-oe-line mb-4 block"></i>
+                <p className="text-lg text-oe-muted">No appointment requests yet</p>
               </div>
             ) : (
               <div className="space-y-4">
                 {appointments.map((appointment) => (
-                  <div key={appointment.id} className="border-2 border-[#E5E5E5] rounded-2xl p-6 hover:border-[#0096FF] transition-all">
+                  <div key={appointment.id} className="border-2 border-oe-line rounded-2xl p-6 hover:border-oe-primary transition-all">
                     <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                       <div className="flex-1">
                         <div className="flex items-start gap-4">
-                          <div className="w-12 h-12 bg-[#0096FF]/10 rounded-full flex items-center justify-center flex-shrink-0">
-                            <i className="ri-user-fill text-xl text-[#0096FF]"></i>
+                          <div className="w-12 h-12 bg-oe-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i className="ri-user-fill text-xl text-oe-primary"></i>
                           </div>
                           <div className="flex-1">
-                            <h3 className="text-lg font-bold text-[#2A2A2A] mb-1">{appointment.user_name}</h3>
+                            <h3 className="text-lg font-bold text-oe-ink mb-1">{appointment.user_name}</h3>
                             <div className="space-y-1">
-                              <p className="text-sm text-[#6B6B6B] flex items-center gap-2">
+                              <p className="text-sm text-oe-muted flex items-center gap-2">
                                 <i className="ri-mail-line"></i>
                                 {appointment.user_email}
                               </p>
                               {appointment.user_phone && (
-                                <p className="text-sm text-[#6B6B6B] flex items-center gap-2">
+                                <p className="text-sm text-oe-muted flex items-center gap-2">
                                   <i className="ri-phone-line"></i>
                                   {appointment.user_phone}
                                 </p>
                               )}
-                              <p className="text-sm text-[#6B6B6B] flex items-center gap-2">
+                              <p className="text-sm text-oe-muted flex items-center gap-2">
                                 <i className="ri-calendar-line"></i>
                                 {formatDate(appointment.appointment_date)} at {formatTime(appointment.appointment_time)}
                               </p>
                               {appointment.notes && (
-                                <p className="text-sm text-[#6B6B6B] mt-2">
+                                <p className="text-sm text-oe-muted mt-2">
                                   <span className="font-medium">Notes:</span> {appointment.notes}
                                 </p>
                               )}
@@ -1116,7 +1116,7 @@ export default function AdminDashboardPage() {
                           <div className="flex gap-2">
                             <button
                               onClick={() => updateAppointmentStatus(appointment.id, 'confirmed')}
-                              className="px-4 py-2 bg-green-500 text-white rounded-xl text-sm font-medium hover:bg-green-600 transition-all cursor-pointer whitespace-nowrap"
+                              className="px-4 py-2 bg-forest-500 text-white rounded-xl text-sm font-medium hover:bg-forest-600 transition-all cursor-pointer whitespace-nowrap"
                             >
                               <i className="ri-check-line mr-1"></i>
                               Confirm
@@ -1134,7 +1134,7 @@ export default function AdminDashboardPage() {
                         {appointment.status === 'confirmed' && (
                           <button
                             onClick={() => updateAppointmentStatus(appointment.id, 'completed')}
-                            className="px-4 py-2 bg-blue-500 text-white rounded-xl text-sm font-medium hover:bg-blue-600 transition-all cursor-pointer whitespace-nowrap"
+                            className="px-4 py-2 bg-forest-500 text-white rounded-xl text-sm font-medium hover:bg-forest-600 transition-all cursor-pointer whitespace-nowrap"
                           >
                             <i className="ri-check-double-line mr-1"></i>
                             Mark Complete
@@ -1153,12 +1153,12 @@ export default function AdminDashboardPage() {
         {activeView === 'clients' && (
           <div className="bg-white rounded-3xl p-6 md:p-10 shadow-lg">
             <div className="flex items-center justify-between mb-6 md:mb-8">
-              <h2 className="text-2xl md:text-3xl font-bold text-[#2A2A2A]">Registered users</h2>
+              <h2 className="text-2xl md:text-3xl font-bold text-oe-ink">Registered users</h2>
               <button
                 type="button"
                 onClick={fetchUsers}
                 disabled={usersLoading}
-                className="flex items-center gap-2 px-4 py-2 bg-[#0096FF] text-white rounded-xl text-sm font-medium disabled:opacity-50 cursor-pointer"
+                className="flex items-center gap-2 px-4 py-2 bg-oe-primary text-white rounded-xl text-sm font-medium disabled:opacity-50 cursor-pointer"
               >
                 <i className={`ri-refresh-line ${usersLoading ? 'animate-spin' : ''}`}></i>
                 Refresh
@@ -1166,35 +1166,35 @@ export default function AdminDashboardPage() {
             </div>
             {usersLoading ? (
               <div className="flex justify-center py-12">
-                <i className="ri-loader-4-line animate-spin text-4xl text-[#0096FF]"></i>
+                <i className="ri-loader-4-line animate-spin text-4xl text-oe-primary"></i>
               </div>
             ) : users.length === 0 ? (
-              <p className="text-center py-12 text-[#6B6B6B]">No verified users yet.</p>
+              <p className="text-center py-12 text-oe-muted">No verified users yet.</p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b-2 border-[#E5E5E5]">
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-[#6B6B6B]">User</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-[#6B6B6B]">Credits</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-[#6B6B6B]">Sessions</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-[#6B6B6B]">Spent</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-[#6B6B6B]">Joined</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-[#6B6B6B]">Last active</th>
+                    <tr className="border-b-2 border-oe-line">
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-oe-muted">User</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-oe-muted">Credits</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-oe-muted">Sessions</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-oe-muted">Spent</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-oe-muted">Joined</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-oe-muted">Last active</th>
                     </tr>
                   </thead>
                   <tbody>
                     {users.map((u) => (
-                      <tr key={u.id} className="border-b border-[#E5E5E5] hover:bg-[#FAFAFA]">
+                      <tr key={u.id} className="border-b border-oe-line hover:bg-oe-surface-low">
                         <td className="py-3 px-4">
-                          <p className="font-medium text-[#2A2A2A]">{u.name}</p>
-                          <p className="text-xs text-[#6B6B6B]">{u.email}</p>
+                          <p className="font-medium text-oe-ink">{u.name}</p>
+                          <p className="text-xs text-oe-muted">{u.email}</p>
                         </td>
                         <td className="py-3 px-4 text-sm">{u.credits}</td>
                         <td className="py-3 px-4 text-sm">{u.totalSessions}</td>
                         <td className="py-3 px-4 text-sm">${formatMoney(u.totalSpent)}</td>
-                        <td className="py-3 px-4 text-sm text-[#6B6B6B]">{formatDate(u.joinDate)}</td>
-                        <td className="py-3 px-4 text-sm text-[#6B6B6B]">{formatTimeAgo(u.lastActive)}</td>
+                        <td className="py-3 px-4 text-sm text-oe-muted">{formatDate(u.joinDate)}</td>
+                        <td className="py-3 px-4 text-sm text-oe-muted">{formatTimeAgo(u.lastActive)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -1211,26 +1211,26 @@ export default function AdminDashboardPage() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8 mb-8 md:mb-12">
               <div className="bg-white rounded-3xl p-6 md:p-8 shadow-lg">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 md:w-14 md:h-14 bg-green-100 rounded-2xl flex items-center justify-center">
-                    <i className="ri-add-circle-fill text-2xl md:text-3xl text-green-600"></i>
+                  <div className="w-12 h-12 md:w-14 md:h-14 bg-forest-100 rounded-2xl flex items-center justify-center">
+                    <i className="ri-add-circle-fill text-2xl md:text-3xl text-forest-600"></i>
                   </div>
                 </div>
-                <p className="text-3xl md:text-4xl font-bold text-[#2A2A2A] mb-2">
+                <p className="text-3xl md:text-4xl font-bold text-oe-ink mb-2">
                   ${getTransactionStats().totalPurchases.toLocaleString()}
                 </p>
-                <p className="text-sm md:text-base text-[#6B6B6B]">Total Purchases</p>
+                <p className="text-sm md:text-base text-oe-muted">Total Purchases</p>
               </div>
 
               <div className="bg-white rounded-3xl p-6 md:p-8 shadow-lg">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 md:w-14 md:h-14 bg-[#0096FF]/10 rounded-2xl flex items-center justify-center">
-                    <i className="ri-coin-fill text-2xl md:text-3xl text-[#0096FF]"></i>
+                  <div className="w-12 h-12 md:w-14 md:h-14 bg-oe-primary/10 rounded-2xl flex items-center justify-center">
+                    <i className="ri-coin-fill text-2xl md:text-3xl text-oe-primary"></i>
                   </div>
                 </div>
-                <p className="text-3xl md:text-4xl font-bold text-[#2A2A2A] mb-2">
+                <p className="text-3xl md:text-4xl font-bold text-oe-ink mb-2">
                   {getTransactionStats().totalCredits.toLocaleString()}
                 </p>
-                <p className="text-sm md:text-base text-[#6B6B6B]">Credits Purchased</p>
+                <p className="text-sm md:text-base text-oe-muted">Credits Purchased</p>
               </div>
 
               <div className="bg-white rounded-3xl p-6 md:p-8 shadow-lg">
@@ -1239,10 +1239,10 @@ export default function AdminDashboardPage() {
                     <i className="ri-subtract-fill text-2xl md:text-3xl text-orange-600"></i>
                   </div>
                 </div>
-                <p className="text-3xl md:text-4xl font-bold text-[#2A2A2A] mb-2">
+                <p className="text-3xl md:text-4xl font-bold text-oe-ink mb-2">
                   {getTransactionStats().totalUsage.toLocaleString()}
                 </p>
-                <p className="text-sm md:text-base text-[#6B6B6B]">Credits Used</p>
+                <p className="text-sm md:text-base text-oe-muted">Credits Used</p>
               </div>
 
               <div className="bg-white rounded-3xl p-6 md:p-8 shadow-lg">
@@ -1251,27 +1251,27 @@ export default function AdminDashboardPage() {
                     <i className="ri-file-list-3-fill text-2xl md:text-3xl text-purple-600"></i>
                   </div>
                 </div>
-                <p className="text-3xl md:text-4xl font-bold text-[#2A2A2A] mb-2">
+                <p className="text-3xl md:text-4xl font-bold text-oe-ink mb-2">
                   {transactions.length}
                 </p>
-                <p className="text-sm md:text-base text-[#6B6B6B]">Total Transactions</p>
+                <p className="text-sm md:text-base text-oe-muted">Total Transactions</p>
               </div>
             </div>
 
             {/* Transactions Table */}
             <div className="bg-white rounded-3xl p-6 md:p-10 shadow-lg">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 md:mb-8 gap-4">
-                <h2 className="text-2xl md:text-3xl font-bold text-[#2A2A2A]">Credit Transactions</h2>
+                <h2 className="text-2xl md:text-3xl font-bold text-oe-ink">Credit Transactions</h2>
                 
                 <div className="flex items-center gap-3">
                   {/* Filter Toggle */}
-                  <div className="flex items-center gap-2 bg-[#F5F5F5] p-1.5 rounded-xl">
+                  <div className="flex items-center gap-2 bg-oe-surface p-1.5 rounded-xl">
                     <button
                       onClick={() => setTransactionFilter('all')}
                       className={`px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer whitespace-nowrap ${
                         transactionFilter === 'all'
-                          ? 'bg-[#0096FF] text-white'
-                          : 'text-[#6B6B6B] hover:text-[#2A2A2A]'
+                          ? 'bg-oe-primary text-white'
+                          : 'text-oe-muted hover:text-oe-ink'
                       }`}
                     >
                       All
@@ -1280,8 +1280,8 @@ export default function AdminDashboardPage() {
                       onClick={() => setTransactionFilter('purchase')}
                       className={`px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer whitespace-nowrap ${
                         transactionFilter === 'purchase'
-                          ? 'bg-[#0096FF] text-white'
-                          : 'text-[#6B6B6B] hover:text-[#2A2A2A]'
+                          ? 'bg-oe-primary text-white'
+                          : 'text-oe-muted hover:text-oe-ink'
                       }`}
                     >
                       Purchases
@@ -1290,8 +1290,8 @@ export default function AdminDashboardPage() {
                       onClick={() => setTransactionFilter('usage')}
                       className={`px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer whitespace-nowrap ${
                         transactionFilter === 'usage'
-                          ? 'bg-[#0096FF] text-white'
-                          : 'text-[#6B6B6B] hover:text-[#2A2A2A]'
+                          ? 'bg-oe-primary text-white'
+                          : 'text-oe-muted hover:text-oe-ink'
                       }`}
                     >
                       Usage
@@ -1300,8 +1300,8 @@ export default function AdminDashboardPage() {
                       onClick={() => setTransactionFilter('refund')}
                       className={`px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer whitespace-nowrap ${
                         transactionFilter === 'refund'
-                          ? 'bg-[#0096FF] text-white'
-                          : 'text-[#6B6B6B] hover:text-[#2A2A2A]'
+                          ? 'bg-oe-primary text-white'
+                          : 'text-oe-muted hover:text-oe-ink'
                       }`}
                     >
                       Refunds
@@ -1311,7 +1311,7 @@ export default function AdminDashboardPage() {
                   <button
                     onClick={fetchTransactions}
                     disabled={transactionsLoading}
-                    className="flex items-center gap-2 px-4 py-2 bg-[#0096FF] text-white rounded-xl font-medium hover:bg-[#0077CC] transition-all disabled:opacity-50 cursor-pointer whitespace-nowrap"
+                    className="flex items-center gap-2 px-4 py-2 bg-oe-primary text-white rounded-xl font-medium hover:bg-oe-primary-hover transition-all disabled:opacity-50 cursor-pointer whitespace-nowrap"
                   >
                     <i className={`ri-refresh-line ${transactionsLoading ? 'animate-spin' : ''}`}></i>
                     Refresh
@@ -1321,13 +1321,13 @@ export default function AdminDashboardPage() {
 
               {transactionsLoading ? (
                 <div className="flex items-center justify-center py-12">
-                  <i className="ri-loader-4-line animate-spin text-4xl text-[#0096FF]"></i>
+                  <i className="ri-loader-4-line animate-spin text-4xl text-oe-primary"></i>
                 </div>
               ) : getFilteredTransactions().length === 0 ? (
                 <div className="text-center py-12">
-                  <i className="ri-exchange-dollar-line text-6xl text-[#E5E5E5] mb-4 block"></i>
-                  <p className="text-lg text-[#6B6B6B]">No transactions found</p>
-                  <p className="text-sm text-[#9B9B9B] mt-2">
+                  <i className="ri-exchange-dollar-line text-6xl text-oe-line mb-4 block"></i>
+                  <p className="text-lg text-oe-muted">No transactions found</p>
+                  <p className="text-sm text-oe-faint mt-2">
                     {transactionFilter !== 'all' 
                       ? `No ${transactionFilter} transactions yet` 
                       : 'Transactions will appear here once users make purchases'}
@@ -1337,37 +1337,37 @@ export default function AdminDashboardPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b-2 border-[#E5E5E5]">
-                        <th className="text-left py-4 px-4 text-sm font-semibold text-[#6B6B6B]">Transaction ID</th>
-                        <th className="text-left py-4 px-4 text-sm font-semibold text-[#6B6B6B]">User ID</th>
-                        <th className="text-left py-4 px-4 text-sm font-semibold text-[#6B6B6B]">Type</th>
-                        <th className="text-left py-4 px-4 text-sm font-semibold text-[#6B6B6B]">Amount</th>
-                        <th className="text-left py-4 px-4 text-sm font-semibold text-[#6B6B6B]">Credits</th>
-                        <th className="text-left py-4 px-4 text-sm font-semibold text-[#6B6B6B]">Description</th>
-                        <th className="text-left py-4 px-4 text-sm font-semibold text-[#6B6B6B]">Status</th>
-                        <th className="text-left py-4 px-4 text-sm font-semibold text-[#6B6B6B]">Date</th>
+                      <tr className="border-b-2 border-oe-line">
+                        <th className="text-left py-4 px-4 text-sm font-semibold text-oe-muted">Transaction ID</th>
+                        <th className="text-left py-4 px-4 text-sm font-semibold text-oe-muted">User ID</th>
+                        <th className="text-left py-4 px-4 text-sm font-semibold text-oe-muted">Type</th>
+                        <th className="text-left py-4 px-4 text-sm font-semibold text-oe-muted">Amount</th>
+                        <th className="text-left py-4 px-4 text-sm font-semibold text-oe-muted">Credits</th>
+                        <th className="text-left py-4 px-4 text-sm font-semibold text-oe-muted">Description</th>
+                        <th className="text-left py-4 px-4 text-sm font-semibold text-oe-muted">Status</th>
+                        <th className="text-left py-4 px-4 text-sm font-semibold text-oe-muted">Date</th>
                       </tr>
                     </thead>
                     <tbody>
                       {getFilteredTransactions().map((transaction) => (
-                        <tr key={transaction.id} className="border-b border-[#E5E5E5] hover:bg-[#FAFAFA] transition-colors">
+                        <tr key={transaction.id} className="border-b border-oe-line hover:bg-oe-surface-low transition-colors">
                           <td className="py-4 px-4">
                             <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 bg-[#0096FF]/10 rounded-lg flex items-center justify-center">
+                              <div className="w-8 h-8 bg-oe-primary/10 rounded-lg flex items-center justify-center">
                                 <i className={`${
                                   transaction.type?.toLowerCase() === 'purchase' 
-                                    ? 'ri-add-circle-fill text-green-600' 
+                                    ? 'ri-add-circle-fill text-forest-600' 
                                     : transaction.type?.toLowerCase() === 'refund'
-                                    ? 'ri-refund-2-fill text-blue-600'
+                                    ? 'ri-refund-2-fill text-forest-600'
                                     : 'ri-subtract-fill text-orange-600'
                                 }`}></i>
                               </div>
-                              <span className="text-sm font-medium text-[#2A2A2A] font-mono">
+                              <span className="text-sm font-medium text-oe-ink font-mono">
                                 {transaction.id.slice(0, 8)}...
                               </span>
                             </div>
                           </td>
-                          <td className="py-4 px-4 text-sm text-[#6B6B6B] font-mono">
+                          <td className="py-4 px-4 text-sm text-oe-muted font-mono">
                             {transaction.user_id.slice(0, 8)}...
                           </td>
                           <td className="py-4 px-4">
@@ -1378,10 +1378,10 @@ export default function AdminDashboardPage() {
                           <td className="py-4 px-4">
                             <span className={`text-sm font-bold ${
                               transaction.type?.toLowerCase() === 'purchase' 
-                                ? 'text-green-600' 
+                                ? 'text-forest-600' 
                                 : transaction.type?.toLowerCase() === 'refund'
-                                ? 'text-blue-600'
-                                : 'text-[#2A2A2A]'
+                                ? 'text-forest-600'
+                                : 'text-oe-ink'
                             }`}>
                               {transaction.type?.toLowerCase() === 'purchase'
                                 ? `$${formatMoney(toDollars(transaction.amount))}`
@@ -1393,7 +1393,7 @@ export default function AdminDashboardPage() {
                           <td className="py-4 px-4">
                             <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${
                               transaction.credits > 0 
-                                ? 'bg-green-100 text-green-700' 
+                                ? 'bg-forest-100 text-forest-700' 
                                 : transaction.credits < 0
                                 ? 'bg-orange-100 text-orange-700'
                                 : 'bg-gray-100 text-gray-700'
@@ -1403,7 +1403,7 @@ export default function AdminDashboardPage() {
                             </span>
                           </td>
                           <td className="py-4 px-4">
-                            <span className="text-sm text-[#6B6B6B] max-w-[200px] truncate block">
+                            <span className="text-sm text-oe-muted max-w-[200px] truncate block">
                               {transaction.description || '-'}
                             </span>
                           </td>
@@ -1414,8 +1414,8 @@ export default function AdminDashboardPage() {
                           </td>
                           <td className="py-4 px-4">
                             <div>
-                              <p className="text-sm text-[#2A2A2A]">{formatTimeAgo(transaction.created_at)}</p>
-                              <p className="text-xs text-[#9B9B9B]">
+                              <p className="text-sm text-oe-ink">{formatTimeAgo(transaction.created_at)}</p>
+                              <p className="text-xs text-oe-faint">
                                 {new Date(transaction.created_at).toLocaleString()}
                               </p>
                             </div>
@@ -1429,8 +1429,8 @@ export default function AdminDashboardPage() {
 
               {/* Transaction Summary */}
               {getFilteredTransactions().length > 0 && (
-                <div className="mt-6 pt-6 border-t-2 border-[#F5F5F5]">
-                  <p className="text-sm text-[#6B6B6B]">
+                <div className="mt-6 pt-6 border-t-2 border-oe-surface">
+                  <p className="text-sm text-oe-muted">
                     Showing {getFilteredTransactions().length} of {transactions.length} transactions
                     {transactionFilter !== 'all' && ` (filtered by ${transactionFilter})`}
                   </p>

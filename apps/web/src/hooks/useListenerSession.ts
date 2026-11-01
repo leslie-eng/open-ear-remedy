@@ -20,6 +20,8 @@ export interface ActiveCall {
   callId: string;
   callerName: string;
   mode: ConversationMode;
+  /** A booked Conversation (connected directly, no ringing). */
+  booked: boolean;
   /** Earlier notes about this person from Listeners (empty if they turned notes off). */
   notes: ListenerNote[];
   /** Text Chat only. Kept in memory for this conversation; never saved. */
@@ -98,11 +100,23 @@ export function useListenerSession() {
         const callerName = msg.callerName ?? 'Anonymous';
         setIncoming([]);
         const mode = msg.mode ?? 'voice';
-        setActive({ callId: msg.callId, callerName, mode, notes: msg.notes ?? [], lines: [], phase: 'connecting', elapsed: 0, peerReconnecting: false });
+        setActive({
+          callId: msg.callId,
+          callerName,
+          mode,
+          booked: Boolean(msg.booked),
+          notes: msg.notes ?? [],
+          lines: [],
+          phase: 'connecting',
+          elapsed: 0,
+          peerReconnecting: false,
+        });
         // A Text Chat has no audio to set up.
         if (mode === 'text') break;
         const callId = msg.callId;
         try {
+          // A booked call connects without an Accept tap, so the microphone may not be on yet.
+          if (!mic.current) mic.current = await getMicrophone();
           peer.current = await createCallPeer({
             role: 'listener',
             microphone: mic.current!,

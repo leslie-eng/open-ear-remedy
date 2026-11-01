@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Navbar from '../../components/feature/Navbar';
+import SiteFooter from '../../components/feature/SiteFooter';
+import MicCheck from '../../components/feature/MicCheck';
 import { useAuth } from '../../contexts/AuthContext';
 import { apiFetch } from '../../lib/api';
 import { useSEO, generateWebPageSchema } from '../../utils/seo';
@@ -13,7 +15,7 @@ import type { Balance } from '../../hooks/useBalance';
 import { useCallSession } from '../../hooks/useCallSession';
 import { useNotesNoticeGate } from '../../hooks/useNotesNoticeGate';
 import NotesNotice from '../../components/feature/NotesNotice';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 
 const END_MESSAGES: Record<string, string> = {
   hangup: 'Call ended.',
@@ -22,6 +24,29 @@ const END_MESSAGES: Record<string, string> = {
   dropped: 'The connection was lost, so the call ended. You were only charged up to the moment it dropped.',
   time_limit: 'Your call time ran out, so the call ended.',
 };
+
+const SAFE_BASELINE = [
+  {
+    icon: 'ri-hourglass-line',
+    title: 'You set the pace',
+    body: 'Silence is welcome. You don’t have to fill every gap with words. The Listener follows your lead.',
+  },
+  {
+    icon: 'ri-shield-keyhole-line',
+    title: 'No diagnosis, never recorded',
+    body: 'Listeners aren’t clinicians and calls are never recorded. A Listener may keep a short private note, which you can turn off.',
+  },
+  {
+    icon: 'ri-logout-box-r-line',
+    title: 'Leave anytime',
+    body: 'If it doesn’t feel right, or you need to step away, end the call with one tap. No hard feelings.',
+  },
+  {
+    icon: 'ri-chat-off-line',
+    title: 'No unasked-for advice',
+    body: 'Listeners listen. They won’t try to fix things unless you ask for another pair of eyes.',
+  },
+];
 
 async function sendLowCreditNotification(currentCredits: number) {
   if (currentCredits > 50) return;
@@ -65,14 +90,6 @@ export default function CallPage() {
     forgotPassword: sendForgotPassword,
   } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [showBookingModal, setShowBookingModal] = useState(false);
-  const [bookingDate, setBookingDate] = useState('');
-  const [bookingTime, setBookingTime] = useState('');
-  const [bookingNotes, setBookingNotes] = useState('');
-  const [bookingLoading, setBookingLoading] = useState(false);
-  const [bookingError, setBookingError] = useState('');
-  const [bookingSuccess, setBookingSuccess] = useState(false);
-  const [bookingPhoneNumber, setBookingPhoneNumber] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
   const [forgotPassword, setForgotPassword] = useState(false);
   const [verificationSent, setVerificationSent] = useState(false);
@@ -98,6 +115,9 @@ export default function CallPage() {
   }, []);
 
   const notesGate = useNotesNoticeGate();
+  // Joining a booked Conversation from the dashboard: /call?booking=<id>.
+  const [searchParams] = useSearchParams();
+  const bookingId = searchParams.get('booking');
   const call = useCallSession({
     onEnded: () => {
       void fetchCredits();
@@ -105,7 +125,7 @@ export default function CallPage() {
       void sendLowCreditNotification(0);
     },
   });
-  const callInProgress = ['preparing', 'ringing', 'connecting', 'live'].includes(call.state.phase);
+  const callInProgress = ['preparing', 'waiting', 'ringing', 'connecting', 'live'].includes(call.state.phase);
 
   useEffect(() => {
     if (user) {
@@ -167,7 +187,7 @@ export default function CallPage() {
       return;
     }
     // First Conversation: tell them about Listener notes before connecting.
-    await notesGate.gate(() => void call.start());
+    await notesGate.gate(() => void call.start(bookingId ?? undefined));
   };
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -229,53 +249,6 @@ export default function CallPage() {
     }
   };
 
-  const handleBookAppointment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setBookingLoading(true);
-    setBookingError('');
-    setBookingSuccess(false);
-
-    try {
-      await apiFetch('/api/appointments', {
-        method: 'POST',
-        body: JSON.stringify({
-          appointmentDate: bookingDate,
-          appointmentTime: bookingTime,
-          notes: bookingNotes,
-          phoneNumber: bookingPhoneNumber,
-        }),
-      });
-
-      setBookingSuccess(true);
-      setTimeout(() => {
-        setShowBookingModal(false);
-        setBookingDate('');
-        setBookingTime('');
-        setBookingNotes('');
-        setBookingPhoneNumber('');
-        setBookingSuccess(false);
-      }, 3000);
-    } catch (err: any) {
-      setBookingError(err.message || 'Failed to book appointment. Please try again.');
-    } finally {
-      setBookingLoading(false);
-    }
-  };
-
-  const openBookingModal = () => {
-    if (!user) {
-      setShowAuthModal(true);
-      return;
-    }
-    setShowBookingModal(true);
-  };
-
-  // Get minimum date (today)
-  const getMinDate = () => {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
-  };
-
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -284,129 +257,142 @@ export default function CallPage() {
       .padStart(2, '0')}`;
   };
 
+  const isLive = call.state.phase === 'live';
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]">
+    <div className="min-h-screen bg-oe-bg text-oe-ink">
       <Navbar />
       {notesGate.noticeOpen && <NotesNotice onChoose={(allow) => void notesGate.choose(allow)} onCancel={notesGate.cancel} />}
       <ConnectingOverlay
-        open={['preparing', 'ringing', 'connecting'].includes(call.state.phase)}
-        title={call.state.phase === 'connecting' ? 'Connecting you to a listener…' : 'Finding a listener for you…'}
+        open={['preparing', 'waiting', 'ringing', 'connecting'].includes(call.state.phase)}
+        title={
+          call.state.phase === 'connecting'
+            ? 'Connecting you to a listener…'
+            : call.state.phase === 'waiting'
+              ? 'Waiting for your Listener to join…'
+              : 'Finding a listener for you…'
+        }
         detail={
           call.state.phase === 'preparing'
             ? 'If your browser asks, allow the microphone so the listener can hear you.'
-            : 'Take a slow breath. There’s no rush.'
+            : call.state.phase === 'waiting'
+              ? 'They’ll be with you shortly. Stay on this page; you’re only charged once you’re talking.'
+              : 'Take a slow breath. There’s no rush.'
         }
         action={{ label: 'Cancel', onClick: call.hangup }}
       />
 
-      <div className="pt-20 md:pt-24 px-6 pb-12">
-        <div className="max-w-5xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-8 md:mb-12">
-            <div className="inline-flex items-center gap-2 px-4 md:px-6 py-2 bg-[#0096FF]/10 rounded-full mb-4 md:mb-6">
-              <i className="ri-phone-fill text-[#0096FF] text-sm md:text-base"></i>
-              <span className="text-xs md:text-sm font-medium text-[#0096FF]">
-                Voice Support
-              </span>
-            </div>
-            <h1
-              className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#2A2A2A] mb-4"
-              style={{ fontFamily: 'Poppins, sans-serif' }}
-            >
-              Connect Through Voice
-            </h1>
-            <p className="text-base md:text-lg text-[#6B6B6B] max-w-2xl mx-auto">
-              Real-time emotional support when you need it most. {CREDITS_PER_CALL_MINUTE} credits per
-              minute.
+      <main className="oe-route mx-auto max-w-[1120px] px-5 pb-20 pt-28 md:px-8">
+        {isLive ? (
+          <section className="mx-auto max-w-xl rounded-3xl border border-oe-line bg-white p-8 text-center md:p-12">
+            <p className="inline-flex items-center gap-2 rounded-full bg-oe-primary-tint px-3 py-1 text-xs font-medium text-oe-primary-deep">
+              <span aria-hidden="true" className="oe-breathe" /> You&rsquo;re talking with a Listener
             </p>
-            {user && (
-              <div className="mt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-md">
-                  <i className="ri-copper-coin-fill text-[#0096FF]"></i>
-                  <span className="font-semibold text-[#2A2A2A]">
-                    {credits} Credits
-                  </span>
-                  <span className="text-xs text-[#6B6B6B]">
-                    ({Math.floor(availableSeconds / 60)} min{passSecondsLeft > 0 ? ' incl. Monthly Pass' : ''})
-                  </span>
-                </div>
-                {isFirstTimeUser && (
-                  <button
-                    onClick={claimFreeCredits}
-                    disabled={claimingFreeCredits}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-full shadow-md hover:bg-green-600 transition-all disabled:opacity-50 whitespace-nowrap cursor-pointer text-sm font-medium animate-pulse"
-                  >
-                    <i className="ri-gift-fill"></i>
-                    {claimingFreeCredits
-                      ? 'Claiming...'
-                      : `Claim ${FREE_TRIAL_CREDITS} Free Credits!`}
-                  </button>
-                )}
-              </div>
+            <p className="mt-8 font-heading text-6xl font-semibold text-oe-ink" aria-live="off">
+              {formatTime(call.state.elapsed)}
+            </p>
+            <p className="mt-2 text-sm text-oe-muted">Up to {formatTime(call.state.maxSeconds)} on your balance</p>
+            {call.state.peerReconnecting && (
+              <p role="status" className="mx-auto mt-6 max-w-md rounded-xl bg-oe-accent-tint p-3 text-sm font-medium text-oe-accent">
+                The connection is unstable. Trying to reconnect…
+              </p>
             )}
-            {!user && (
-              <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-200 rounded-full">
-                <i className="ri-gift-fill text-green-600"></i>
-                <span className="text-green-700 font-medium text-sm">
-                  First-time users get {FREE_TRIAL_CREDITS} FREE credits!
-                </span>
-              </div>
+            {call.state.lowTimeWarning && (
+              <p role="alert" className="mx-auto mt-6 max-w-md rounded-xl bg-orange-100 p-3 text-sm font-medium text-orange-700">
+                About 2 minutes of call time left. The call will end when it runs out.
+              </p>
             )}
-          </div>
-
-          {/* Error Message */}
-          {callError && (
-            <div
-              className={`max-w-2xl mx-auto mb-6 p-4 border rounded-2xl flex items-start gap-3 ${
-                callError.includes('✓')
-                  ? 'bg-green-50 border-green-200'
-                  : 'bg-red-50 border-red-200'
-              }`}
-            >
-              <i
-                className={`text-xl mt-0.5 ${
-                  callError.includes('✓')
-                    ? 'ri-checkbox-circle-fill text-green-500'
-                    : 'ri-error-warning-fill text-red-500'
+            <p className="mt-8 text-sm text-oe-muted">Silence is welcome. You can leave whenever you want.</p>
+            <div className="mt-8 flex items-center justify-center gap-4">
+              <button
+                onClick={call.toggleMute}
+                aria-label={call.state.muted ? 'Unmute microphone' : 'Mute microphone'}
+                aria-pressed={call.state.muted}
+                className={`flex h-14 w-14 cursor-pointer items-center justify-center rounded-full ${
+                  call.state.muted ? 'bg-oe-crisis text-white' : 'bg-oe-surface text-oe-ink hover:bg-oe-primary-tint'
                 }`}
-              ></i>
+              >
+                <i className={`${call.state.muted ? 'ri-mic-off-line' : 'ri-mic-line'} text-2xl`} aria-hidden="true" />
+              </button>
+              <button
+                onClick={call.hangup}
+                className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-oe-crisis px-8 py-4 font-semibold text-white hover:opacity-90"
+              >
+                <i className="ri-phone-line rotate-[135deg]" aria-hidden="true" /> End call
+              </button>
+            </div>
+          </section>
+        ) : (
+          <>
+            <p className="inline-flex items-center gap-2 rounded-full bg-oe-accent-tint px-3 py-1 text-xs font-medium uppercase tracking-wide text-oe-accent">
+              <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-oe-accent" /> Getting ready · Zero pressure
+            </p>
+            <h1 className="mt-4 text-4xl font-bold md:text-5xl">
+              {bookingId ? 'Getting ready for your booked call.' : 'Getting ready to connect.'}
+            </h1>
+            <p className="mt-3 max-w-2xl text-lg text-oe-muted">
+              Take 30 seconds to settle in. There&rsquo;s no performance here, just an honest conversation with someone who
+              listens.
+            </p>
+
+            {call.state.phase === 'ended' && call.state.endReason && (
+              <p role="status" className="mt-6 max-w-2xl rounded-2xl bg-oe-primary-tint px-5 py-3 text-sm text-oe-ink">
+                {END_MESSAGES[call.state.endReason]}
+                {call.state.billedSeconds > 0 && ` Talk time: ${formatTime(call.state.billedSeconds)}.`}
+                {call.state.billedSeconds > 0 && call.state.callId && (
+                  <>
+                    {' '}
+                    <Link to={`/book?again=${call.state.callId}`} className="font-medium text-oe-primary underline">
+                      Book again with this Listener
+                    </Link>
+                  </>
+                )}
+              </p>
+            )}
+            {callError && (
               <p
-                className={`text-sm ${
-                  callError.includes('✓')
-                    ? 'text-green-700'
-                    : 'text-red-700'
+                role="alert"
+                className={`mt-6 max-w-2xl rounded-2xl px-5 py-3 text-sm ${
+                  callError.includes('✓') ? 'bg-oe-primary-tint text-oe-primary-deep' : 'bg-oe-crisis-tint text-oe-crisis'
                 }`}
               >
                 {callError}
               </p>
-            </div>
-          )}
+            )}
 
-          {/* Call Interface */}
-          <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12">
-            {/* Call Status */}
-            <div className="text-center mb-8 md:mb-12">
-              {call.state.phase !== 'live' ? (
-                <>
-                  <div className="w-24 h-24 md:w-32 md:h-32 bg-gradient-to-br from-[#0096FF] to-[#0077CC] rounded-full flex items-center justify-center mx-auto mb-6 md:mb-8 shadow-lg">
-                    <i className="ri-phone-fill text-4xl md:text-5xl text-white"></i>
+            <div className="mt-10 grid gap-5 lg:grid-cols-2">
+              <div className="space-y-5">
+                <section className="rounded-3xl border border-oe-line bg-white p-6 md:p-8">
+                  <div className="flex items-start gap-4">
+                    <span aria-hidden="true" className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-oe-primary-soft text-2xl text-oe-primary-deep">
+                      <i className="ri-user-heart-line" />
+                    </span>
+                    <div>
+                      <h2 className="font-sans text-lg font-semibold">A trained Listener</h2>
+                      <p className="text-sm text-oe-muted">The first free Listener will pick up. You won&rsquo;t need to explain who you are.</p>
+                      <div className="mt-3 flex flex-wrap gap-2 text-xs">
+                        {['Calm presence', 'Slow pace', 'Non-judgmental'].map((t) => (
+                          <span key={t} className="rounded-full bg-oe-surface px-3 py-1 text-oe-ink">
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                  <h2 className="text-2xl md:text-3xl font-bold text-[#2A2A2A] mb-3">
-                    Ready to Connect
-                  </h2>
-                  <p className="text-sm md:text-base text-[#6B6B6B]">
-                    Talk with a listener from your browser, or book an appointment
-                  </p>
-                  {call.state.phase === 'ended' && call.state.endReason && (
-                    <p role="status" className="mt-4 mx-auto max-w-md text-sm md:text-base text-[#2A2A2A] bg-[#E6F5FF] rounded-xl p-3">
-                      {END_MESSAGES[call.state.endReason]}
-                      {call.state.billedSeconds > 0 && ` Talk time: ${formatTime(call.state.billedSeconds)}.`}
-                    </p>
-                  )}
-                  {user && (
-                    <div className="mt-6 mx-auto max-w-sm text-left">
-                      <label htmlFor="display-name" className="block text-sm font-medium text-[#2A2A2A] mb-2">
-                        Name the listener will see (optional)
+                  <blockquote className="mt-6 rounded-2xl bg-oe-surface-low px-5 py-4 text-sm italic text-oe-muted">
+                    &ldquo;Take your time. We don&rsquo;t have to solve your life in twenty minutes. We just start right where you
+                    are.&rdquo;
+                  </blockquote>
+                  <div className="mt-5">
+                    <MicCheck disabled={callInProgress} />
+                  </div>
+                </section>
+
+                <section className="rounded-3xl border border-oe-line bg-white p-6 md:p-8">
+                  {user ? (
+                    <>
+                      <label htmlFor="display-name" className="block text-sm font-medium">
+                        Name the Listener will see (optional)
                       </label>
                       <input
                         id="display-name"
@@ -415,133 +401,99 @@ export default function CallPage() {
                         value={displayName}
                         onChange={(e) => setDisplayName(e.target.value)}
                         placeholder="Anonymous"
-                        className="w-full px-4 py-3 border-2 border-[#E5E5E5] rounded-xl focus:border-[#0096FF] focus:outline-none text-sm md:text-base"
+                        className="mt-2 w-full rounded-xl border border-oe-line bg-oe-surface-low px-4 py-3 focus:border-oe-primary focus:outline-none focus:ring-2 focus:ring-oe-primary/30"
                       />
-                      <p className="text-xs text-[#6B6B6B] mt-2">
-                        Listeners never see your email or phone number. Calls are never recorded.
-                      </p>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <>
-                  <div className="w-24 h-24 md:w-32 md:h-32 bg-gradient-to-br from-[#0096FF] to-[#0077CC] rounded-full flex items-center justify-center mx-auto mb-6 md:mb-8 shadow-lg animate-pulse">
-                    <i className="ri-phone-fill text-4xl md:text-5xl text-white"></i>
-                  </div>
-                  <h2 className="text-2xl md:text-3xl font-bold text-[#2A2A2A] mb-3">
-                    Call in Progress
-                  </h2>
-                  <div className="text-3xl md:text-4xl font-bold text-[#0096FF] mb-2" aria-live="off">
-                    {formatTime(call.state.elapsed)}
-                  </div>
-                  <p className="text-sm md:text-base text-[#6B6B6B]">
-                    Up to {formatTime(call.state.maxSeconds)} on your balance
-                  </p>
-
-                  {call.state.peerReconnecting && (
-                    <p role="status" className="mt-4 mx-auto max-w-md p-3 rounded-xl bg-yellow-100 border-2 border-yellow-400 text-sm font-medium text-yellow-700">
-                      The connection is unstable. Trying to reconnect…
+                      <p className="mt-2 text-xs text-oe-muted">Listeners never see your email or phone number.</p>
+                      <div className="mt-5 flex flex-wrap items-center gap-3 text-sm">
+                        <span className="inline-flex items-center gap-2 rounded-full bg-oe-surface px-4 py-2">
+                          <i className="ri-copper-coin-line text-oe-primary" aria-hidden="true" />
+                          <strong>{credits}</strong> credits
+                          <span className="text-oe-muted">
+                            ({Math.floor(availableSeconds / 60)} min{passSecondsLeft > 0 ? ' incl. Monthly Pass' : ''})
+                          </span>
+                        </span>
+                        {isFirstTimeUser && (
+                          <button
+                            onClick={claimFreeCredits}
+                            disabled={claimingFreeCredits}
+                            className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-oe-primary-tint px-4 py-2 font-medium text-oe-primary-deep disabled:opacity-50"
+                          >
+                            <i className="ri-gift-line" aria-hidden="true" />
+                            {claimingFreeCredits ? 'Claiming…' : `Claim ${FREE_TRIAL_CREDITS} free credits`}
+                          </button>
+                        )}
+                        <Link to="/pricing" className="text-oe-primary hover:underline">
+                          Top up
+                        </Link>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-sm text-oe-muted">
+                      You&rsquo;ll be asked to sign in when you&rsquo;re ready, so we can keep track of your call time. New here?{' '}
+                      {FREE_TRIAL_CREDITS} free credits ({CREDITS_PER_CALL_MINUTE} credits a minute).
                     </p>
                   )}
-                  {call.state.lowTimeWarning && (
-                    <div role="alert" className="mt-4 mx-auto max-w-md p-3 rounded-xl flex items-center justify-center gap-2 bg-orange-100 border-2 border-orange-400">
-                      <i className="ri-alert-fill text-lg text-orange-600"></i>
-                      <span className="text-sm font-medium text-orange-700">
-                        About 2 minutes of call time left. The call will end when it runs out.
+                </section>
+              </div>
+
+              <section className="rounded-3xl border border-oe-line bg-white p-6 md:p-8">
+                <div className="flex items-center justify-between">
+                  <h2 className="font-sans text-xl font-semibold">Safe baseline</h2>
+                  <span className="rounded-full bg-oe-primary-tint px-3 py-1 text-xs text-oe-primary-deep">Open Ear principles</span>
+                </div>
+                <p className="mt-2 text-sm text-oe-muted">
+                  Every call is designed to take the pressure off. You are in control from the first second.
+                </p>
+                <ul className="mt-6 space-y-3">
+                  {SAFE_BASELINE.map((item) => (
+                    <li key={item.title} className="flex gap-4 rounded-2xl bg-oe-surface-low p-4">
+                      <span aria-hidden="true" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-oe-accent-tint text-oe-accent">
+                        <i className={item.icon} />
                       </span>
-                    </div>
-                  )}
-                </>
-              )}
+                      <span>
+                        <span className="block font-semibold">{item.title}</span>
+                        <span className="mt-0.5 block text-sm leading-relaxed text-oe-muted">{item.body}</span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
             </div>
 
-            {/* Call Action Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-6 mb-8">
-              {!callInProgress ? (
-                <>
-                  <button
-                    onClick={() => void startCall()}
-                    className="w-full sm:w-auto px-8 md:px-12 py-3 md:py-4 bg-[#0096FF] text-white rounded-2xl font-semibold hover:bg-[#0077CC] transition-all flex items-center justify-center gap-3 whitespace-nowrap cursor-pointer"
-                  >
-                    <i className="ri-phone-fill text-lg md:text-xl"></i>
-                    Start Call
-                  </button>
-                  <button
-                    onClick={openBookingModal}
-                    className="w-full sm:w-auto px-8 md:px-12 py-3 md:py-4 bg-white text-[#0096FF] border-2 border-[#0096FF] rounded-2xl font-semibold hover:bg-[#0077CC] hover:text-white transition-all flex items-center justify-center gap-3 whitespace-nowrap cursor-pointer"
-                  >
-                    <i className="ri-calendar-fill text-lg md:text-xl"></i>
-                    Book Appointment
-                  </button>
-                  <Link to="/listener-chat" className="text-sm font-medium text-[#0096FF] hover:underline">
-                    Prefer to type? Text a Listener
-                  </Link>
-                </>
-              ) : (
-                <button
-                  onClick={call.hangup}
-                  className="px-8 md:px-12 py-3 md:py-4 bg-red-500 text-white rounded-2xl font-semibold hover:bg-red-600 transition-all flex items-center gap-3 whitespace-nowrap cursor-pointer"
-                >
-                  <i className="ri-phone-fill text-lg md:text-xl"></i>
-                  End Call
-                </button>
-              )}
-            </div>
-
-            {/* Call Controls */}
-            <div className="flex items-center justify-center gap-4 md:gap-6 mb-8">
+            <div className="mt-5 flex flex-col items-center justify-between gap-4 rounded-3xl bg-oe-surface p-5 sm:flex-row">
+              <div className="flex flex-wrap items-center gap-3">
+                <Link to="/check-in/reflection" className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-medium text-oe-primary-deep">
+                  <i className="ri-time-line" aria-hidden="true" /> I need a few more minutes
+                </Link>
+                <Link to="/listener-chat" className="px-2 text-sm font-medium text-oe-primary hover:underline">
+                  Prefer to type?
+                </Link>
+                <Link to="/book" className="px-2 text-sm font-medium text-oe-primary hover:underline">
+                  Book a time instead
+                </Link>
+              </div>
               <button
-                onClick={call.toggleMute}
-                disabled={call.state.phase !== 'live'}
-                aria-label={call.state.muted ? 'Unmute microphone' : 'Mute microphone'}
-                aria-pressed={call.state.muted}
-                className={`w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center transition-all cursor-pointer ${
-                  call.state.muted
-                    ? 'bg-red-500 hover:bg-red-600'
-                    : 'bg-[#F5F5F5] hover:bg-[#E6F5FF]'
-                } ${
-                  call.state.phase !== 'live' ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
+                onClick={() => void startCall()}
+                className="oe-btn inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-oe-primary px-8 py-4 text-lg font-semibold text-white hover:bg-oe-primary-hover sm:w-auto"
               >
-                <i
-                  className={`${
-                    call.state.muted
-                      ? 'ri-mic-off-fill text-white'
-                      : 'ri-mic-fill text-[#2A2A2A]'
-                  } text-xl md:text-2xl`}
-                ></i>
+                {bookingId ? 'Join my booked call' : 'Find a Listener now'} <i className="ri-arrow-right-line" aria-hidden="true" />
               </button>
             </div>
+            <p className="mt-4 text-center text-xs text-oe-muted">
+              Calls are private and never recorded · In danger? Call{' '}
+              <a href="tel:999" className="font-semibold text-oe-crisis underline">
+                999
+              </a>{' '}
+              or{' '}
+              <a href="tel:112" className="font-semibold text-oe-crisis underline">
+                112
+              </a>
+            </p>
+          </>
+        )}
+      </main>
 
-            {/* Info Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-              <div className="bg-[#E6F5FF] rounded-2xl p-4 md:p-6 text-center">
-                <i className="ri-shield-check-fill text-2xl md:text-3xl text-[#0096FF] mb-2 md:mb-3 block"></i>
-                <p className="text-xs md:text-sm font-semibold text-[#2A2A2A] mb-1">
-                  Secure & Private
-                </p>
-                <p className="text-xs text-[#6B6B6B]">End-to-end encrypted</p>
-              </div>
-
-              <div className="bg-[#E6F5FF] rounded-2xl p-4 md:p-6 text-center">
-                <i className="ri-time-fill text-2xl md:text-3xl text-[#0096FF] mb-2 md:mb-3 block"></i>
-                <p className="text-xs md:text-sm font-semibold text-[#2A2A2A] mb-1">
-                  Available 24/7
-                </p>
-                <p className="text-xs text-[#6B6B6B]">Connect anytime</p>
-              </div>
-
-              <div className="bg-[#E6F5FF] rounded-2xl p-4 md:p-6 text-center">
-                <i className="ri-heart-3-fill text-2xl md:text-3xl text-[#0096FF] mb-2 md:mb-3 block"></i>
-                <p className="text-xs md:text-sm font-semibold text-[#2A2A2A] mb-1">
-                  Judgment‑Free
-                </p>
-                <p className="text-xs text-[#6B6B6B]">Safe space to share</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <SiteFooter />
 
       {/* Auth Modal */}
       {showAuthModal && (
@@ -550,21 +502,21 @@ export default function CallPage() {
             {/* Verification Sent State */}
             {verificationSent ? (
               <div className="text-center">
-                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <i className="ri-mail-check-fill text-4xl text-green-600"></i>
+                <div className="w-20 h-20 bg-forest-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <i className="ri-mail-check-fill text-4xl text-forest-600"></i>
                 </div>
-                <h2 className="text-2xl md:text-3xl font-bold text-[#2A2A2A] mb-3">
+                <h2 className="text-2xl md:text-3xl font-bold text-oe-ink mb-3">
                   Verify Your Email
                 </h2>
-                <p className="text-sm md:text-base text-[#6B6B6B] mb-2">
+                <p className="text-sm md:text-base text-oe-muted mb-2">
                   We've sent a verification link to:
                 </p>
-                <p className="text-sm md:text-base font-semibold text-[#0096FF] mb-6">
+                <p className="text-sm md:text-base font-semibold text-oe-primary mb-6">
                   {email}
                 </p>
-                <div className="bg-[#E6F5FF] rounded-xl p-4 mb-6">
-                  <p className="text-sm text-[#2A2A2A]">
-                    <i className="ri-information-fill text-[#0096FF] mr-2"></i>
+                <div className="bg-oe-primary-tint rounded-xl p-4 mb-6">
+                  <p className="text-sm text-oe-ink">
+                    <i className="ri-information-fill text-oe-primary mr-2"></i>
                     Click the link in your email to activate your account and start using Open Ear.
                   </p>
                 </div>
@@ -572,8 +524,8 @@ export default function CallPage() {
                 {authError && (
                   <div className={`mb-4 px-4 py-3 rounded-xl text-sm ${
                     authError.includes('resent')
-                      ? 'bg-green-50 border border-green-200 text-green-700'
-                      : 'bg-[#FFE6E6] border border-[#FF4444] text-[#FF4444]'
+                      ? 'bg-forest-50 border border-forest-200 text-forest-700'
+                      : 'bg-oe-crisis-tint border border-oe-crisis text-oe-crisis'
                   }`}>
                     {authError}
                   </div>
@@ -583,7 +535,7 @@ export default function CallPage() {
                   <button
                     onClick={handleResendVerification}
                     disabled={resendingVerification}
-                    className="w-full px-6 py-3 bg-white border-2 border-[#0096FF] text-[#0096FF] rounded-xl font-semibold hover:border-[#0077CC] hover:bg-[#E6F5FF] transition-all disabled:opacity-50 whitespace-nowrap cursor-pointer"
+                    className="w-full px-6 py-3 bg-white border-2 border-oe-primary text-oe-primary rounded-xl font-semibold hover:border-oe-primary-hover hover:bg-oe-primary-tint transition-all disabled:opacity-50 whitespace-nowrap cursor-pointer"
                   >
                     {resendingVerification ? (
                       <span className="flex items-center justify-center gap-2">
@@ -604,26 +556,26 @@ export default function CallPage() {
                       setIsSignUp(false);
                       setAuthError('');
                     }}
-                    className="w-full px-6 py-3 bg-[#0096FF] text-white rounded-xl font-semibold hover:bg-[#0077CC] transition-all whitespace-nowrap cursor-pointer"
+                    className="w-full px-6 py-3 bg-oe-primary text-white rounded-xl font-semibold hover:bg-oe-primary-hover transition-all whitespace-nowrap cursor-pointer"
                   >
                     Back to Sign In
                   </button>
                 </div>
                 
-                <p className="text-xs text-[#6B6B6B] mt-6">
+                <p className="text-xs text-oe-muted mt-6">
                   Didn't receive the email? Check your spam folder or try a different email address.
                 </p>
               </div>
             ) : (
               <>
                 <div className="text-center mb-6">
-                  <div className="w-16 h-16 md:w-20 md:h-20 bg-[#0096FF]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i className={`${forgotPassword ? 'ri-lock-unlock-fill' : 'ri-user-fill'} text-3xl md:text-4xl text-[#0096FF]`}></i>
+                  <div className="w-16 h-16 md:w-20 md:h-20 bg-oe-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i className={`${forgotPassword ? 'ri-lock-unlock-fill' : 'ri-user-fill'} text-3xl md:text-4xl text-oe-primary`}></i>
                   </div>
-                  <h2 className="text-2xl md:text-3xl font-bold text-[#2A2A2A] mb-2">
+                  <h2 className="text-2xl md:text-3xl font-bold text-oe-ink mb-2">
                     {forgotPassword ? 'Reset Password' : isSignUp ? 'Create Account' : 'Welcome Back'}
                   </h2>
-                  <p className="text-sm md:text-base text-[#6B6B6B]">
+                  <p className="text-sm md:text-base text-oe-muted">
                     {forgotPassword ? 'Enter your email to receive a reset link' : isSignUp ? 'Sign up to start calling' : 'Sign in to continue'}
                   </p>
                 </div>
@@ -632,9 +584,9 @@ export default function CallPage() {
                   <>
                     {/* Divider */}
                     <div className="flex items-center gap-3 mb-5">
-                      <div className="flex-1 h-px bg-[#E5E5E5]"></div>
-                      <span className="text-xs text-[#6B6B6B]">Sign in with email</span>
-                      <div className="flex-1 h-px bg-[#E5E5E5]"></div>
+                      <div className="flex-1 h-px bg-oe-line"></div>
+                      <span className="text-xs text-oe-muted">Sign in with email</span>
+                      <div className="flex-1 h-px bg-oe-line"></div>
                     </div>
                   </>
                 )}
@@ -642,14 +594,14 @@ export default function CallPage() {
                 <form onSubmit={handleAuth} className="space-y-4">
                   {!forgotPassword && isSignUp && (
                     <div>
-                      <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
+                      <label className="block text-sm font-medium text-oe-ink mb-2">
                         Full Name
                       </label>
                       <input
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="w-full px-4 py-3 border-2 border-[#E5E5E5] rounded-xl focus:border-[#0096FF] focus:outline-none text-sm md:text-base"
+                        className="w-full px-4 py-3 border-2 border-oe-line rounded-xl focus:border-oe-primary focus:outline-none text-sm md:text-base"
                         placeholder="Enter your name"
                         required
                       />
@@ -657,14 +609,14 @@ export default function CallPage() {
                   )}
 
                   <div>
-                    <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
+                    <label className="block text-sm font-medium text-oe-ink mb-2">
                       Email
                     </label>
                     <input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full px-4 py-3 border-2 border-[#E5E5E5] rounded-xl focus:border-[#0096FF] focus:outline-none text-sm md:text-base"
+                      className="w-full px-4 py-3 border-2 border-oe-line rounded-xl focus:border-oe-primary focus:outline-none text-sm md:text-base"
                       placeholder="your@email.com"
                       required
                     />
@@ -672,14 +624,14 @@ export default function CallPage() {
 
                   {!forgotPassword && (
                     <div>
-                      <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
+                      <label className="block text-sm font-medium text-oe-ink mb-2">
                         Password
                       </label>
                       <input
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full px-4 py-3 border-2 border-[#E5E5E5] rounded-xl focus:border-[#0096FF] focus:outline-none text-sm md:text-base"
+                        className="w-full px-4 py-3 border-2 border-oe-line rounded-xl focus:border-oe-primary focus:outline-none text-sm md:text-base"
                         placeholder={isSignUp ? 'Min. 6 characters' : '••••••••'}
                         required
                       />
@@ -695,7 +647,7 @@ export default function CallPage() {
                           setForgotPassword(true);
                           setAuthError('');
                         }}
-                        className="text-sm text-[#0096FF] font-medium hover:underline cursor-pointer"
+                        className="text-sm text-oe-primary font-medium hover:underline cursor-pointer"
                       >
                         Forgot password?
                       </button>
@@ -705,8 +657,8 @@ export default function CallPage() {
                   {authError && (
                     <div className={`px-4 py-3 rounded-xl text-sm ${
                       authError.includes('Check your email') || authError.includes('reset link sent') || authError.includes('resent')
-                        ? 'bg-[#E6F5FF] border border-[#0096FF] text-[#0096FF]'
-                        : 'bg-[#FFE6E6] border border-[#FF4444] text-[#FF4444]'
+                        ? 'bg-oe-primary-tint border border-oe-primary text-oe-primary'
+                        : 'bg-oe-crisis-tint border border-oe-crisis text-oe-crisis'
                     }`}>
                       {authError}
                     </div>
@@ -715,7 +667,7 @@ export default function CallPage() {
                   <button
                     type="submit"
                     disabled={isAuthLoading}
-                    className="w-full px-6 py-3 md:py-4 bg-[#0096FF] text-white rounded-xl text-base md:text-lg font-semibold hover:bg-[#0077CC] transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
+                    className="w-full px-6 py-3 md:py-4 bg-oe-primary text-white rounded-xl text-base md:text-lg font-semibold hover:bg-oe-primary-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
                   >
                     {isAuthLoading
                       ? 'Please wait...'
@@ -734,7 +686,7 @@ export default function CallPage() {
                         setForgotPassword(false);
                         setAuthError('');
                       }}
-                      className="text-sm md:text-base text-[#0096FF] font-semibold hover:underline cursor-pointer flex items-center justify-center gap-1 mx-auto"
+                      className="text-sm md:text-base text-oe-primary font-semibold hover:underline cursor-pointer flex items-center justify-center gap-1 mx-auto"
                     >
                       <i className="ri-arrow-left-line"></i>
                       Back to Sign In
@@ -745,7 +697,7 @@ export default function CallPage() {
                         setIsSignUp(!isSignUp);
                         setAuthError('');
                       }}
-                      className="text-sm md:text-base text-[#0096FF] font-semibold hover:underline cursor-pointer"
+                      className="text-sm md:text-base text-oe-primary font-semibold hover:underline cursor-pointer"
                     >
                       {isSignUp
                         ? 'Already have an account? Sign In'
@@ -763,7 +715,7 @@ export default function CallPage() {
                 setVerificationSent(false);
                 setAuthError('');
               }}
-              className="absolute top-4 right-4 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-[#6B6B6B] hover:text-[#2A2A2A] transition-colors cursor-pointer"
+              className="absolute top-4 right-4 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-oe-muted hover:text-oe-ink transition-colors cursor-pointer"
             >
               <i className="ri-close-line text-xl md:text-2xl"></i>
             </button>
@@ -771,111 +723,6 @@ export default function CallPage() {
         </div>
       )}
 
-      {/* Booking Modal */}
-      {showBookingModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl p-6 md:p-10 max-w-md w-full shadow-2xl relative">
-            <div className="text-center mb-6 md:mb-8">
-              <div className="w-16 h-16 md:w-20 md:h-20 bg-[#0096FF]/10 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6">
-                <i className="ri-calendar-fill text-3xl md:text-4xl text-[#0096FF]"></i>
-              </div>
-              <h2 className="text-2xl md:text-3xl font-bold text-[#2A2A2A] mb-2">
-                Book Appointment
-              </h2>
-              <p className="text-sm md:text-base text-[#6B6B6B]">
-                Schedule a call at your convenience
-              </p>
-            </div>
-
-            <form onSubmit={handleBookAppointment} className="space-y-4 md:space-y-5">
-              <div>
-                <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  value={bookingPhoneNumber}
-                  onChange={(e) => setBookingPhoneNumber(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-[#E5E5E5] rounded-xl focus:border-[#0096FF] focus:outline-none text-sm md:text-base"
-                  placeholder="+233201234567"
-                  required
-                />
-                <p className="text-xs text-[#6B6B6B] mt-1">
-                  Include country code
-                </p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
-                  Date
-                </label>
-                <input
-                  type="date"
-                  value={bookingDate}
-                  onChange={(e) => setBookingDate(e.target.value)}
-                  min={getMinDate()}
-                  className="w-full px-4 py-3 border-2 border-[#E5E5E5] rounded-xl focus:border-[#0096FF] focus:outline-none text-sm md:text-base"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
-                  Time
-                </label>
-                <input
-                  type="time"
-                  value={bookingTime}
-                  onChange={(e) => setBookingTime(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-[#E5E5E5] rounded-xl focus:border-[#0096FF] focus:outline-none text-sm md:text-base"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
-                  Notes (Optional)
-                </label>
-                <textarea
-                  value={bookingNotes}
-                  onChange={(e) => setBookingNotes(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-[#E5E5E5] rounded-xl focus:border-[#0096FF] focus:outline-none text-sm md:text-base resize-none"
-                  rows={3}
-                  placeholder="Any specific topics you'd like to discuss..."
-                />
-              </div>
-
-              {bookingError && (
-                <div className="bg-[#FFE6E6] border border-[#FF4444] text-[#FF4444] px-4 py-3 rounded-xl text-sm">
-                  {bookingError}
-                </div>
-              )}
-
-              {bookingSuccess && (
-                <div className="bg-[#E6F5FF] border border-[#0096FF] text-[#0096FF] px-4 py-3 rounded-xl text-sm">
-                  ✓ Appointment booked! Admin notified and calendar updated.
-                  Check your email for confirmation.
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={bookingLoading}
-                className="w-full px-6 py-3 md:py-4 bg-[#0096FF] text-white rounded-xl text-base md:text-lg font-semibold hover:bg-[#0077CC] transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
-              >
-                {bookingLoading ? 'Booking...' : 'Confirm Booking'}
-              </button>
-            </form>
-
-            <button
-              onClick={() => setShowBookingModal(false)}
-              className="absolute top-4 right-4 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-[#6B6B6B] hover:text-[#2A2A2A] transition-colors cursor-pointer"
-            >
-              <i className="ri-close-line text-xl md:text-2xl"></i>
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

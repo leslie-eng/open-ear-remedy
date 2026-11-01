@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { CREDITS_PER_CALL_MINUTE } from '@openear/shared/pricing';
 import { MAX_CHAT_MESSAGE_CHARS } from '@openear/shared/calls';
 import Navbar from '../../components/feature/Navbar';
 import NotesNotice from '../../components/feature/NotesNotice';
+import SiteFooter from '../../components/feature/SiteFooter';
 import CrisisLink from '../../components/ui/CrisisLink';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTextChatSession } from '../../hooks/useTextChatSession';
@@ -35,6 +36,9 @@ export default function ListenerChatPage() {
   const { user, loading } = useAuth();
   const chat = useTextChatSession();
   const notesGate = useNotesNoticeGate();
+  // Joining a booked text chat from the dashboard: /listener-chat?booking=<id>.
+  const [searchParams] = useSearchParams();
+  const bookingId = searchParams.get('booking');
   const [displayName, setDisplayName] = useState('');
   const [draft, setDraft] = useState('');
   const [error, setError] = useState('');
@@ -53,7 +57,7 @@ export default function ListenerChatPage() {
       setError(err instanceof Error ? err.message : 'Could not save your display name.');
       return;
     }
-    await notesGate.gate(chat.start);
+    await notesGate.gate(() => chat.start(bookingId ?? undefined));
   };
 
   const submit = (e: FormEvent) => {
@@ -64,126 +68,190 @@ export default function ListenerChatPage() {
   if (loading) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]">
+    <div className="min-h-screen bg-oe-bg text-oe-ink">
       <Navbar />
       {notesGate.noticeOpen && <NotesNotice onChoose={(allow) => void notesGate.choose(allow)} onCancel={notesGate.cancel} />}
-      <main className="px-4 pb-12 pt-24 md:pt-28">
-        <div className="mx-auto max-w-2xl">
-          <div className="mb-6 text-center">
-            <h1 className="text-3xl font-bold text-[#2A2A2A]">Text a Listener</h1>
-            <p className="mt-2 text-[#6B6B6B]">
-              Type with a trained Listener in real time. {CREDITS_PER_CALL_MINUTE} credits a minute, the same as a call.
-              Nothing you type is saved.
-            </p>
-            <CrisisLink className="mt-2 justify-center" />
-          </div>
+      <main className="oe-route mx-auto max-w-3xl px-5 pb-20 pt-28 md:px-8">
+        <p className="inline-flex items-center gap-1.5 rounded-full bg-oe-primary-soft px-3 py-1 text-xs font-medium uppercase tracking-wide text-oe-primary-deep">
+          <i className="ri-chat-3-line" aria-hidden="true" /> Text Chat
+        </p>
+        <h1 className="mt-4 text-4xl font-bold md:text-5xl">Text a Listener</h1>
+        <p className="mt-3 max-w-2xl text-lg text-oe-muted">
+          Type with a trained Listener in real time. {CREDITS_PER_CALL_MINUTE} credits a minute, the same as a call. Nothing you
+          type is saved.
+        </p>
+        <CrisisLink className="mt-3" />
 
-          {!user ? (
-            <div className="rounded-3xl bg-white p-8 text-center shadow-lg">
-              <p className="mb-6 text-[#6B6B6B]">Sign in to text a Listener.</p>
-              <Link to="/signin" state={{ returnTo: '/listener-chat' }} className="inline-block rounded-2xl bg-[#0096FF] px-8 py-3 font-semibold text-white hover:bg-[#0077CC]">
-                Sign in
-              </Link>
-            </div>
-          ) : phase === 'idle' || phase === 'ended' ? (
-            <div className="rounded-3xl bg-white p-6 shadow-lg md:p-8">
-              {phase === 'ended' && chat.state.endReason && (
-                <p role="status" className="mb-4 rounded-xl bg-[#E6F5FF] px-4 py-3 text-sm text-[#2A2A2A]">
-                  {END_LABELS[chat.state.endReason] ?? 'The chat has ended.'}
-                  {chat.state.billedSeconds > 0 && ` Chat time ${formatTime(chat.state.billedSeconds)}.`}
-                </p>
-              )}
-              {(error || chat.state.error) && (
-                <p role="alert" className="mb-4 rounded-xl border border-[#FF4444] bg-[#FFE6E6] px-4 py-3 text-sm text-[#C62828]">
-                  {error || chat.state.error}
-                </p>
-              )}
-              <label htmlFor="display-name" className="mb-2 block text-sm font-medium text-[#2A2A2A]">
-                Name the Listener will see (optional)
-              </label>
-              <input
-                id="display-name"
-                value={displayName}
-                maxLength={40}
-                onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="Anonymous"
-                className="mb-4 w-full rounded-xl border-2 border-[#E5E5E5] px-4 py-3 focus:border-[#0096FF] focus:outline-none"
-              />
-              <button onClick={() => void begin()} className="w-full cursor-pointer rounded-2xl bg-[#0096FF] py-3 font-semibold text-white hover:bg-[#0077CC]">
-                {phase === 'ended' ? 'Start another chat' : 'Find a Listener'}
-              </button>
-              <p className="mt-4 text-center text-sm">
-                <Link to="/call" className="text-[#0096FF] hover:underline">
-                  Prefer to talk? Call a Listener
-                </Link>
+        {!user ? (
+          <section className="mt-10 rounded-3xl border border-oe-line bg-white p-8 text-center">
+            <p className="text-oe-muted">Sign in to text a Listener.</p>
+            <Link
+              to="/signin"
+              state={{ returnTo: bookingId ? `/listener-chat?booking=${bookingId}` : '/listener-chat' }}
+              className="oe-btn mt-5 inline-block rounded-full bg-oe-primary px-8 py-3 font-semibold text-white hover:bg-oe-primary-hover"
+            >
+              Sign in
+            </Link>
+          </section>
+        ) : phase === 'idle' || phase === 'ended' ? (
+          <>
+            {phase === 'ended' && chat.state.endReason && (
+              <p role="status" className="mt-8 rounded-2xl bg-oe-primary-tint px-5 py-3 text-sm text-oe-ink">
+                {END_LABELS[chat.state.endReason] ?? 'The chat has ended.'}
+                {chat.state.billedSeconds > 0 && ` Chat time ${formatTime(chat.state.billedSeconds)}.`}
+                {chat.state.billedSeconds > 0 && chat.state.callId && (
+                  <>
+                    {' '}
+                    <Link to={`/book?again=${chat.state.callId}`} className="font-medium text-oe-primary underline">
+                      Book again with this Listener
+                    </Link>
+                  </>
+                )}
               </p>
-            </div>
-          ) : phase === 'ringing' ? (
-            <div className="rounded-3xl bg-white p-8 text-center shadow-lg" role="status" aria-live="polite">
-              <i className="ri-chat-heart-line mb-3 block text-4xl text-[#0096FF]" aria-hidden="true"></i>
-              <p className="font-semibold text-[#2A2A2A]">Finding a Listener…</p>
-              <p className="mt-1 text-sm text-[#6B6B6B]">This usually takes under a minute. You are not charged until someone joins.</p>
-              <button onClick={chat.end} className="mt-6 cursor-pointer rounded-xl border-2 border-[#E5E5E5] px-6 py-2 font-medium text-[#2A2A2A]">
-                Cancel
-              </button>
-            </div>
-          ) : (
-            <div className="flex h-[70vh] flex-col overflow-hidden rounded-3xl bg-white shadow-lg">
-              <div className="flex items-center justify-between border-b border-gray-100 px-5 py-3">
+            )}
+            {(error || chat.state.error) && (
+              <p role="alert" className="mt-6 rounded-2xl bg-oe-crisis-tint px-5 py-3 text-sm text-oe-crisis">
+                {error || chat.state.error}
+              </p>
+            )}
+            <section className="mt-8 rounded-3xl border border-oe-line bg-white p-6 md:p-8">
+              <div className="flex items-start gap-4">
+                <span aria-hidden="true" className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-oe-primary-soft text-xl text-oe-primary-deep">
+                  <i className="ri-user-heart-line" />
+                </span>
                 <div>
-                  <p className="font-semibold text-[#2A2A2A]">You&apos;re chatting with a Listener</p>
-                  <p className="text-xs text-[#6B6B6B]">
-                    {formatTime(chat.state.elapsed)} of {formatTime(chat.state.maxSeconds)}
-                    {chat.state.peerReconnecting && ' · the Listener’s connection dropped, waiting…'}
+                  <h2 className="font-sans text-lg font-semibold">
+                    {bookingId && phase !== 'ended' ? 'Your booked chat' : 'A trained Listener'}
+                  </h2>
+                  <p className="text-sm text-oe-muted">
+                    {bookingId && phase !== 'ended'
+                      ? 'Your Listener is expecting you. Join when you’re ready.'
+                      : 'The first free Listener will answer. You’re only charged once you’re chatting.'}
                   </p>
                 </div>
-                <button onClick={chat.end} className="cursor-pointer rounded-xl bg-red-500 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600">
-                  End chat
-                </button>
               </div>
-              {chat.state.lowTimeWarning && (
-                <p role="alert" className="bg-orange-100 px-5 py-2 text-sm text-orange-700">
-                  About 2 minutes of chat time left.
-                </p>
-              )}
-              <div className="flex-1 space-y-3 overflow-y-auto p-5" aria-live="polite">
-                {chat.state.lines.length === 0 && (
-                  <p className="text-center text-sm text-[#6B6B6B]">Say hello whenever you&apos;re ready.</p>
-                )}
-                {chat.state.lines.map((line) => (
-                  <div key={line.id} className={`flex ${line.from === 'me' ? 'justify-end' : 'justify-start'}`}>
-                    <p
-                      className={`max-w-[80%] whitespace-pre-wrap rounded-2xl px-4 py-2 text-sm ${
-                        line.from === 'me' ? 'rounded-br-md bg-[#0096FF] text-white' : 'rounded-bl-md bg-[#F5F5F5] text-[#2A2A2A]'
-                      }`}
-                    >
-                      {line.text}
-                    </p>
-                  </div>
-                ))}
-                <div ref={endRef} />
-              </div>
-              <form onSubmit={submit} className="flex gap-2 border-t border-gray-100 p-3">
-                <label htmlFor="chat-draft" className="sr-only">
-                  Message
+
+              <div className="mt-6">
+                <label htmlFor="display-name" className="block text-sm font-medium">
+                  Name the Listener will see (optional)
                 </label>
                 <input
-                  id="chat-draft"
-                  value={draft}
-                  maxLength={MAX_CHAT_MESSAGE_CHARS}
-                  onChange={(e) => setDraft(e.target.value)}
-                  placeholder="Type a message"
-                  autoComplete="off"
-                  className="flex-1 rounded-xl border-2 border-[#E5E5E5] px-4 py-2 focus:border-[#0096FF] focus:outline-none"
+                  id="display-name"
+                  value={displayName}
+                  maxLength={40}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  placeholder="Anonymous"
+                  className="mt-2 w-full rounded-xl border border-oe-line bg-oe-surface-low px-4 py-3 focus:border-oe-primary focus:outline-none focus:ring-2 focus:ring-oe-primary/30"
                 />
-                <button type="submit" disabled={!draft.trim()} className="cursor-pointer rounded-xl bg-[#0096FF] px-5 font-semibold text-white hover:bg-[#0077CC] disabled:opacity-50">
-                  Send
-                </button>
-              </form>
+                <p className="mt-2 text-xs text-oe-muted">Listeners never see your email or phone number.</p>
+              </div>
+            </section>
+
+            <div className="mt-5 flex flex-col items-center justify-between gap-4 rounded-3xl bg-oe-surface p-5 sm:flex-row">
+              <div className="flex flex-wrap items-center gap-3 text-sm">
+                <Link to="/call" className="px-2 font-medium text-oe-primary hover:underline">
+                  Prefer to talk? Call a Listener
+                </Link>
+                <Link to="/book" className="px-2 font-medium text-oe-primary hover:underline">
+                  Book a time
+                </Link>
+              </div>
+              <button
+                onClick={() => void begin()}
+                className="oe-btn inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-oe-primary px-8 py-3.5 font-semibold text-white hover:bg-oe-primary-hover sm:w-auto"
+              >
+                {bookingId && phase !== 'ended' ? 'Join my booked chat' : phase === 'ended' ? 'Start another chat' : 'Find a Listener'}
+                <i className="ri-arrow-right-line" aria-hidden="true" />
+              </button>
             </div>
-          )}
-        </div>
+          </>
+        ) : phase === 'ringing' || phase === 'waiting' ? (
+          <section className="mt-10 rounded-3xl border border-oe-line bg-white p-8 text-center md:p-12" role="status" aria-live="polite">
+            <span aria-hidden="true" className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-oe-primary-soft text-2xl text-oe-primary-deep">
+              <i className="ri-chat-heart-line" />
+            </span>
+            <p className="mt-5 font-heading text-2xl font-semibold">
+              {phase === 'waiting' ? 'Waiting for your Listener to join…' : 'Finding a Listener…'}
+            </p>
+            <p className="mx-auto mt-2 max-w-md text-sm text-oe-muted">
+              {phase === 'waiting'
+                ? 'They’ll be with you shortly. Stay on this page; you’re only charged once you’re chatting.'
+                : 'This usually takes under a minute. You are not charged until someone joins.'}
+            </p>
+            <button
+              onClick={chat.end}
+              className="mt-8 cursor-pointer rounded-full border border-oe-line bg-white px-6 py-2.5 font-medium text-oe-ink hover:bg-oe-surface"
+            >
+              Cancel
+            </button>
+          </section>
+        ) : (
+          <section className="mt-8 flex h-[70vh] min-h-[480px] flex-col overflow-hidden rounded-3xl border border-oe-line bg-white">
+            <div className="flex items-center gap-3 border-b border-oe-line px-5 py-4">
+              <span aria-hidden="true" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-oe-primary-soft text-oe-primary-deep">
+                <i className="ri-user-heart-line" />
+              </span>
+              <div className="flex-1">
+                <h2 className="font-sans text-base font-semibold">You&apos;re chatting with a Listener</h2>
+                <p className="text-xs text-oe-muted">
+                  {formatTime(chat.state.elapsed)} of {formatTime(chat.state.maxSeconds)}
+                  {chat.state.peerReconnecting && ' · the Listener’s connection dropped, waiting…'}
+                </p>
+              </div>
+              <button
+                onClick={chat.end}
+                className="shrink-0 cursor-pointer rounded-full bg-oe-crisis px-5 py-2 text-sm font-semibold text-white hover:opacity-90"
+              >
+                End chat
+              </button>
+            </div>
+            {chat.state.lowTimeWarning && (
+              <p role="alert" className="bg-oe-accent-tint px-5 py-2 text-sm font-medium text-oe-accent">
+                About 2 minutes of chat time left.
+              </p>
+            )}
+            <div className="flex-1 space-y-3 overflow-y-auto bg-oe-surface-low/40 p-5" aria-live="polite">
+              {chat.state.lines.length === 0 && (
+                <p className="text-center text-sm text-oe-muted">Say hello whenever you&apos;re ready.</p>
+              )}
+              {chat.state.lines.map((line) => (
+                <div key={line.id} className={`flex ${line.from === 'me' ? 'justify-end' : 'justify-start'}`}>
+                  <p
+                    className={`max-w-[80%] whitespace-pre-wrap rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
+                      line.from === 'me' ? 'rounded-br-md bg-oe-primary text-white' : 'rounded-bl-md bg-oe-surface text-oe-ink'
+                    }`}
+                  >
+                    {line.text}
+                  </p>
+                </div>
+              ))}
+              <div ref={endRef} />
+            </div>
+            <form onSubmit={submit} className="flex gap-2 border-t border-oe-line p-3 md:p-4">
+              <label htmlFor="chat-draft" className="sr-only">
+                Message
+              </label>
+              <input
+                id="chat-draft"
+                value={draft}
+                maxLength={MAX_CHAT_MESSAGE_CHARS}
+                onChange={(e) => setDraft(e.target.value)}
+                placeholder="Type a message"
+                autoComplete="off"
+                className="flex-1 rounded-xl border border-oe-line bg-oe-surface-low px-4 py-3 focus:border-oe-primary focus:outline-none focus:ring-2 focus:ring-oe-primary/30"
+              />
+              <button
+                type="submit"
+                disabled={!draft.trim()}
+                className="cursor-pointer rounded-full bg-oe-primary px-6 font-semibold text-white hover:bg-oe-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Send
+              </button>
+            </form>
+          </section>
+        )}
       </main>
+      <SiteFooter />
     </div>
   );
 }

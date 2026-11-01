@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import SiteFooter from '../../components/feature/SiteFooter';
 import Navbar from '../../components/feature/Navbar';
 import NotesSettingsCard from '../../components/feature/NotesSettingsCard';
 import { useAuth, type AuthUser } from '../../contexts/AuthContext';
 import { apiFetch } from '../../lib/api';
+import { formatPrice } from '@openear/shared/pricing';
 import { useSEO } from '../../utils/seo';
 
 interface UserProfile {
@@ -33,8 +35,8 @@ interface CreditTransaction {
 
 export default function ProfilePage() {
   useSEO({
-    title: 'My Profile - Open Ear | Account Settings',
-    description: 'Manage your Open Ear account settings, view call history, and update your profile information.',
+    title: 'Profile | Open Ear',
+    description: 'Your Open Ear account: details, calls, credits, Listener notes and privacy settings.',
     keywords: 'profile, account settings, Open Ear, user dashboard',
     canonical: '/profile',
   });
@@ -203,7 +205,7 @@ export default function ProfilePage() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString('en-KE', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -219,22 +221,21 @@ export default function ProfilePage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed':
-        return 'bg-green-100 text-green-700';
       case 'active':
-        return 'bg-blue-100 text-blue-700';
+        return 'bg-oe-primary-tint text-oe-primary-deep';
       case 'failed':
-        return 'bg-red-100 text-red-700';
+        return 'bg-oe-crisis-tint text-oe-crisis';
       default:
-        return 'bg-gray-100 text-gray-700';
+        return 'bg-oe-surface text-oe-muted';
     }
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount / 100);
-  };
+  // Amounts are stored in cents of a shilling.
+  const formatCurrency = (amount: number) => formatPrice(amount / 100);
+
+  // Usage and booking holds are stored as negative credits.
+  const isDebit = (t: CreditTransaction) => t.credits < 0 || t.type === 'usage';
+  const signedCredits = (t: CreditTransaction) => `${isDebit(t) ? '−' : '+'}${Math.abs(t.credits)}`;
 
   const getTransactionIcon = (type: string) => {
     switch (type) {
@@ -254,35 +255,31 @@ export default function ProfilePage() {
   const getTransactionColor = (type: string) => {
     switch (type) {
       case 'purchase':
-        return 'bg-green-100 text-green-600';
-      case 'bonus':
-        return 'bg-amber-100 text-amber-600';
       case 'refund':
-        return 'bg-blue-100 text-blue-600';
-      case 'usage':
-        return 'bg-red-100 text-red-600';
+        return 'bg-oe-primary-soft text-oe-primary-deep';
+      case 'bonus':
+        return 'bg-oe-accent-tint text-oe-accent';
       default:
-        return 'bg-gray-100 text-gray-600';
+        return 'bg-oe-surface text-oe-muted';
     }
   };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'completed':
-        return 'bg-green-100 text-green-700';
-      case 'pending':
-        return 'bg-amber-100 text-amber-700';
-      case 'failed':
-        return 'bg-red-100 text-red-700';
       case 'refunded':
-        return 'bg-blue-100 text-blue-700';
+        return 'bg-oe-primary-tint text-oe-primary-deep';
+      case 'pending':
+        return 'bg-oe-accent-tint text-oe-accent';
+      case 'failed':
+        return 'bg-oe-crisis-tint text-oe-crisis';
       default:
-        return 'bg-gray-100 text-gray-700';
+        return 'bg-oe-surface text-oe-muted';
     }
   };
 
   const formatDateTime = (dateString: string) => {
-    return new Date(dateString).toLocaleString('en-US', {
+    return new Date(dateString).toLocaleString('en-KE', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -314,10 +311,10 @@ export default function ProfilePage() {
         <title>Invoice ${invoiceNumber}</title>
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
-          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #2A2A2A; padding: 40px; }
+          body { font-family: 'Nunito Sans', 'Segoe UI', sans-serif; color: #2A2A2A; padding: 40px; }
           .invoice-container { max-width: 800px; margin: 0 auto; }
-          .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 2px solid #0096FF; }
-          .logo { font-size: 28px; font-weight: bold; color: #0096FF; }
+          .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 2px solid #4a7c59; }
+          .logo { font-size: 28px; font-weight: bold; color: #4a7c59; }
           .invoice-title { text-align: right; }
           .invoice-title h1 { font-size: 32px; color: #2A2A2A; margin-bottom: 5px; }
           .invoice-number { color: #6B6B6B; font-size: 14px; }
@@ -325,7 +322,7 @@ export default function ProfilePage() {
           .info-block h3 { font-size: 12px; text-transform: uppercase; color: #6B6B6B; margin-bottom: 8px; letter-spacing: 1px; }
           .info-block p { font-size: 14px; line-height: 1.6; }
           .details-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-          .details-table th { background: #F8FAFC; padding: 12px 16px; text-align: left; font-size: 12px; text-transform: uppercase; color: #6B6B6B; letter-spacing: 1px; border-bottom: 2px solid #E5E7EB; }
+          .details-table th { background: #faf6f0; padding: 12px 16px; text-align: left; font-size: 12px; text-transform: uppercase; color: #6B6B6B; letter-spacing: 1px; border-bottom: 2px solid #E5E7EB; }
           .details-table td { padding: 16px; border-bottom: 1px solid #E5E7EB; font-size: 14px; }
           .details-table .description { width: 50%; }
           .details-table .amount { text-align: right; }
@@ -338,9 +335,9 @@ export default function ProfilePage() {
           .status-failed { background: #FEE2E2; color: #991B1B; }
           .footer { margin-top: 60px; padding-top: 20px; border-top: 1px solid #E5E7EB; text-align: center; color: #6B6B6B; font-size: 12px; }
           .footer p { margin-bottom: 5px; }
-          .credits-highlight { background: #E6F5FF; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
-          .credits-highlight h4 { color: #0096FF; font-size: 14px; margin-bottom: 5px; }
-          .credits-highlight .credits-value { font-size: 32px; font-weight: bold; color: #0077CC; }
+          .credits-highlight { background: #eef3ec; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
+          .credits-highlight h4 { color: #4a7c59; font-size: 14px; margin-bottom: 5px; }
+          .credits-highlight .credits-value { font-size: 32px; font-weight: bold; color: #3a6347; }
         </style>
       </head>
       <body>
@@ -368,8 +365,8 @@ export default function ProfilePage() {
           </div>
 
           <div class="credits-highlight">
-            <h4>Credits ${transaction.type === 'usage' ? 'Used' : 'Added'}</h4>
-            <div class="credits-value">${transaction.type === 'usage' ? '-' : '+'}${transaction.credits} Credits</div>
+            <h4>Credits ${isDebit(transaction) ? 'Used' : 'Added'}</h4>
+            <div class="credits-value">${signedCredits(transaction)} Credits</div>
           </div>
           
           <table class="details-table">
@@ -385,7 +382,7 @@ export default function ProfilePage() {
               <tr>
                 <td class="description">${transaction.description || `${transactionType} - Open Ear Credits`}</td>
                 <td>${transactionType}</td>
-                <td>${transaction.type === 'usage' ? '-' : '+'}${transaction.credits}</td>
+                <td>${signedCredits(transaction)}</td>
                 <td class="amount">${transaction.amount > 0 ? formatCurrency(transaction.amount) : '-'}</td>
               </tr>
             </tbody>
@@ -399,7 +396,7 @@ export default function ProfilePage() {
             </div>
             <div class="totals-row">
               <span>Tax</span>
-              <span>$0.00</span>
+              <span>${formatPrice(0)}</span>
             </div>
             <div class="totals-row total">
               <span>Total</span>
@@ -409,8 +406,8 @@ export default function ProfilePage() {
           ` : ''}
           
           <div class="footer">
-            <p><strong>Open Ear</strong> - AI-Powered Support Platform</p>
-            <p>Thank you for your business!</p>
+            <p><strong>Open Ear</strong>: a place to talk and be heard</p>
+            <p>Thank you.</p>
             <p style="margin-top: 15px; color: #9CA3AF;">This invoice was generated automatically. For questions, please contact support.</p>
           </div>
         </div>
@@ -446,656 +443,586 @@ export default function ProfilePage() {
     }
   };
 
+  const card = 'rounded-3xl border border-oe-line bg-white p-6 md:p-8';
+  const inputClass =
+    'w-full rounded-xl border border-oe-line bg-oe-surface-low px-4 py-3 text-sm text-oe-ink focus:border-oe-primary focus:outline-none focus:ring-2 focus:ring-oe-primary/30';
+  const tabs = [
+    { id: 'profile', label: 'Account', icon: 'ri-user-line' },
+    { id: 'history', label: 'Calls', icon: 'ri-history-line' },
+    { id: 'purchases', label: 'Credits', icon: 'ri-wallet-line' },
+    { id: 'security', label: 'Privacy & security', icon: 'ri-shield-keyhole-line' },
+  ] as const;
+
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-oe-bg" aria-busy="true">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 border-3 border-[#0096FF] border-t-transparent rounded-full animate-spin"></div>
-          <span className="text-[#6B6B6B]">Loading...</span>
+          <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-oe-primary border-t-transparent" />
+          <span className="text-oe-muted">Loading…</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
+    <div className="min-h-screen bg-oe-bg text-oe-ink">
       <Navbar />
 
-      {/* Success Toast */}
+      {/* Success toast */}
       {showSuccessToast && (
-        <div className="fixed top-24 right-6 z-50 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg flex items-center gap-2 animate-fade-in">
-          <i className="ri-check-line text-lg"></i>
-          <span className="text-sm font-medium">{successMessage}</span>
+        <div
+          role="status"
+          className="fixed right-5 top-24 z-50 flex animate-fade-in items-center gap-2 rounded-2xl border border-oe-line bg-oe-primary-tint px-5 py-3 text-sm shadow-oe-md"
+        >
+          <i className="ri-check-line text-lg text-oe-primary" aria-hidden="true" />
+          <span className="font-medium">{successMessage}</span>
         </div>
       )}
 
-      <div className="pt-28 pb-16 px-4 md:px-8 lg:px-14">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-2xl md:text-3xl font-bold text-[#2A2A2A] mb-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
-              My Profile
-            </h1>
-            <p className="text-sm text-[#6B6B6B]">Manage your account settings and preferences</p>
+      <main className="oe-route mx-auto max-w-3xl px-5 pb-20 pt-28 md:px-8">
+        {/* Header */}
+        <p className="inline-flex items-center gap-1.5 rounded-full bg-oe-primary-soft px-3 py-1 text-xs font-medium uppercase tracking-wide text-oe-primary-deep">
+          <i className="ri-user-heart-line" aria-hidden="true" /> Your account
+        </p>
+        <h1 className="mt-4 text-4xl font-bold md:text-5xl">Profile</h1>
+        <p className="mt-3 max-w-2xl text-lg text-oe-muted">Your details, calls, credits and privacy choices.</p>
+
+        {/* Identity */}
+        <section className={`mt-8 flex flex-col gap-5 sm:flex-row sm:items-center ${card}`} aria-label="Account summary">
+          <span
+            aria-hidden="true"
+            className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-oe-primary-soft font-heading text-2xl font-bold text-oe-primary-deep"
+          >
+            {profile?.email?.charAt(0).toUpperCase()}
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-lg font-semibold">{profile?.email}</p>
+            <p className="text-sm text-oe-muted">Member since {formatDate(profile?.created_at || '')}</p>
           </div>
-
-          {/* Profile Card */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            {/* User Info Header */}
-            <div className="bg-gradient-to-r from-[#0096FF] to-[#0077CC] p-6 md:p-8">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 md:w-20 md:h-20 bg-white/20 rounded-full flex items-center justify-center">
-                  <span className="text-2xl md:text-3xl font-bold text-white">
-                    {profile?.email?.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-                <div className="flex-1">
-                  <h2 className="text-lg md:text-xl font-semibold text-white mb-1">{profile?.email}</h2>
-                  <p className="text-sm text-white/80">Member since {formatDate(profile?.created_at || '')}</p>
-                </div>
-                <div className="hidden md:block text-right">
-                  <div className="bg-white/20 rounded-xl px-4 py-2">
-                    <p className="text-xs text-white/80 mb-0.5">Available Credits</p>
-                    <p className="text-2xl font-bold text-white">{profile?.credits}</p>
-                  </div>
-                </div>
-              </div>
-              <div className="md:hidden mt-4 bg-white/20 rounded-xl px-4 py-3 flex items-center justify-between">
-                <p className="text-sm text-white/80">Available Credits</p>
-                <p className="text-xl font-bold text-white">{profile?.credits}</p>
-              </div>
-            </div>
-
-            {/* Tabs */}
-            <div className="border-b border-gray-100">
-              <div className="flex overflow-x-auto">
-                <button
-                  onClick={() => setActiveTab('profile')}
-                  className={`flex-1 md:flex-none px-6 py-4 text-sm font-medium transition-colors cursor-pointer whitespace-nowrap ${
-                    activeTab === 'profile'
-                      ? 'text-[#0096FF] border-b-2 border-[#0096FF]'
-                      : 'text-[#6B6B6B] hover:text-[#2A2A2A]'
-                  }`}
-                >
-                  <i className="ri-user-line mr-2"></i>
-                  Profile
-                </button>
-                <button
-                  onClick={() => setActiveTab('history')}
-                  className={`flex-1 md:flex-none px-6 py-4 text-sm font-medium transition-colors cursor-pointer whitespace-nowrap ${
-                    activeTab === 'history'
-                      ? 'text-[#0096FF] border-b-2 border-[#0096FF]'
-                      : 'text-[#6B6B6B] hover:text-[#2A2A2A]'
-                  }`}
-                >
-                  <i className="ri-history-line mr-2"></i>
-                  Call History
-                </button>
-                <button
-                  onClick={() => setActiveTab('purchases')}
-                  className={`flex-1 md:flex-none px-6 py-4 text-sm font-medium transition-colors cursor-pointer whitespace-nowrap ${
-                    activeTab === 'purchases'
-                      ? 'text-[#0096FF] border-b-2 border-[#0096FF]'
-                      : 'text-[#6B6B6B] hover:text-[#2A2A2A]'
-                  }`}
-                >
-                  <i className="ri-wallet-line mr-2"></i>
-                  Purchases
-                </button>
-                <button
-                  onClick={() => setActiveTab('security')}
-                  className={`flex-1 md:flex-none px-6 py-4 text-sm font-medium transition-colors cursor-pointer whitespace-nowrap ${
-                    activeTab === 'security'
-                      ? 'text-[#0096FF] border-b-2 border-[#0096FF]'
-                      : 'text-[#6B6B6B] hover:text-[#2A2A2A]'
-                  }`}
-                >
-                  <i className="ri-shield-keyhole-line mr-2"></i>
-                  Security
-                </button>
-              </div>
-            </div>
-
-            {/* Tab Content */}
-            <div className="p-6 md:p-8">
-              {/* Profile Tab */}
-              {activeTab === 'profile' && (
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-[#2A2A2A] mb-2">Email Address</label>
-                    <div className="relative">
-                      <input
-                        type="email"
-                        value={profile?.email || ''}
-                        disabled
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-[#6B6B6B] cursor-not-allowed"
-                      />
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                        <span className="text-xs bg-gray-200 text-[#6B6B6B] px-2 py-1 rounded-md">Verified</span>
-                      </div>
-                    </div>
-                    <p className="text-xs text-[#6B6B6B] mt-1.5">Email cannot be changed</p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-[#2A2A2A] mb-2">Phone Number</label>
-                    <input
-                      type="tel"
-                      value={phoneNumber}
-                      onChange={(e) => setPhoneNumber(e.target.value)}
-                      placeholder="+1 (555) 123-4567"
-                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-[#2A2A2A] focus:outline-none focus:border-[#0096FF] focus:ring-2 focus:ring-[#0096FF]/20 transition-all"
-                    />
-                    <p className="text-xs text-[#6B6B6B] mt-1.5">Used for call notifications</p>
-                  </div>
-
-                  <div className="pt-4 border-t border-gray-100">
-                    <button
-                      onClick={handleSaveProfile}
-                      disabled={isSaving}
-                      className="px-6 py-3 bg-[#0096FF] text-white rounded-xl text-sm font-semibold hover:bg-[#0077CC] transition-colors disabled:opacity-50 cursor-pointer whitespace-nowrap"
-                    >
-                      {isSaving ? 'Saving...' : 'Save Changes'}
-                    </button>
-                  </div>
-
-                  {/* Quick Actions */}
-                  <div className="pt-6 border-t border-gray-100">
-                    <h3 className="text-sm font-semibold text-[#2A2A2A] mb-4">Quick Actions</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <Link
-                        to="/pricing"
-                        className="flex items-center gap-3 p-4 bg-[#E6F5FF] rounded-xl hover:bg-[#D6EFFF] transition-colors cursor-pointer"
-                      >
-                        <div className="w-10 h-10 bg-[#0096FF]/20 rounded-full flex items-center justify-center">
-                          <i className="ri-add-circle-line text-[#0096FF] text-lg"></i>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-[#2A2A2A]">Buy Credits</p>
-                          <p className="text-xs text-[#6B6B6B]">Add more minutes to your account</p>
-                        </div>
-                      </Link>
-                      <Link
-                        to="/call"
-                        className="flex items-center gap-3 p-4 bg-[#E6F5FF] rounded-xl hover:bg-[#D6EFFF] transition-colors cursor-pointer"
-                      >
-                        <div className="w-10 h-10 bg-[#0096FF]/20 rounded-full flex items-center justify-center">
-                          <i className="ri-phone-line text-[#0096FF] text-lg"></i>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-[#2A2A2A]">Start a Call</p>
-                          <p className="text-xs text-[#6B6B6B]">Connect with support now</p>
-                        </div>
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Call History Tab */}
-              {activeTab === 'history' && (
-                <div>
-                  {callHistory.length === 0 ? (
-                    <div className="text-center py-12">
-                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i className="ri-phone-line text-2xl text-[#6B6B6B]"></i>
-                      </div>
-                      <h3 className="text-lg font-semibold text-[#2A2A2A] mb-2">No calls yet</h3>
-                      <p className="text-sm text-[#6B6B6B] mb-6">Start your first call to see your history here</p>
-                      <Link
-                        to="/call"
-                        className="inline-flex items-center gap-2 px-6 py-3 bg-[#0096FF] text-white rounded-xl text-sm font-semibold hover:bg-[#0077CC] transition-colors cursor-pointer whitespace-nowrap"
-                      >
-                        <i className="ri-phone-line"></i>
-                        Start a Call
-                      </Link>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {callHistory.map((call) => (
-                        <div
-                          key={call.id}
-                          className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
-                        >
-                          <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-[#0096FF]/10 rounded-full flex items-center justify-center">
-                              <i className="ri-phone-line text-[#0096FF]"></i>
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium text-[#2A2A2A]">
-                                {formatDate(call.started_at)}
-                              </p>
-                              <p className="text-xs text-[#6B6B6B]">
-                                Duration: {formatDuration(call.duration_seconds)}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-4">
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(call.status)}`}>
-                              {call.status}
-                            </span>
-                            <span className="text-sm font-medium text-[#2A2A2A]">
-                              -{call.credits_used} credits
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Purchases Tab */}
-              {activeTab === 'purchases' && (
-                <div>
-                  {/* Summary Cards */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
-                          <i className="ri-coin-line text-green-600 text-lg"></i>
-                        </div>
-                        <div>
-                          <p className="text-xs text-green-700/70">Total Purchased</p>
-                          <p className="text-xl font-bold text-green-700">
-                            {transactions
-                              .filter(t => t.type === 'purchase' && t.status === 'completed')
-                              .reduce((sum, t) => sum + t.credits, 0)} credits
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-amber-500/20 rounded-full flex items-center justify-center">
-                          <i className="ri-gift-line text-amber-600 text-lg"></i>
-                        </div>
-                        <div>
-                          <p className="text-xs text-amber-700/70">Bonus Credits</p>
-                          <p className="text-xl font-bold text-amber-700">
-                            {transactions
-                              .filter(t => t.type === 'bonus' && t.status === 'completed')
-                              .reduce((sum, t) => sum + t.credits, 0)} credits
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="bg-gradient-to-br from-[#E6F5FF] to-[#D6EFFF] rounded-xl p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-[#0096FF]/20 rounded-full flex items-center justify-center">
-                          <i className="ri-money-dollar-circle-line text-[#0096FF] text-lg"></i>
-                        </div>
-                        <div>
-                          <p className="text-xs text-[#0077CC]/70">Total Spent</p>
-                          <p className="text-xl font-bold text-[#0077CC]">
-                            {formatCurrency(
-                              transactions
-                                .filter(t => t.type === 'purchase' && t.status === 'completed')
-                                .reduce((sum, t) => sum + t.amount, 0)
-                            )}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Transaction List */}
-                  {transactions.length === 0 ? (
-                    <div className="text-center py-12">
-                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i className="ri-wallet-line text-2xl text-[#6B6B6B]"></i>
-                      </div>
-                      <h3 className="text-lg font-semibold text-[#2A2A2A] mb-2">No transactions yet</h3>
-                      <p className="text-sm text-[#6B6B6B] mb-6">Purchase credits to see your transaction history here</p>
-                      <Link
-                        to="/pricing"
-                        className="inline-flex items-center gap-2 px-6 py-3 bg-[#0096FF] text-white rounded-xl text-sm font-semibold hover:bg-[#0077CC] transition-colors cursor-pointer whitespace-nowrap"
-                      >
-                        <i className="ri-add-circle-line"></i>
-                        Buy Credits
-                      </Link>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-sm font-semibold text-[#2A2A2A]">Transaction History</h3>
-                        <button
-                          onClick={() => user && fetchTransactions()}
-                          className="text-sm text-[#0096FF] hover:text-[#0077CC] flex items-center gap-1 cursor-pointer"
-                        >
-                          <i className="ri-refresh-line"></i>
-                          Refresh
-                        </button>
-                      </div>
-                      {transactions.map((transaction) => (
-                        <div
-                          key={transaction.id}
-                          onClick={() => setSelectedTransaction(transaction)}
-                          className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer group"
-                        >
-                          <div className="flex items-center gap-4">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${getTransactionColor(transaction.type)}`}>
-                              <i className={`${getTransactionIcon(transaction.type)}`}></i>
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium text-[#2A2A2A]">
-                                {transaction.description || `${transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}`}
-                              </p>
-                              <p className="text-xs text-[#6B6B6B]">
-                                {formatDate(transaction.created_at)}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-4">
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadge(transaction.status)}`}>
-                              {transaction.status}
-                            </span>
-                            <div className="text-right">
-                              {transaction.amount > 0 && (
-                                <p className="text-xs text-[#6B6B6B]">{formatCurrency(transaction.amount)}</p>
-                              )}
-                              <p className={`text-sm font-semibold ${transaction.type === 'usage' ? 'text-red-600' : 'text-green-600'}`}>
-                                {transaction.type === 'usage' ? '-' : '+'}{transaction.credits} credits
-                              </p>
-                            </div>
-                            <div className="w-8 h-8 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                              <i className="ri-arrow-right-s-line text-[#6B6B6B]"></i>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Transaction Detail Modal */}
-                  {selectedTransaction && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                      <div className="absolute inset-0 bg-black/50" onClick={() => setSelectedTransaction(null)}></div>
-                      <div className="relative bg-white rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden">
-                        {/* Modal Header */}
-                        <div className="bg-gradient-to-r from-[#0096FF] to-[#0077CC] p-6">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="text-sm text-white/80 mb-1">Transaction Details</p>
-                              <h3 className="text-lg font-bold text-white">
-                                {generateInvoiceNumber(selectedTransaction)}
-                              </h3>
-                            </div>
-                            <button
-                              onClick={() => setSelectedTransaction(null)}
-                              className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors cursor-pointer"
-                            >
-                              <i className="ri-close-line text-white"></i>
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Modal Content */}
-                        <div className="p-6">
-                          {/* Status Badge */}
-                          <div className="flex items-center justify-between mb-6">
-                            <span className={`px-4 py-2 rounded-full text-sm font-semibold ${getStatusBadge(selectedTransaction.status)}`}>
-                              {selectedTransaction.status.charAt(0).toUpperCase() + selectedTransaction.status.slice(1)}
-                            </span>
-                            <span className="text-sm text-[#6B6B6B]">
-                              {formatDateTime(selectedTransaction.created_at)}
-                            </span>
-                          </div>
-
-                          {/* Credits Card */}
-                          <div className={`rounded-xl p-5 mb-6 ${selectedTransaction.type === 'usage' ? 'bg-red-50' : 'bg-green-50'}`}>
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <p className={`text-sm font-medium ${selectedTransaction.type === 'usage' ? 'text-red-600' : 'text-green-600'}`}>
-                                  Credits {selectedTransaction.type === 'usage' ? 'Used' : 'Added'}
-                                </p>
-                                <p className={`text-3xl font-bold ${selectedTransaction.type === 'usage' ? 'text-red-700' : 'text-green-700'}`}>
-                                  {selectedTransaction.type === 'usage' ? '-' : '+'}{selectedTransaction.credits}
-                                </p>
-                              </div>
-                              <div className={`w-14 h-14 rounded-full flex items-center justify-center ${selectedTransaction.type === 'usage' ? 'bg-red-100' : 'bg-green-100'}`}>
-                                <i className={`${getTransactionIcon(selectedTransaction.type)} text-2xl ${selectedTransaction.type === 'usage' ? 'text-red-600' : 'text-green-600'}`}></i>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Transaction Details */}
-                          <div className="space-y-4 mb-6">
-                            <div className="flex items-center justify-between py-3 border-b border-gray-100">
-                              <span className="text-sm text-[#6B6B6B]">Type</span>
-                              <span className="text-sm font-medium text-[#2A2A2A] capitalize">{selectedTransaction.type}</span>
-                            </div>
-                            <div className="flex items-center justify-between py-3 border-b border-gray-100">
-                              <span className="text-sm text-[#6B6B6B]">Description</span>
-                              <span className="text-sm font-medium text-[#2A2A2A] text-right max-w-[200px]">
-                                {selectedTransaction.description || `${selectedTransaction.type.charAt(0).toUpperCase() + selectedTransaction.type.slice(1)} transaction`}
-                              </span>
-                            </div>
-                            {selectedTransaction.amount > 0 && (
-                              <div className="flex items-center justify-between py-3 border-b border-gray-100">
-                                <span className="text-sm text-[#6B6B6B]">Amount Paid</span>
-                                <span className="text-sm font-bold text-[#2A2A2A]">{formatCurrency(selectedTransaction.amount)}</span>
-                              </div>
-                            )}
-                            <div className="flex items-center justify-between py-3 border-b border-gray-100">
-                              <span className="text-sm text-[#6B6B6B]">Transaction ID</span>
-                              <span className="text-xs font-mono text-[#6B6B6B] bg-gray-100 px-2 py-1 rounded">
-                                {selectedTransaction.id.slice(0, 16)}...
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Action Buttons */}
-                          <div className="flex gap-3">
-                            <button
-                              onClick={() => setSelectedTransaction(null)}
-                              className="flex-1 px-6 py-3 bg-gray-100 text-[#2A2A2A] rounded-xl text-sm font-semibold hover:bg-gray-200 transition-colors cursor-pointer whitespace-nowrap"
-                            >
-                              Close
-                            </button>
-                            <button
-                              onClick={() => downloadInvoice(selectedTransaction)}
-                              disabled={isDownloading}
-                              className="flex-1 px-6 py-3 bg-[#0096FF] text-white rounded-xl text-sm font-semibold hover:bg-[#0077CC] transition-colors disabled:opacity-50 cursor-pointer whitespace-nowrap flex items-center justify-center gap-2"
-                            >
-                              {isDownloading ? (
-                                <>
-                                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                  Generating...
-                                </>
-                              ) : (
-                                <>
-                                  <i className="ri-download-line"></i>
-                                  Download Invoice
-                                </>
-                              )}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Security Tab */}
-              {activeTab === 'security' && (
-                <div className="space-y-8">
-                  {/* Change Password */}
-                  <div>
-                    <h3 className="text-lg font-semibold text-[#2A2A2A] mb-4">Change Password</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-[#2A2A2A] mb-2">Current Password</label>
-                        <input
-                          type="password"
-                          value={currentPassword}
-                          onChange={(e) => setCurrentPassword(e.target.value)}
-                          placeholder="Enter current password"
-                          autoComplete="current-password"
-                          className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-[#2A2A2A] focus:outline-none focus:border-[#0096FF] focus:ring-2 focus:ring-[#0096FF]/20 transition-all"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-[#2A2A2A] mb-2">New Password</label>
-                        <input
-                          type="password"
-                          value={newPassword}
-                          onChange={(e) => setNewPassword(e.target.value)}
-                          placeholder="Enter new password"
-                          className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-[#2A2A2A] focus:outline-none focus:border-[#0096FF] focus:ring-2 focus:ring-[#0096FF]/20 transition-all"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-[#2A2A2A] mb-2">Confirm New Password</label>
-                        <input
-                          type="password"
-                          value={confirmPassword}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
-                          placeholder="Confirm new password"
-                          className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-[#2A2A2A] focus:outline-none focus:border-[#0096FF] focus:ring-2 focus:ring-[#0096FF]/20 transition-all"
-                        />
-                      </div>
-                      {passwordError && (
-                        <p className="text-sm text-red-500 flex items-center gap-2">
-                          <i className="ri-error-warning-line"></i>
-                          {passwordError}
-                        </p>
-                      )}
-                      <button
-                        onClick={handleChangePassword}
-                        disabled={isSaving || !currentPassword || !newPassword || !confirmPassword}
-                        className="px-6 py-3 bg-[#0096FF] text-white rounded-xl text-sm font-semibold hover:bg-[#0077CC] transition-colors disabled:opacity-50 cursor-pointer whitespace-nowrap"
-                      >
-                        {isSaving ? 'Updating...' : 'Update Password'}
-                      </button>
-                    </div>
-                  </div>
-
-                  <NotesSettingsCard />
-
-                  {/* Sign Out */}
-                  <div className="pt-6 border-t border-gray-100">
-                    <h3 className="text-lg font-semibold text-[#2A2A2A] mb-4">Session</h3>
-                    <button
-                      onClick={handleSignOut}
-                      className="flex items-center gap-2 px-6 py-3 bg-gray-100 text-[#2A2A2A] rounded-xl text-sm font-semibold hover:bg-gray-200 transition-colors cursor-pointer whitespace-nowrap"
-                    >
-                      <i className="ri-logout-box-line"></i>
-                      Sign Out
-                    </button>
-                  </div>
-
-                  {/* Danger Zone */}
-                  <div className="pt-6 border-t border-gray-100">
-                    <h3 className="text-lg font-semibold text-red-600 mb-2">Danger Zone</h3>
-                    <p className="text-sm text-[#6B6B6B] mb-4">
-                      Once you delete your account, there is no going back. Please be certain.
-                    </p>
-                    <button
-                      onClick={() => setShowDeleteModal(true)}
-                      className="flex items-center gap-2 px-6 py-3 bg-red-50 text-red-600 rounded-xl text-sm font-semibold hover:bg-red-100 transition-colors cursor-pointer whitespace-nowrap"
-                    >
-                      <i className="ri-delete-bin-line"></i>
-                      Delete Account
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
+          <div className="rounded-2xl bg-oe-surface-low px-5 py-3 sm:text-right">
+            <p className="text-xs font-medium uppercase tracking-wide text-oe-muted">Credits</p>
+            <p className="font-heading text-2xl font-bold">{profile?.credits}</p>
           </div>
+        </section>
+
+        {/* Tabs */}
+        <div role="tablist" aria-label="Profile sections" className="mt-8 flex gap-1 overflow-x-auto rounded-full border border-oe-line bg-white p-1">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex flex-1 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                activeTab === tab.id ? 'bg-oe-primary text-white' : 'text-oe-muted hover:bg-oe-surface hover:text-oe-ink'
+              }`}
+            >
+              <i className={tab.icon} aria-hidden="true" />
+              {tab.label}
+            </button>
+          ))}
         </div>
-      </div>
 
-      {/* Delete Account Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50" onClick={closeDeleteModal}></div>
-          <div className="relative bg-white rounded-2xl p-6 md:p-8 max-w-md w-full shadow-2xl">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i className="ri-error-warning-line text-3xl text-red-600"></i>
+        {/* Account tab */}
+        {activeTab === 'profile' && (
+          <div className="mt-6 space-y-6">
+            <section className={card} aria-labelledby="details-heading">
+              <h2 id="details-heading" className="text-xl font-semibold">
+                Your details
+              </h2>
+              <div className="mt-6 space-y-5">
+                <div>
+                  <label htmlFor="profile-email" className="mb-2 block text-sm font-medium">
+                    Email address
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="profile-email"
+                      type="email"
+                      value={profile?.email || ''}
+                      disabled
+                      className="w-full cursor-not-allowed rounded-xl border border-oe-line bg-oe-surface px-4 py-3 text-sm text-oe-muted"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white px-2.5 py-0.5 text-xs text-oe-muted">
+                      Verified
+                    </span>
+                  </div>
+                  <p className="mt-1.5 text-xs text-oe-muted">Your email can&rsquo;t be changed.</p>
+                </div>
+
+                <div>
+                  <label htmlFor="profile-phone" className="mb-2 block text-sm font-medium">
+                    Phone number <span className="font-normal text-oe-muted">(optional)</span>
+                  </label>
+                  <input
+                    id="profile-phone"
+                    type="tel"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder="+254 7XX XXX XXX"
+                    className={inputClass}
+                  />
+                  <p className="mt-1.5 text-xs text-oe-muted">
+                    Kept with your account. We never ring you: calls happen in your browser.
+                  </p>
+                </div>
               </div>
-              <h3 className="text-xl font-bold text-[#2A2A2A] mb-2">Delete Account?</h3>
-              <p className="text-sm text-[#6B6B6B]">
-                This action cannot be undone. All your data, credits, and call history will be permanently deleted.
+              <button
+                onClick={handleSaveProfile}
+                disabled={isSaving}
+                className="mt-6 cursor-pointer whitespace-nowrap rounded-full bg-oe-primary px-6 py-3 text-sm font-semibold text-white hover:bg-oe-primary-hover disabled:opacity-50"
+              >
+                {isSaving ? 'Saving…' : 'Save changes'}
+              </button>
+            </section>
+
+            <section className="grid gap-3 sm:grid-cols-2" aria-label="Quick links">
+              <Link
+                to="/pricing"
+                className="flex items-center gap-3 rounded-3xl border border-oe-line bg-oe-surface p-5 transition-colors hover:border-oe-primary/40"
+              >
+                <span aria-hidden="true" className="flex h-10 w-10 items-center justify-center rounded-full bg-oe-accent-tint text-oe-accent">
+                  <i className="ri-add-circle-line" />
+                </span>
+                <span>
+                  <span className="block font-semibold">Credits &amp; Monthly Pass</span>
+                  <span className="block text-sm text-oe-muted">Top up with M-Pesa</span>
+                </span>
+              </Link>
+              <Link
+                to="/call"
+                className="flex items-center gap-3 rounded-3xl border border-oe-line bg-oe-surface p-5 transition-colors hover:border-oe-primary/40"
+              >
+                <span aria-hidden="true" className="flex h-10 w-10 items-center justify-center rounded-full bg-oe-primary-soft text-oe-primary-deep">
+                  <i className="ri-voiceprint-line" />
+                </span>
+                <span>
+                  <span className="block font-semibold">Talk now</span>
+                  <span className="block text-sm text-oe-muted">A Listener is ready to hear you</span>
+                </span>
+              </Link>
+            </section>
+          </div>
+        )}
+
+        {/* Calls tab */}
+        {activeTab === 'history' && (
+          <section className={`mt-6 ${card}`} aria-labelledby="calls-heading">
+            <h2 id="calls-heading" className="text-xl font-semibold">
+              Your calls
+            </h2>
+            <p className="mt-1 text-sm text-oe-muted">When and how long. Calls are never recorded.</p>
+            {callHistory.length === 0 ? (
+              <div className="mt-6 rounded-2xl bg-oe-surface-low p-8 text-center">
+                <span aria-hidden="true" className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-oe-primary-soft text-xl text-oe-primary-deep">
+                  <i className="ri-phone-line" />
+                </span>
+                <p className="mt-4 font-semibold">No calls yet</p>
+                <p className="mt-1 text-sm text-oe-muted">When you&rsquo;re ready, a Listener is a tap away.</p>
+                <Link
+                  to="/call"
+                  className="oe-btn mt-5 inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-oe-primary px-6 py-3 text-sm font-semibold text-white hover:bg-oe-primary-hover"
+                >
+                  <i className="ri-voiceprint-line" aria-hidden="true" />
+                  Talk now
+                </Link>
+              </div>
+            ) : (
+              <ul className="mt-6 space-y-3">
+                {callHistory.map((call) => (
+                  <li key={call.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-oe-surface-low p-4">
+                    <div className="flex items-center gap-4">
+                      <span aria-hidden="true" className="flex h-10 w-10 items-center justify-center rounded-full bg-oe-primary-soft text-oe-primary-deep">
+                        <i className="ri-phone-line" />
+                      </span>
+                      <div>
+                        <p className="text-sm font-medium">{formatDate(call.started_at)}</p>
+                        <p className="text-xs text-oe-muted">Length: {formatDuration(call.duration_seconds)}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className={`rounded-full px-3 py-1 text-xs font-medium capitalize ${getStatusColor(call.status)}`}>{call.status}</span>
+                      <span className="text-sm font-medium">−{call.credits_used} credits</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        )}
+
+        {/* Credits tab */}
+        {activeTab === 'purchases' && (
+          <div className="mt-6 space-y-6">
+            <dl className="grid gap-3 sm:grid-cols-3">
+              <div className="rounded-3xl border border-oe-line bg-white p-5">
+                <dt className="text-xs font-medium uppercase tracking-wide text-oe-muted">Bought</dt>
+                <dd className="mt-1 font-heading text-2xl font-semibold">
+                  {transactions
+                    .filter(t => t.type === 'purchase' && t.status === 'completed')
+                    .reduce((sum, t) => sum + t.credits, 0)}{' '}
+                  <span className="font-sans text-sm font-normal text-oe-muted">credits</span>
+                </dd>
+              </div>
+              <div className="rounded-3xl border border-oe-line bg-white p-5">
+                <dt className="text-xs font-medium uppercase tracking-wide text-oe-muted">Free</dt>
+                <dd className="mt-1 font-heading text-2xl font-semibold">
+                  {transactions
+                    .filter(t => t.type === 'bonus' && t.status === 'completed')
+                    .reduce((sum, t) => sum + t.credits, 0)}{' '}
+                  <span className="font-sans text-sm font-normal text-oe-muted">credits</span>
+                </dd>
+              </div>
+              <div className="rounded-3xl border border-oe-line bg-white p-5">
+                <dt className="text-xs font-medium uppercase tracking-wide text-oe-muted">Spent</dt>
+                <dd className="mt-1 font-heading text-2xl font-semibold">
+                  {formatCurrency(
+                    transactions
+                      .filter(t => t.type === 'purchase' && t.status === 'completed')
+                      .reduce((sum, t) => sum + t.amount, 0)
+                  )}
+                </dd>
+              </div>
+            </dl>
+
+            <section className={card} aria-labelledby="transactions-heading">
+              <div className="flex items-center justify-between gap-4">
+                <h2 id="transactions-heading" className="text-xl font-semibold">
+                  Credit history
+                </h2>
+                {transactions.length > 0 && (
+                  <button
+                    onClick={() => user && fetchTransactions()}
+                    className="flex cursor-pointer items-center gap-1 rounded-full bg-oe-surface px-4 py-2 text-sm font-medium hover:bg-oe-primary-tint"
+                  >
+                    <i className="ri-refresh-line" aria-hidden="true" />
+                    Refresh
+                  </button>
+                )}
+              </div>
+
+              {transactions.length === 0 ? (
+                <div className="mt-6 rounded-2xl bg-oe-surface-low p-8 text-center">
+                  <span aria-hidden="true" className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-oe-primary-soft text-xl text-oe-primary-deep">
+                    <i className="ri-wallet-line" />
+                  </span>
+                  <p className="mt-4 font-semibold">Nothing here yet</p>
+                  <p className="mt-1 text-sm text-oe-muted">Credits you buy or use will show up here.</p>
+                  <Link
+                    to="/pricing"
+                    className="oe-btn mt-5 inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-oe-primary px-6 py-3 text-sm font-semibold text-white hover:bg-oe-primary-hover"
+                  >
+                    <i className="ri-add-circle-line" aria-hidden="true" />
+                    Get credits
+                  </Link>
+                </div>
+              ) : (
+                <ul className="mt-6 space-y-3">
+                  {transactions.map((transaction) => (
+                    <li key={transaction.id}>
+                      <button
+                        onClick={() => setSelectedTransaction(transaction)}
+                        className="group flex w-full cursor-pointer flex-wrap items-center justify-between gap-3 rounded-2xl bg-oe-surface-low p-4 text-left transition-colors hover:bg-oe-primary-tint"
+                      >
+                        <span className="flex items-center gap-4">
+                          <span aria-hidden="true" className={`flex h-10 w-10 items-center justify-center rounded-full ${getTransactionColor(transaction.type)}`}>
+                            <i className={getTransactionIcon(transaction.type)} />
+                          </span>
+                          <span>
+                            <span className="block text-sm font-medium">
+                              {transaction.description || `${transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}`}
+                            </span>
+                            <span className="block text-xs text-oe-muted">{formatDate(transaction.created_at)}</span>
+                          </span>
+                        </span>
+                        <span className="flex items-center gap-3">
+                          <span className={`rounded-full px-3 py-1 text-xs font-medium capitalize ${getStatusBadge(transaction.status)}`}>
+                            {transaction.status}
+                          </span>
+                          <span className="text-right">
+                            {transaction.amount > 0 && <span className="block text-xs text-oe-muted">{formatCurrency(transaction.amount)}</span>}
+                            <span className={`block text-sm font-semibold ${isDebit(transaction) ? 'text-oe-ink' : 'text-oe-primary-deep'}`}>
+                              {signedCredits(transaction)} credits
+                            </span>
+                          </span>
+                          <i className="ri-arrow-right-s-line text-oe-muted opacity-0 transition-opacity group-hover:opacity-100" aria-hidden="true" />
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+
+            {/* Transaction detail modal */}
+            {selectedTransaction && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="transaction-title">
+                <div className="absolute inset-0 bg-oe-ink/40" onClick={() => setSelectedTransaction(null)} />
+                <div className="relative w-full max-w-lg rounded-3xl border border-oe-line bg-white p-6 shadow-oe-md md:p-8">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-wide text-oe-muted">Transaction</p>
+                      <h3 id="transaction-title" className="mt-1 text-xl font-semibold">
+                        {generateInvoiceNumber(selectedTransaction)}
+                      </h3>
+                    </div>
+                    <button
+                      onClick={() => setSelectedTransaction(null)}
+                      aria-label="Close"
+                      className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-oe-surface hover:bg-oe-primary-tint"
+                    >
+                      <i className="ri-close-line" aria-hidden="true" />
+                    </button>
+                  </div>
+
+                  <div className="mt-5 flex flex-wrap items-center justify-between gap-2">
+                    <span className={`rounded-full px-3 py-1 text-sm font-medium capitalize ${getStatusBadge(selectedTransaction.status)}`}>
+                      {selectedTransaction.status}
+                    </span>
+                    <span className="text-sm text-oe-muted">{formatDateTime(selectedTransaction.created_at)}</span>
+                  </div>
+
+                  <div className="mt-5 flex items-center justify-between rounded-2xl bg-oe-surface-low p-5">
+                    <div>
+                      <p className="text-sm text-oe-muted">Credits {isDebit(selectedTransaction) ? 'used' : 'added'}</p>
+                      <p className="font-heading text-3xl font-bold">{signedCredits(selectedTransaction)}</p>
+                    </div>
+                    <span aria-hidden="true" className={`flex h-12 w-12 items-center justify-center rounded-full text-xl ${getTransactionColor(selectedTransaction.type)}`}>
+                      <i className={getTransactionIcon(selectedTransaction.type)} />
+                    </span>
+                  </div>
+
+                  <dl className="mt-5 divide-y divide-oe-line text-sm">
+                    <div className="flex items-center justify-between py-3">
+                      <dt className="text-oe-muted">Type</dt>
+                      <dd className="font-medium capitalize">{selectedTransaction.type}</dd>
+                    </div>
+                    <div className="flex items-center justify-between gap-4 py-3">
+                      <dt className="text-oe-muted">Description</dt>
+                      <dd className="max-w-[220px] text-right font-medium">
+                        {selectedTransaction.description || `${selectedTransaction.type.charAt(0).toUpperCase() + selectedTransaction.type.slice(1)} transaction`}
+                      </dd>
+                    </div>
+                    {selectedTransaction.amount > 0 && (
+                      <div className="flex items-center justify-between py-3">
+                        <dt className="text-oe-muted">Amount paid</dt>
+                        <dd className="font-semibold">{formatCurrency(selectedTransaction.amount)}</dd>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between py-3">
+                      <dt className="text-oe-muted">Transaction ID</dt>
+                      <dd className="rounded-lg bg-oe-surface px-2 py-1 font-mono text-xs text-oe-muted">{selectedTransaction.id.slice(0, 16)}…</dd>
+                    </div>
+                  </dl>
+
+                  <div className="mt-6 flex gap-3">
+                    <button
+                      onClick={() => setSelectedTransaction(null)}
+                      className="flex-1 cursor-pointer whitespace-nowrap rounded-full bg-oe-surface px-6 py-3 text-sm font-medium hover:bg-oe-primary-tint"
+                    >
+                      Close
+                    </button>
+                    <button
+                      onClick={() => downloadInvoice(selectedTransaction)}
+                      disabled={isDownloading}
+                      className="flex flex-1 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full bg-oe-primary px-6 py-3 text-sm font-semibold text-white hover:bg-oe-primary-hover disabled:opacity-50"
+                    >
+                      {isDownloading ? (
+                        <>
+                          <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" aria-hidden="true" />
+                          Preparing…
+                        </>
+                      ) : (
+                        <>
+                          <i className="ri-download-line" aria-hidden="true" />
+                          Download invoice
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Privacy & security tab */}
+        {activeTab === 'security' && (
+          <div className="mt-6 space-y-6">
+            <section className={card} aria-labelledby="password-heading">
+              <h2 id="password-heading" className="text-xl font-semibold">
+                Password
+              </h2>
+              {user?.has_password === false ? (
+                <p className="mt-2 text-sm text-oe-muted">
+                  You sign in with Google, so there&rsquo;s no Open Ear password to change.
+                </p>
+              ) : (
+                <div className="mt-5 space-y-4">
+                  <div>
+                    <label htmlFor="current-password" className="mb-2 block text-sm font-medium">
+                      Current password
+                    </label>
+                    <input
+                      id="current-password"
+                      type="password"
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      placeholder="Enter current password"
+                      autoComplete="current-password"
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="new-password" className="mb-2 block text-sm font-medium">
+                      New password
+                    </label>
+                    <input
+                      id="new-password"
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="At least 6 characters"
+                      autoComplete="new-password"
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="confirm-password" className="mb-2 block text-sm font-medium">
+                      Confirm new password
+                    </label>
+                    <input
+                      id="confirm-password"
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Type it again"
+                      autoComplete="new-password"
+                      className={inputClass}
+                    />
+                  </div>
+                  {passwordError && (
+                    <p role="alert" className="flex items-center gap-2 rounded-2xl bg-oe-crisis-tint px-5 py-3 text-sm text-oe-crisis">
+                      <i className="ri-error-warning-line" aria-hidden="true" />
+                      {passwordError}
+                    </p>
+                  )}
+                  <button
+                    onClick={handleChangePassword}
+                    disabled={isSaving || !currentPassword || !newPassword || !confirmPassword}
+                    className="cursor-pointer whitespace-nowrap rounded-full bg-oe-primary px-6 py-3 text-sm font-semibold text-white hover:bg-oe-primary-hover disabled:opacity-50"
+                  >
+                    {isSaving ? 'Updating…' : 'Update password'}
+                  </button>
+                </div>
+              )}
+            </section>
+
+            {/* Shared card brings its own top border and padding; drop them inside a Terra card. */}
+            <section className={`${card} [&>div]:border-t-0 [&>div]:pt-0`}>
+              <NotesSettingsCard />
+            </section>
+
+            <section className={card} aria-labelledby="session-heading">
+              <h2 id="session-heading" className="text-xl font-semibold">
+                Sign out
+              </h2>
+              <p className="mt-1 text-sm text-oe-muted">Sign out of Open Ear on this device.</p>
+              <button
+                onClick={handleSignOut}
+                className="mt-5 flex cursor-pointer items-center gap-2 whitespace-nowrap rounded-full bg-oe-surface px-6 py-3 text-sm font-medium hover:bg-oe-primary-tint"
+              >
+                <i className="ri-logout-box-line" aria-hidden="true" />
+                Sign out
+              </button>
+            </section>
+
+            <section className="rounded-3xl border border-oe-crisis/30 bg-white p-6 md:p-8" aria-labelledby="delete-heading">
+              <h2 id="delete-heading" className="text-xl font-semibold text-oe-crisis">
+                Delete account
+              </h2>
+              <p className="mt-1 text-sm text-oe-muted">This removes your account for good. It can&rsquo;t be undone.</p>
+              <button
+                onClick={() => setShowDeleteModal(true)}
+                className="mt-5 flex cursor-pointer items-center gap-2 whitespace-nowrap rounded-full bg-oe-crisis-tint px-6 py-3 text-sm font-semibold text-oe-crisis hover:bg-oe-crisis/15"
+              >
+                <i className="ri-delete-bin-line" aria-hidden="true" />
+                Delete account
+              </button>
+            </section>
+          </div>
+        )}
+      </main>
+
+      {/* Delete account modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="delete-title">
+          <div className="absolute inset-0 bg-oe-ink/40" onClick={closeDeleteModal} />
+          <div className="relative w-full max-w-md rounded-3xl border border-oe-line bg-white p-6 shadow-oe-md md:p-8">
+            <div className="text-center">
+              <span aria-hidden="true" className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-oe-crisis-tint text-xl text-oe-crisis">
+                <i className="ri-error-warning-line" />
+              </span>
+              <h3 id="delete-title" className="mt-4 text-xl font-semibold">
+                Delete your account?
+              </h3>
+              <p className="mt-2 text-sm text-oe-muted">
+                This can&rsquo;t be undone. Your account, credits and call history will be deleted.
               </p>
             </div>
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
-                Type <span className="font-bold text-red-600">DELETE</span> to confirm
+            <div className="mt-6">
+              <label htmlFor="delete-confirm" className="mb-2 block text-sm font-medium">
+                Type <span className="font-bold text-oe-crisis">DELETE</span> to confirm
               </label>
               <input
+                id="delete-confirm"
                 type="text"
                 value={deleteConfirmText}
                 onChange={(e) => setDeleteConfirmText(e.target.value)}
                 placeholder="DELETE"
-                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-[#2A2A2A] focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all"
+                className="w-full rounded-xl border border-oe-line bg-oe-surface-low px-4 py-3 text-sm focus:border-oe-crisis focus:outline-none focus:ring-2 focus:ring-oe-crisis/30"
               />
             </div>
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
+            <div className="mt-4">
+              <label htmlFor="delete-password" className="mb-2 block text-sm font-medium">
                 {user?.has_password === false ? 'Enter your email address' : 'Enter your password'}
               </label>
               <input
+                id="delete-password"
                 type={user?.has_password === false ? 'email' : 'password'}
                 value={deletePassword}
                 onChange={(e) => setDeletePassword(e.target.value)}
                 placeholder={user?.has_password === false ? user.email : 'Your password'}
                 autoComplete={user?.has_password === false ? 'off' : 'current-password'}
-                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-[#2A2A2A] focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all"
+                className="w-full rounded-xl border border-oe-line bg-oe-surface-low px-4 py-3 text-sm focus:border-oe-crisis focus:outline-none focus:ring-2 focus:ring-oe-crisis/30"
               />
               {deleteError && (
-                <p className="mt-2 text-sm text-red-500 flex items-center gap-2">
-                  <i className="ri-error-warning-line"></i>
+                <p role="alert" className="mt-3 flex items-center gap-2 rounded-2xl bg-oe-crisis-tint px-4 py-2 text-sm text-oe-crisis">
+                  <i className="ri-error-warning-line" aria-hidden="true" />
                   {deleteError}
                 </p>
               )}
             </div>
-            <div className="flex gap-3">
+            <div className="mt-6 flex gap-3">
               <button
                 onClick={closeDeleteModal}
-                className="flex-1 px-6 py-3 bg-gray-100 text-[#2A2A2A] rounded-xl text-sm font-semibold hover:bg-gray-200 transition-colors cursor-pointer whitespace-nowrap"
+                className="flex-1 cursor-pointer whitespace-nowrap rounded-full bg-oe-surface px-6 py-3 text-sm font-medium hover:bg-oe-primary-tint"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteAccount}
                 disabled={deleteConfirmText !== 'DELETE' || !deletePassword || isDeleting}
-                className="flex-1 px-6 py-3 bg-red-600 text-white rounded-xl text-sm font-semibold hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer whitespace-nowrap"
+                className="flex-1 cursor-pointer whitespace-nowrap rounded-full bg-oe-crisis px-6 py-3 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {isDeleting ? 'Deleting...' : 'Delete Account'}
+                {isDeleting ? 'Deleting…' : 'Delete account'}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Footer */}
-      <footer className="bg-[#0096FF] text-white py-8 px-4 md:px-8 lg:px-14">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <Link
-              to="/"
-              className="text-xl font-bold hover:opacity-80 transition-opacity"
-              style={{ fontFamily: 'Poppins, sans-serif' }}
-            >
-              Open Ear
-            </Link>
-            <div className="flex items-center gap-6">
-              <Link to="/pricing" className="text-sm text-white/80 hover:text-white transition-colors cursor-pointer">
-                Pricing
-              </Link>
-              <Link to="/how-it-works" className="text-sm text-white/80 hover:text-white transition-colors cursor-pointer">
-                How It Works
-              </Link>
-              <a href="https://readdy.ai/?ref=logo" target="_blank" rel="noopener noreferrer" className="text-sm text-white/80 hover:text-white transition-colors cursor-pointer">
-                Powered by Readdy
-              </a>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

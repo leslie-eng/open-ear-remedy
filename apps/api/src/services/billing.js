@@ -198,6 +198,43 @@ export async function chargeCall(userId, seconds, { callId = null, now = new Dat
   });
 }
 
+/**
+ * Sets credits aside for a booked Conversation of `seconds`, inside the caller's transaction.
+ * Monthly Pass time counts first, so only the rest is held. Returns the credits held.
+ */
+export async function holdForBooking(client, userId, seconds, { now = new Date() } = {}) {
+  const account = await lockCredits(client, userId);
+  const pass = await lockActivePass(client, userId, now);
+  const { credits } = splitCallCharge({
+    seconds,
+    passSecondsLeft: pass ? pass.call_seconds_total - pass.call_seconds_used : 0,
+  });
+  if (credits > account.credits) {
+    throw new BillingError('INSUFFICIENT_BALANCE', 'You don’t have enough credits for this booking. Top up first.');
+  }
+  if (credits > 0) {
+    await client.query(`UPDATE user_credits SET credits = credits - $2, updated_at = NOW() WHERE user_id = $1`, [userId, credits]);
+    await client.query(
+      `INSERT INTO credit_transactions (user_id, type, credits, amount, description, status)
+       VALUES ($1, 'booking_hold', $2, 0, 'Held for a booked conversation', 'completed')`,
+      [userId, -credits],
+    );
+  }
+  return credits;
+}
+
+/** Gives held booking credits back, inside the caller's transaction. */
+export async function releaseBookingHold(client, userId, credits) {
+  if (credits <= 0) return;
+  await lockCredits(client, userId);
+  await client.query(`UPDATE user_credits SET credits = credits + $2, updated_at = NOW() WHERE user_id = $1`, [userId, credits]);
+  await client.query(
+    `INSERT INTO credit_transactions (user_id, type, credits, amount, description, status)
+     VALUES ($1, 'booking_release', $2, 0, 'Booked conversation hold returned', 'completed')`,
+    [userId, credits],
+  );
+}
+
 /** Admin correction (refund, goodwill, fix). Positive adds, negative removes; never below zero. */
 export async function adjustCredits({ adminId, userId, delta, reason }) {
   const why = typeof reason === 'string' ? reason.trim() : '';

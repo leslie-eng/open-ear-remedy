@@ -1,7 +1,8 @@
-
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/feature/Navbar';
+import SiteFooter from '../../components/feature/SiteFooter';
+import { siteConfig } from '../../config/site';
 import { useAuth } from '../../contexts/AuthContext';
 import { apiFetch } from '../../lib/api';
 
@@ -13,13 +14,16 @@ interface MoodLog {
   created_at: string;
 }
 
+// `color` fills the chart bars: calm, earthy steps from green (great) to clay (struggling).
 const moods = [
-  { name: 'Great', score: 5, emoji: '😄', color: 'bg-emerald-500', lightColor: 'bg-emerald-50', textColor: 'text-emerald-600' },
-  { name: 'Good', score: 4, emoji: '🙂', color: 'bg-teal-500', lightColor: 'bg-teal-50', textColor: 'text-teal-600' },
-  { name: 'Okay', score: 3, emoji: '😐', color: 'bg-amber-500', lightColor: 'bg-amber-50', textColor: 'text-amber-600' },
-  { name: 'Low', score: 2, emoji: '😔', color: 'bg-orange-500', lightColor: 'bg-orange-50', textColor: 'text-orange-600' },
-  { name: 'Struggling', score: 1, emoji: '😢', color: 'bg-rose-500', lightColor: 'bg-rose-50', textColor: 'text-rose-600' },
+  { name: 'Great', score: 5, emoji: '😄', color: 'bg-oe-primary' },
+  { name: 'Good', score: 4, emoji: '🙂', color: 'bg-forest-400' },
+  { name: 'Okay', score: 3, emoji: '😐', color: 'bg-oe-accent/60' },
+  { name: 'Low', score: 2, emoji: '😔', color: 'bg-oe-accent' },
+  { name: 'Struggling', score: 1, emoji: '😢', color: 'bg-oe-crisis/60' },
 ];
+
+const card = 'rounded-3xl border border-oe-line bg-white p-6 md:p-8';
 
 export default function MoodTrackerPage() {
   const navigate = useNavigate();
@@ -91,10 +95,10 @@ export default function MoodTrackerPage() {
     const recent = moodLogs.slice(0, 7);
     const older = moodLogs.slice(7, 14);
     if (older.length === 0) return 'neutral';
-    
+
     const recentAvg = recent.reduce((sum, log) => sum + log.mood_score, 0) / recent.length;
     const olderAvg = older.reduce((sum, log) => sum + log.mood_score, 0) / older.length;
-    
+
     if (recentAvg > olderAvg + 0.3) return 'up';
     if (recentAvg < olderAvg - 0.3) return 'down';
     return 'neutral';
@@ -107,12 +111,12 @@ export default function MoodTrackerPage() {
     yesterday.setDate(yesterday.getDate() - 1);
 
     if (date.toDateString() === today.toDateString()) {
-      return `Today, ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
+      return `Today, ${date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}`;
     }
     if (date.toDateString() === yesterday.toDateString()) {
-      return `Yesterday, ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
+      return `Yesterday, ${date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}`;
     }
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
   };
 
   const getLast7DaysData = () => {
@@ -124,11 +128,11 @@ export default function MoodTrackerPage() {
         const logDate = new Date(log.created_at);
         return logDate.toDateString() === date.toDateString();
       });
-      const avgScore = dayLogs.length > 0 
-        ? dayLogs.reduce((sum, log) => sum + log.mood_score, 0) / dayLogs.length 
+      const avgScore = dayLogs.length > 0
+        ? dayLogs.reduce((sum, log) => sum + log.mood_score, 0) / dayLogs.length
         : null;
       days.push({
-        day: date.toLocaleDateString('en-US', { weekday: 'short' }),
+        day: date.toLocaleDateString(undefined, { weekday: 'short' }),
         score: avgScore,
         count: dayLogs.length
       });
@@ -138,273 +142,297 @@ export default function MoodTrackerPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#F0F9FF] to-[#E0F2FE] flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-[#0096FF] border-t-transparent rounded-full animate-spin"></div>
+      <div className="flex min-h-screen items-center justify-center bg-oe-bg" aria-busy="true" aria-label="Loading">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-oe-primary border-t-transparent" />
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F0F9FF] to-[#E0F2FE]">
-      <Navbar />
-      
-      <div className="pt-28 pb-16 px-4 md:px-8 max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-[#2A2A2A] mb-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
-            Mood Tracker
-          </h1>
-          <p className="text-gray-600">Track how you're feeling and discover patterns over time</p>
-        </div>
+  const trend = getMoodTrend();
 
-        {/* Success Message */}
+  return (
+    <div className="min-h-screen bg-oe-bg text-oe-ink">
+      <Navbar />
+
+      <main className="oe-route mx-auto max-w-3xl px-5 pb-20 pt-28 md:px-8">
+        {/* Header */}
+        <p className="inline-flex items-center gap-1.5 rounded-full bg-oe-primary-soft px-3 py-1 text-xs font-medium uppercase tracking-wide text-oe-primary-deep">
+          <i className="ri-sun-cloudy-line" aria-hidden="true" /> Mood tracker
+        </p>
+        <h1 className="mt-4 text-4xl font-bold md:text-5xl">How are you, really?</h1>
+        <p className="mt-3 max-w-2xl text-lg text-oe-muted">
+          Note how you feel, as often as you like. Over time you may start to notice patterns.
+        </p>
+
+        {/* Success message */}
         {showSuccess && (
-          <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-3 animate-fade-in">
-            <div className="w-10 h-10 flex items-center justify-center bg-emerald-500 rounded-full">
-              <i className="ri-check-line text-white text-xl"></i>
-            </div>
-            <div>
-              <p className="font-semibold text-emerald-800">Mood logged!</p>
-              <p className="text-sm text-emerald-600">Keep tracking to see your patterns</p>
-            </div>
+          <div role="status" className="mt-6 flex animate-fade-in items-center gap-3 rounded-2xl bg-oe-primary-tint px-5 py-3 text-sm">
+            <span aria-hidden="true" className="flex h-8 w-8 items-center justify-center rounded-full bg-oe-primary text-white">
+              <i className="ri-check-line" />
+            </span>
+            <span>
+              <span className="font-semibold">Mood logged.</span> Thank you for checking in with yourself.
+            </span>
           </div>
         )}
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-8 bg-white/60 p-1.5 rounded-full w-fit mx-auto">
+        <div role="tablist" aria-label="Mood tracker" className="mt-8 flex w-fit gap-1 rounded-full border border-oe-line bg-white p-1">
           {[
-            { id: 'log', label: 'Log Mood', icon: 'ri-add-circle-line' },
+            { id: 'log', label: 'Log mood', icon: 'ri-add-circle-line' },
             { id: 'history', label: 'History', icon: 'ri-history-line' },
-            { id: 'insights', label: 'Insights', icon: 'ri-line-chart-line' },
+            { id: 'insights', label: 'Patterns', icon: 'ri-line-chart-line' },
           ].map((tab) => (
             <button
               key={tab.id}
+              role="tab"
+              aria-selected={activeTab === tab.id}
               onClick={() => setActiveTab(tab.id as typeof activeTab)}
-              className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap ${
-                activeTab === tab.id
-                  ? 'bg-[#0096FF] text-white shadow-md'
-                  : 'text-gray-600 hover:bg-white/80'
+              className={`flex cursor-pointer items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors sm:px-5 ${
+                activeTab === tab.id ? 'bg-oe-primary text-white' : 'text-oe-muted hover:bg-oe-surface hover:text-oe-ink'
               }`}
             >
-              <i className={tab.icon}></i>
+              <i className={tab.icon} aria-hidden="true" />
               {tab.label}
             </button>
           ))}
         </div>
 
-        {/* Log Mood Tab */}
+        {/* Log mood tab */}
         {activeTab === 'log' && (
-          <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
-            <h2 className="text-xl font-semibold text-[#2A2A2A] mb-6 text-center">How are you feeling right now?</h2>
-            
-            {/* Mood Selection */}
-            <div className="grid grid-cols-5 gap-3 md:gap-4 mb-8">
+          <section className={`mt-6 ${card}`} aria-labelledby="log-heading">
+            <h2 id="log-heading" className="text-2xl font-semibold">
+              How are you feeling right now?
+            </h2>
+
+            <div role="radiogroup" aria-label="Mood" className="mt-6 grid grid-cols-5 gap-2 sm:gap-3">
               {moods.map((mood) => (
                 <button
                   key={mood.name}
+                  role="radio"
+                  aria-checked={selectedMood?.name === mood.name}
                   onClick={() => setSelectedMood(mood)}
-                  className={`flex flex-col items-center p-3 md:p-4 rounded-xl transition-all cursor-pointer ${
+                  className={`flex cursor-pointer flex-col items-center gap-1.5 rounded-2xl border-2 px-1 py-4 transition-colors ${
                     selectedMood?.name === mood.name
-                      ? `${mood.lightColor} ring-2 ring-offset-2 ring-${mood.color.replace('bg-', '')}`
-                      : 'bg-gray-50 hover:bg-gray-100'
+                      ? 'border-oe-primary bg-oe-primary-tint'
+                      : 'border-transparent bg-oe-surface-low hover:border-oe-primary/40'
                   }`}
                 >
-                  <span className="text-3xl md:text-4xl mb-2">{mood.emoji}</span>
-                  <span className={`text-xs md:text-sm font-medium ${selectedMood?.name === mood.name ? mood.textColor : 'text-gray-600'}`}>
-                    {mood.name}
+                  <span aria-hidden="true" className="text-3xl md:text-4xl">
+                    {mood.emoji}
                   </span>
+                  <span className="text-xs font-medium text-oe-muted md:text-sm">{mood.name}</span>
                 </button>
               ))}
             </div>
 
-            {/* Note Input */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Add a note (optional)
+            <div className="mt-6">
+              <label htmlFor="mood-note" className="block text-sm font-medium">
+                Add a note <span className="font-normal text-oe-muted">(optional)</span>
               </label>
               <textarea
+                id="mood-note"
                 value={note}
                 onChange={(e) => setNote(e.target.value.slice(0, 500))}
                 placeholder="What's on your mind? What happened today?"
-                className="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0096FF] focus:border-transparent resize-none text-sm"
+                className="mt-2 w-full resize-none rounded-xl border border-oe-line bg-oe-surface-low px-4 py-3 text-sm focus:border-oe-primary focus:outline-none focus:ring-2 focus:ring-oe-primary/30"
                 rows={3}
                 maxLength={500}
               />
-              <p className="text-xs text-gray-400 mt-1 text-right">{note.length}/500</p>
+              <p className="mt-1 text-right text-xs text-oe-faint">{note.length}/500</p>
             </div>
 
-            {/* Submit Button */}
             <button
               onClick={handleSubmit}
               disabled={!selectedMood || isSubmitting}
-              className={`w-full py-4 rounded-xl font-semibold text-white transition-all cursor-pointer whitespace-nowrap ${
-                selectedMood && !isSubmitting
-                  ? 'bg-[#0096FF] hover:bg-[#0077CC] shadow-lg shadow-[#0096FF]/30'
-                  : 'bg-gray-300 cursor-not-allowed'
-              }`}
+              className="oe-btn mt-4 w-full cursor-pointer whitespace-nowrap rounded-full bg-oe-primary py-3.5 font-semibold text-white hover:bg-oe-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isSubmitting ? (
                 <span className="flex items-center justify-center gap-2">
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Saving...
+                  <span className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" aria-hidden="true" />
+                  Saving…
                 </span>
               ) : (
-                'Log My Mood'
+                'Log my mood'
               )}
             </button>
-          </div>
+          </section>
         )}
 
-        {/* History Tab */}
+        {/* History tab */}
         {activeTab === 'history' && (
-          <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
-            <h2 className="text-xl font-semibold text-[#2A2A2A] mb-6">Recent Mood Logs</h2>
-            
+          <section className={`mt-6 ${card}`} aria-labelledby="history-heading">
+            <h2 id="history-heading" className="text-2xl font-semibold">
+              Recent moods
+            </h2>
+
             {moodLogs.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="w-16 h-16 flex items-center justify-center bg-gray-100 rounded-full mx-auto mb-4">
-                  <i className="ri-emotion-line text-3xl text-gray-400"></i>
-                </div>
-                <p className="text-gray-500 mb-4">No mood logs yet</p>
+              <div className="mt-6 rounded-2xl bg-oe-surface-low p-8 text-center">
+                <span aria-hidden="true" className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-oe-primary-soft text-xl text-oe-primary-deep">
+                  <i className="ri-emotion-line" />
+                </span>
+                <p className="mt-4 text-oe-muted">Nothing logged yet.</p>
                 <button
                   onClick={() => setActiveTab('log')}
-                  className="px-6 py-2 bg-[#0096FF] text-white rounded-full text-sm font-medium hover:bg-[#0077CC] transition-colors cursor-pointer whitespace-nowrap"
+                  className="mt-5 cursor-pointer whitespace-nowrap rounded-full bg-oe-primary px-6 py-2.5 text-sm font-semibold text-white hover:bg-oe-primary-hover"
                 >
-                  Log Your First Mood
+                  Log your first mood
                 </button>
               </div>
             ) : (
-              <div className="space-y-3">
+              <ul className="mt-6 space-y-3">
                 {moodLogs.map((log) => {
                   const mood = getMoodByScore(log.mood_score);
                   return (
-                    <div
-                      key={log.id}
-                      className={`p-4 rounded-xl ${mood.lightColor} border border-${mood.color.replace('bg-', '')}/20`}
-                    >
-                      <div className="flex items-start gap-4">
-                        <span className="text-3xl">{mood.emoji}</span>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className={`font-semibold ${mood.textColor}`}>{log.mood}</span>
-                            <span className="text-xs text-gray-500">{formatDate(log.created_at)}</span>
-                          </div>
-                          {log.note && (
-                            <p className="text-sm text-gray-600 line-clamp-2">{log.note}</p>
-                          )}
+                    <li key={log.id} className="flex items-start gap-4 rounded-2xl bg-oe-surface-low p-4">
+                      <span aria-hidden="true" className="text-3xl">
+                        {mood.emoji}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center justify-between gap-x-3">
+                          <span className="font-semibold">{log.mood}</span>
+                          <span className="text-xs text-oe-muted">{formatDate(log.created_at)}</span>
                         </div>
+                        {log.note && <p className="mt-1 line-clamp-2 text-sm text-oe-muted">{log.note}</p>}
                       </div>
-                    </div>
+                    </li>
                   );
                 })}
-              </div>
+              </ul>
             )}
-          </div>
+          </section>
         )}
 
-        {/* Insights Tab */}
+        {/* Patterns tab */}
         {activeTab === 'insights' && (
-          <div className="space-y-6">
-            {/* Stats Cards */}
-            <div className="grid grid-cols-3 gap-4">
-              <div className="bg-white rounded-xl shadow-lg p-5 text-center">
-                <p className="text-xs text-gray-500 mb-1">Total Logs</p>
-                <p className="text-2xl font-bold text-[#2A2A2A]">{moodLogs.length}</p>
+          <div className="mt-6 space-y-6">
+            <dl className="grid grid-cols-3 gap-3">
+              <div className="rounded-3xl border border-oe-line bg-white p-5 text-center">
+                <dt className="text-xs font-medium uppercase tracking-wide text-oe-muted">Logs</dt>
+                <dd className="mt-1 font-heading text-3xl font-semibold">{moodLogs.length}</dd>
               </div>
-              <div className="bg-white rounded-xl shadow-lg p-5 text-center">
-                <p className="text-xs text-gray-500 mb-1">Average Mood</p>
-                <p className="text-2xl font-bold text-[#0096FF]">{getAverageMood() || '-'}</p>
+              <div className="rounded-3xl border border-oe-line bg-white p-5 text-center">
+                <dt className="text-xs font-medium uppercase tracking-wide text-oe-muted">Average</dt>
+                <dd className="mt-1 font-heading text-3xl font-semibold text-oe-primary-deep">{getAverageMood() || '-'}</dd>
               </div>
-              <div className="bg-white rounded-xl shadow-lg p-5 text-center">
-                <p className="text-xs text-gray-500 mb-1">Trend</p>
-                <div className="flex items-center justify-center gap-1">
-                  {getMoodTrend() === 'up' && (
+              <div className="rounded-3xl border border-oe-line bg-white p-5 text-center">
+                <dt className="text-xs font-medium uppercase tracking-wide text-oe-muted">Trend</dt>
+                <dd className="mt-2 flex items-center justify-center gap-1 font-semibold">
+                  {trend === 'up' && (
                     <>
-                      <i className="ri-arrow-up-line text-emerald-500 text-xl"></i>
-                      <span className="text-emerald-500 font-semibold">Up</span>
+                      <i className="ri-arrow-up-line text-xl text-oe-primary" aria-hidden="true" />
+                      <span className="text-oe-primary-deep">Up</span>
                     </>
                   )}
-                  {getMoodTrend() === 'down' && (
+                  {trend === 'down' && (
                     <>
-                      <i className="ri-arrow-down-line text-rose-500 text-xl"></i>
-                      <span className="text-rose-500 font-semibold">Down</span>
+                      <i className="ri-arrow-down-line text-xl text-oe-accent" aria-hidden="true" />
+                      <span className="text-oe-accent">Down</span>
                     </>
                   )}
-                  {getMoodTrend() === 'neutral' && (
+                  {trend === 'neutral' && (
                     <>
-                      <i className="ri-subtract-line text-gray-400 text-xl"></i>
-                      <span className="text-gray-500 font-semibold">Stable</span>
+                      <i className="ri-subtract-line text-xl text-oe-muted" aria-hidden="true" />
+                      <span className="text-oe-muted">Steady</span>
                     </>
                   )}
-                </div>
+                </dd>
               </div>
-            </div>
+            </dl>
 
-            {/* Weekly Chart */}
-            <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold text-[#2A2A2A] mb-6">Last 7 Days</h3>
-              <div className="flex items-end justify-between gap-2 h-40">
+            {/* Weekly chart */}
+            <section className={card} aria-labelledby="week-heading">
+              <h2 id="week-heading" className="text-xl font-semibold">
+                Last 7 days
+              </h2>
+              <div className="mt-8 flex h-40 items-end justify-between gap-2">
                 {getLast7DaysData().map((day, index) => (
-                  <div key={index} className="flex-1 flex flex-col items-center">
-                    <div className="w-full flex flex-col items-center justify-end h-28">
+                  <div key={index} className="flex flex-1 flex-col items-center">
+                    <div className="flex h-28 w-full flex-col items-center justify-end">
                       {day.score !== null ? (
                         <div
-                          className={`w-full max-w-[40px] rounded-t-lg ${getMoodByScore(Math.round(day.score)).color} transition-all`}
+                          className={`w-full max-w-[40px] rounded-t-xl ${getMoodByScore(Math.round(day.score)).color} transition-all`}
                           style={{ height: `${(day.score / 5) * 100}%` }}
+                          title={`${day.day}: ${getMoodByScore(Math.round(day.score)).name}`}
                         >
-                          <div className="text-center -mt-6">
-                            <span className="text-lg">{getMoodByScore(Math.round(day.score)).emoji}</span>
+                          <div className="-mt-7 text-center">
+                            <span className="text-lg" aria-hidden="true">
+                              {getMoodByScore(Math.round(day.score)).emoji}
+                            </span>
                           </div>
                         </div>
                       ) : (
-                        <div className="w-full max-w-[40px] h-2 bg-gray-200 rounded-t-lg"></div>
+                        <div className="h-2 w-full max-w-[40px] rounded-t-xl bg-oe-surface" />
                       )}
                     </div>
-                    <span className="text-xs text-gray-500 mt-2">{day.day}</span>
+                    <span className="mt-2 text-xs text-oe-muted">{day.day}</span>
                   </div>
                 ))}
               </div>
-            </div>
+            </section>
 
-            {/* Mood Distribution */}
-            <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold text-[#2A2A2A] mb-4">Mood Distribution</h3>
-              <div className="space-y-3">
+            {/* Mood mix */}
+            <section className={card} aria-labelledby="mix-heading">
+              <h2 id="mix-heading" className="text-xl font-semibold">
+                Your mood mix
+              </h2>
+              <div className="mt-5 space-y-3">
                 {moods.map((mood) => {
                   const count = moodLogs.filter(log => log.mood_score === mood.score).length;
                   const percentage = moodLogs.length > 0 ? (count / moodLogs.length) * 100 : 0;
                   return (
                     <div key={mood.name} className="flex items-center gap-3">
-                      <span className="text-xl w-8">{mood.emoji}</span>
+                      <span className="w-8 text-xl" aria-hidden="true">
+                        {mood.emoji}
+                      </span>
                       <div className="flex-1">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-sm font-medium text-gray-700">{mood.name}</span>
-                          <span className="text-xs text-gray-500">{count} ({percentage.toFixed(0)}%)</span>
+                        <div className="mb-1 flex items-center justify-between">
+                          <span className="text-sm font-medium">{mood.name}</span>
+                          <span className="text-xs text-oe-muted">
+                            {count} ({percentage.toFixed(0)}%)
+                          </span>
                         </div>
-                        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full ${mood.color} rounded-full transition-all duration-500`}
-                            style={{ width: `${percentage}%` }}
-                          ></div>
+                        <div className="h-2 overflow-hidden rounded-full bg-oe-surface">
+                          <div className={`h-full rounded-full ${mood.color} transition-all duration-500`} style={{ width: `${percentage}%` }} />
                         </div>
                       </div>
                     </div>
                   );
                 })}
               </div>
-            </div>
+            </section>
 
             {moodLogs.length < 5 && (
-              <div className="bg-[#0096FF]/10 rounded-xl p-5 text-center">
-                <i className="ri-lightbulb-line text-[#0096FF] text-2xl mb-2"></i>
-                <p className="text-sm text-[#0096FF]">
-                  Log more moods to unlock detailed insights and patterns!
-                </p>
-              </div>
+              <p className="flex items-center gap-3 rounded-2xl bg-oe-accent-tint px-5 py-3 text-sm text-oe-accent">
+                <i className="ri-lightbulb-line text-lg" aria-hidden="true" />
+                Log a few more moods and your patterns will start to show.
+              </p>
             )}
           </div>
         )}
-      </div>
+
+        {/* Gentle next step */}
+        <aside className="mt-10 flex flex-col gap-4 rounded-3xl border border-oe-line bg-oe-surface p-6 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="font-semibold">Feeling low?</p>
+            <p className="mt-1 text-sm text-oe-muted">
+              A Listener can hear you out. In an emergency, call 999 or 112, or see{' '}
+              <Link to={siteConfig.crisisPath} className="font-medium text-oe-crisis underline-offset-2 hover:underline">
+                Crisis Help
+              </Link>
+              .
+            </p>
+          </div>
+          <Link
+            to="/call"
+            className="oe-btn inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-oe-primary px-6 py-3 font-semibold text-white hover:bg-oe-primary-hover"
+          >
+            <i className="ri-voiceprint-line" aria-hidden="true" /> Talk now
+          </Link>
+        </aside>
+      </main>
+
+      <SiteFooter />
     </div>
   );
 }

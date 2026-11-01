@@ -27,7 +27,7 @@ export default function ConnectingOverlay({
           <span className="oe-ring" />
           <span className="oe-ring" />
           <span className="oe-ring" />
-          <span className="absolute inset-0 m-auto w-16 h-16 rounded-full bg-oe-blue flex items-center justify-center shadow-oe-md">
+          <span className="absolute inset-0 m-auto w-16 h-16 rounded-full bg-oe-primary flex items-center justify-center shadow-oe-md">
             <i className="ri-heart-3-fill text-2xl text-white" />
           </span>
         </div>
