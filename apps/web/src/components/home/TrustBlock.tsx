@@ -29,7 +29,7 @@ export default function TrustBlock() {
       <ul ref={ref} data-reveal-group className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10">
         {TRUST_POINTS.map((point) => (
           <li key={point.title} className="flex items-start gap-4">
-            <span className="shrink-0 w-11 h-11 rounded-full bg-oe-sage-soft text-oe-sage flex items-center justify-center">
+            <span className="shrink-0 w-11 h-11 rounded-full bg-oe-primary-soft text-oe-primary flex items-center justify-center">
               <i className={`${point.icon} text-xl`} aria-hidden="true" />
             </span>
             <div>

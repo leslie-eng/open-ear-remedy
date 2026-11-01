@@ -48,24 +48,24 @@ export default function PricingEstimator() {
           </p>
           <ul className="space-y-3 text-body text-oe-ink">
             <li className="flex items-start gap-3">
-              <i className="ri-phone-line text-oe-blue text-xl mt-0.5" aria-hidden="true" />
+              <i className="ri-phone-line text-oe-primary text-xl mt-0.5" aria-hidden="true" />
               Calls use {CREDITS_PER_CALL_MINUTE} credits per minute
             </li>
             <li className="flex items-start gap-3">
-              <i className="ri-message-3-line text-oe-blue text-xl mt-0.5" aria-hidden="true" />
+              <i className="ri-message-3-line text-oe-primary text-xl mt-0.5" aria-hidden="true" />
               AI chat uses {CREDITS_PER_CHAT_MESSAGE} credits per message
             </li>
             <li className="flex items-start gap-3">
-              <i className="ri-price-tag-3-line text-oe-blue text-xl mt-0.5" aria-hidden="true" />
+              <i className="ri-price-tag-3-line text-oe-primary text-xl mt-0.5" aria-hidden="true" />
               Packs from {formatPrice(starterPack.price)} for {starterPack.credits} credits
             </li>
           </ul>
         </div>
 
-        <div ref={cardRef} data-reveal className="bg-oe-cream rounded-oe-md border border-oe-line p-7 md:p-9 shadow-oe-sm">
+        <div ref={cardRef} data-reveal className="bg-oe-bg rounded-oe-md border border-oe-line p-7 md:p-9 shadow-oe-sm">
           <label htmlFor={sliderId} className="flex items-baseline justify-between font-semibold text-oe-ink mb-4">
             <span>How long would you like to talk?</span>
-            <span className="text-oe-blue tabular-nums">{minutes} min</span>
+            <span className="text-oe-primary tabular-nums">{minutes} min</span>
           </label>
           <input
             id={sliderId}
@@ -76,7 +76,7 @@ export default function PricingEstimator() {
             value={minutes}
             onChange={(e) => setMinutes(Number(e.target.value))}
             aria-valuetext={`${minutes} minutes`}
-            className="w-full h-2 cursor-pointer accent-oe-blue"
+            className="w-full h-2 cursor-pointer accent-oe-primary"
           />
           <div className="flex justify-between text-sm text-oe-muted mt-2" aria-hidden="true">
             <span>{MIN_MINUTES} min</span>
@@ -101,7 +101,7 @@ export default function PricingEstimator() {
 
           <Link
             to="/pricing"
-            className="oe-btn mt-7 inline-flex w-full items-center justify-center gap-2 rounded-oe-sm bg-oe-blue hover:bg-oe-blue-hover px-6 py-3.5 text-body font-semibold text-white"
+            className="oe-btn mt-7 inline-flex w-full items-center justify-center gap-2 rounded-oe-sm bg-oe-primary hover:bg-oe-primary-hover px-6 py-3.5 text-body font-semibold text-white"
           >
             See credit packs
             <i className="ri-arrow-right-line" aria-hidden="true" />

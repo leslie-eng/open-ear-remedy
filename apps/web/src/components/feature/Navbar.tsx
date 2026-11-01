@@ -129,8 +129,8 @@ export default function Navbar({ transparent = false }: NavbarProps) {
         <div className="flex items-center justify-between">
           <Link
             to="/"
-            style={{ fontFamily: 'Poppins, sans-serif', transform: isScrolled ? 'scale(0.92)' : 'none' }}
-            className="origin-left text-2xl md:text-3xl font-bold text-[#0096FF] hover:opacity-80 transition-[opacity,transform] duration-oe-base ease-oe-out"
+            style={{ transform: isScrolled ? 'scale(0.92)' : 'none' }}
+            className="origin-left text-2xl md:text-3xl font-bold text-oe-primary hover:opacity-80 transition-[opacity,transform] duration-oe-base ease-oe-out"
           >
             Open Ear
           </Link>
@@ -144,7 +144,7 @@ export default function Navbar({ transparent = false }: NavbarProps) {
               aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={isMobileMenuOpen}
               aria-controls="mobile-menu"
-              className="w-11 h-11 flex items-center justify-center text-oe-blue cursor-pointer"
+              className="w-11 h-11 flex items-center justify-center text-oe-primary cursor-pointer"
             >
               <i
                 aria-hidden="true"
@@ -164,8 +164,8 @@ export default function Navbar({ transparent = false }: NavbarProps) {
                 to={link.path}
                 className={`text-sm lg:text-base font-medium transition-colors cursor-pointer whitespace-nowrap ${
                   isActive(link.path)
-                    ? 'text-[#0096FF]'
-                    : 'text-[#2A2A2A] hover:text-[#0096FF]'
+                    ? 'text-oe-primary'
+                    : 'text-oe-ink hover:text-oe-primary'
                 }`}
               >
                 {link.label}
@@ -176,11 +176,11 @@ export default function Navbar({ transparent = false }: NavbarProps) {
             {isStoreFlow && (
               <Link
                 to="/cart"
-                className="relative text-[#2A2A2A] hover:text-[#0096FF] transition-colors cursor-pointer"
+                className="relative text-oe-ink hover:text-oe-primary transition-colors cursor-pointer"
               >
                 <i className="ri-shopping-cart-line text-xl"></i>
                 {totalItems > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-[#0096FF] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  <span className="absolute -top-2 -right-2 bg-oe-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                     {totalItems}
                   </span>
                 )}
@@ -192,8 +192,8 @@ export default function Navbar({ transparent = false }: NavbarProps) {
                 to="/admin-dashboard"
                 className={`text-sm lg:text-base font-medium transition-colors cursor-pointer whitespace-nowrap flex items-center gap-2 ${
                   isActive('/admin-dashboard')
-                    ? 'text-[#0096FF]'
-                    : 'text-[#2A2A2A] hover:text-[#0096FF]'
+                    ? 'text-oe-primary'
+                    : 'text-oe-ink hover:text-oe-primary'
                 }`}
               >
                 <i className="ri-shield-user-line"></i>
@@ -209,12 +209,12 @@ export default function Navbar({ transparent = false }: NavbarProps) {
                   aria-expanded={showUserMenu}
                   className="flex items-center gap-2 cursor-pointer"
                 >
-                  <div className="w-8 h-8 bg-[#0096FF] rounded-full flex items-center justify-center">
+                  <div className="w-8 h-8 bg-oe-primary rounded-full flex items-center justify-center">
                     <span className="text-xs font-bold text-white">
                       {userEmail.charAt(0).toUpperCase()}
                     </span>
                   </div>
-                  <i className={`ri-arrow-${showUserMenu ? 'up' : 'down'}-s-line text-[#2A2A2A]`}></i>
+                  <i className={`ri-arrow-${showUserMenu ? 'up' : 'down'}-s-line text-oe-ink`}></i>
                 </button>
                 
                 {/* User Dropdown Menu */}
@@ -222,31 +222,31 @@ export default function Navbar({ transparent = false }: NavbarProps) {
                   <>
                     <div className="animate-fade-in absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
                       <div className="px-4 py-3 border-b border-gray-100">
-                        <p className="text-xs text-[#6B6B6B]">Signed in as</p>
-                        <p className="text-sm font-medium text-[#2A2A2A] truncate">{userEmail}</p>
+                        <p className="text-xs text-oe-muted">Signed in as</p>
+                        <p className="text-sm font-medium text-oe-ink truncate">{userEmail}</p>
                       </div>
                       <Link
                         to="/profile"
                         onClick={() => setShowUserMenu(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#2A2A2A] hover:bg-[#E6F5FF] transition-colors cursor-pointer"
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-oe-ink hover:bg-oe-primary-tint transition-colors cursor-pointer"
                       >
-                        <i className="ri-user-line text-[#0096FF]"></i>
+                        <i className="ri-user-line text-oe-primary"></i>
                         My Profile
                       </Link>
                       <Link
                         to="/dashboard"
                         onClick={() => setShowUserMenu(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#2A2A2A] hover:bg-[#E6F5FF] transition-colors cursor-pointer"
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-oe-ink hover:bg-oe-primary-tint transition-colors cursor-pointer"
                       >
-                        <i className="ri-dashboard-line text-[#0096FF]"></i>
+                        <i className="ri-dashboard-line text-oe-primary"></i>
                         Dashboard
                       </Link>
                       <Link
                         to="/library"
                         onClick={() => setShowUserMenu(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#2A2A2A] hover:bg-[#E6F5FF] transition-colors cursor-pointer"
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-oe-ink hover:bg-oe-primary-tint transition-colors cursor-pointer"
                       >
-                        <i className="ri-book-line text-[#0096FF]"></i>
+                        <i className="ri-book-line text-oe-primary"></i>
                         My Library
                       </Link>
                       <div className="border-t border-gray-100 my-2"></div>
@@ -266,8 +266,8 @@ export default function Navbar({ transparent = false }: NavbarProps) {
                 to="/signin"
                 className={`text-sm lg:text-base font-medium transition-colors cursor-pointer whitespace-nowrap ${
                   isActive('/signin')
-                    ? 'text-[#0096FF]'
-                    : 'text-[#2A2A2A] hover:text-[#0096FF]'
+                    ? 'text-oe-primary'
+                    : 'text-oe-ink hover:text-oe-primary'
                 }`}
               >
                 Sign In
@@ -275,7 +275,7 @@ export default function Navbar({ transparent = false }: NavbarProps) {
             )}
             <Link
               to="/get-started"
-              className="oe-btn px-6 lg:px-8 py-2.5 lg:py-3 bg-oe-blue text-white rounded-full text-sm lg:text-base font-semibold hover:bg-oe-blue-hover whitespace-nowrap cursor-pointer"
+              className="oe-btn px-6 lg:px-8 py-2.5 lg:py-3 bg-oe-primary text-white rounded-full text-sm lg:text-base font-semibold hover:bg-oe-primary-hover whitespace-nowrap cursor-pointer"
             >
               Get Started
             </Link>
@@ -292,8 +292,8 @@ export default function Navbar({ transparent = false }: NavbarProps) {
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={`block text-base font-medium transition-colors cursor-pointer ${
                   isActive(link.path)
-                    ? 'text-[#0096FF]'
-                    : 'text-[#2A2A2A] hover:text-[#0096FF]'
+                    ? 'text-oe-primary'
+                    : 'text-oe-ink hover:text-oe-primary'
                 }`}
               >
                 {link.label}
@@ -307,8 +307,8 @@ export default function Navbar({ transparent = false }: NavbarProps) {
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={`block text-base font-medium transition-colors cursor-pointer flex items-center gap-2 ${
                   isActive('/cart')
-                    ? 'text-[#0096FF]'
-                    : 'text-[#2A2A2A] hover:text-[#0096FF]'
+                    ? 'text-oe-primary'
+                    : 'text-oe-ink hover:text-oe-primary'
                 }`}
               >
                 <i className="ri-shopping-cart-line"></i>
@@ -322,8 +322,8 @@ export default function Navbar({ transparent = false }: NavbarProps) {
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={`block text-base font-medium transition-colors cursor-pointer flex items-center gap-2 ${
                   isActive('/admin-dashboard')
-                    ? 'text-[#0096FF]'
-                    : 'text-[#2A2A2A] hover:text-[#0096FF]'
+                    ? 'text-oe-primary'
+                    : 'text-oe-ink hover:text-oe-primary'
                 }`}
               >
                 <i className="ri-shield-user-line"></i>
@@ -337,11 +337,11 @@ export default function Navbar({ transparent = false }: NavbarProps) {
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={`block text-base font-medium transition-colors cursor-pointer flex items-center gap-2 ${
                     isActive('/profile')
-                      ? 'text-[#0096FF]'
-                      : 'text-[#2A2A2A] hover:text-[#0096FF]'
+                      ? 'text-oe-primary'
+                      : 'text-oe-ink hover:text-oe-primary'
                   }`}
                 >
-                  <div className="w-6 h-6 bg-[#0096FF] rounded-full flex items-center justify-center">
+                  <div className="w-6 h-6 bg-oe-primary rounded-full flex items-center justify-center">
                     <span className="text-xs font-bold text-white">
                       {userEmail.charAt(0).toUpperCase()}
                     </span>
@@ -353,8 +353,8 @@ export default function Navbar({ transparent = false }: NavbarProps) {
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={`block text-base font-medium transition-colors cursor-pointer flex items-center gap-2 ${
                     isActive('/dashboard')
-                      ? 'text-[#0096FF]'
-                      : 'text-[#2A2A2A] hover:text-[#0096FF]'
+                      ? 'text-oe-primary'
+                      : 'text-oe-ink hover:text-oe-primary'
                   }`}
                 >
                   <i className="ri-dashboard-line"></i>
@@ -365,8 +365,8 @@ export default function Navbar({ transparent = false }: NavbarProps) {
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={`block text-base font-medium transition-colors cursor-pointer flex items-center gap-2 ${
                     isActive('/library')
-                      ? 'text-[#0096FF]'
-                      : 'text-[#2A2A2A] hover:text-[#0096FF]'
+                      ? 'text-oe-primary'
+                      : 'text-oe-ink hover:text-oe-primary'
                   }`}
                 >
                   <i className="ri-book-line"></i>
@@ -389,8 +389,8 @@ export default function Navbar({ transparent = false }: NavbarProps) {
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={`block text-base font-medium transition-colors cursor-pointer ${
                   isActive('/signin')
-                    ? 'text-[#0096FF]'
-                    : 'text-[#2A2A2A] hover:text-[#0096FF]'
+                    ? 'text-oe-primary'
+                    : 'text-oe-ink hover:text-oe-primary'
                 }`}
               >
                 Sign In
@@ -399,7 +399,7 @@ export default function Navbar({ transparent = false }: NavbarProps) {
             <Link
               to="/get-started"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="block text-center px-6 py-3 bg-[#0096FF] text-white rounded-full font-semibold hover:bg-[#0077CC] transition-colors whitespace-nowrap cursor-pointer"
+              className="block text-center px-6 py-3 bg-oe-primary text-white rounded-full font-semibold hover:bg-oe-primary-hover transition-colors whitespace-nowrap cursor-pointer"
             >
               Get Started
             </Link>

@@ -26,11 +26,11 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50 flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-oe-bg flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link to="/" className="inline-block">
-            <div className="w-16 h-16 bg-gradient-to-br from-teal-500 to-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <div className="w-16 h-16 bg-oe-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
               <i className="ri-phone-line text-3xl text-white"></i>
             </div>
           </Link>
@@ -57,7 +57,7 @@ export default function ForgotPasswordPage() {
                   id="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-sm"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-forest-500 focus:border-transparent text-sm"
                   placeholder="you@example.com"
                   required
                 />
@@ -65,12 +65,12 @@ export default function ForgotPasswordPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-teal-500 to-teal-600 text-white py-3 rounded-lg font-medium disabled:opacity-50"
+                className="w-full bg-oe-primary text-white py-3 rounded-lg font-medium disabled:opacity-50"
               >
                 {loading ? 'Sending...' : 'Send Reset Link'}
               </button>
               <div className="text-center">
-                <Link to="/signin" className="text-sm text-teal-600 font-medium">
+                <Link to="/signin" className="text-sm text-forest-600 font-medium">
                   Back to Sign In
                 </Link>
               </div>
@@ -81,7 +81,7 @@ export default function ForgotPasswordPage() {
               <button
                 type="button"
                 onClick={() => { setSent(false); setEmail(''); }}
-                className="text-sm text-teal-600 font-medium"
+                className="text-sm text-forest-600 font-medium"
               >
                 Try a different email
               </button>

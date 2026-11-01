@@ -14,8 +14,8 @@ interface MoodLog {
 }
 
 const moods = [
-  { name: 'Great', score: 5, emoji: '😄', color: 'bg-emerald-500', lightColor: 'bg-emerald-50', textColor: 'text-emerald-600' },
-  { name: 'Good', score: 4, emoji: '🙂', color: 'bg-teal-500', lightColor: 'bg-teal-50', textColor: 'text-teal-600' },
+  { name: 'Great', score: 5, emoji: '😄', color: 'bg-forest-500', lightColor: 'bg-forest-50', textColor: 'text-forest-600' },
+  { name: 'Good', score: 4, emoji: '🙂', color: 'bg-forest-500', lightColor: 'bg-forest-50', textColor: 'text-forest-600' },
   { name: 'Okay', score: 3, emoji: '😐', color: 'bg-amber-500', lightColor: 'bg-amber-50', textColor: 'text-amber-600' },
   { name: 'Low', score: 2, emoji: '😔', color: 'bg-orange-500', lightColor: 'bg-orange-50', textColor: 'text-orange-600' },
   { name: 'Struggling', score: 1, emoji: '😢', color: 'bg-rose-500', lightColor: 'bg-rose-50', textColor: 'text-rose-600' },
@@ -138,20 +138,20 @@ export default function MoodTrackerPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#F0F9FF] to-[#E0F2FE] flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-[#0096FF] border-t-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-oe-primary-tint flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-oe-primary border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F0F9FF] to-[#E0F2FE]">
+    <div className="min-h-screen bg-oe-primary-tint">
       <Navbar />
       
       <div className="pt-28 pb-16 px-4 md:px-8 max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-[#2A2A2A] mb-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
+          <h1 className="text-3xl md:text-4xl font-bold text-oe-ink mb-2">
             Mood Tracker
           </h1>
           <p className="text-gray-600">Track how you're feeling and discover patterns over time</p>
@@ -159,13 +159,13 @@ export default function MoodTrackerPage() {
 
         {/* Success Message */}
         {showSuccess && (
-          <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-3 animate-fade-in">
-            <div className="w-10 h-10 flex items-center justify-center bg-emerald-500 rounded-full">
+          <div className="mb-6 p-4 bg-forest-50 border border-forest-200 rounded-xl flex items-center gap-3 animate-fade-in">
+            <div className="w-10 h-10 flex items-center justify-center bg-forest-500 rounded-full">
               <i className="ri-check-line text-white text-xl"></i>
             </div>
             <div>
-              <p className="font-semibold text-emerald-800">Mood logged!</p>
-              <p className="text-sm text-emerald-600">Keep tracking to see your patterns</p>
+              <p className="font-semibold text-forest-800">Mood logged!</p>
+              <p className="text-sm text-forest-600">Keep tracking to see your patterns</p>
             </div>
           </div>
         )}
@@ -182,7 +182,7 @@ export default function MoodTrackerPage() {
               onClick={() => setActiveTab(tab.id as typeof activeTab)}
               className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap ${
                 activeTab === tab.id
-                  ? 'bg-[#0096FF] text-white shadow-md'
+                  ? 'bg-oe-primary text-white shadow-md'
                   : 'text-gray-600 hover:bg-white/80'
               }`}
             >
@@ -195,7 +195,7 @@ export default function MoodTrackerPage() {
         {/* Log Mood Tab */}
         {activeTab === 'log' && (
           <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
-            <h2 className="text-xl font-semibold text-[#2A2A2A] mb-6 text-center">How are you feeling right now?</h2>
+            <h2 className="text-xl font-semibold text-oe-ink mb-6 text-center">How are you feeling right now?</h2>
             
             {/* Mood Selection */}
             <div className="grid grid-cols-5 gap-3 md:gap-4 mb-8">
@@ -226,7 +226,7 @@ export default function MoodTrackerPage() {
                 value={note}
                 onChange={(e) => setNote(e.target.value.slice(0, 500))}
                 placeholder="What's on your mind? What happened today?"
-                className="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0096FF] focus:border-transparent resize-none text-sm"
+                className="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-oe-primary focus:border-transparent resize-none text-sm"
                 rows={3}
                 maxLength={500}
               />
@@ -239,7 +239,7 @@ export default function MoodTrackerPage() {
               disabled={!selectedMood || isSubmitting}
               className={`w-full py-4 rounded-xl font-semibold text-white transition-all cursor-pointer whitespace-nowrap ${
                 selectedMood && !isSubmitting
-                  ? 'bg-[#0096FF] hover:bg-[#0077CC] shadow-lg shadow-[#0096FF]/30'
+                  ? 'bg-oe-primary hover:bg-oe-primary-hover shadow-lg shadow-oe-primary/30'
                   : 'bg-gray-300 cursor-not-allowed'
               }`}
             >
@@ -258,7 +258,7 @@ export default function MoodTrackerPage() {
         {/* History Tab */}
         {activeTab === 'history' && (
           <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
-            <h2 className="text-xl font-semibold text-[#2A2A2A] mb-6">Recent Mood Logs</h2>
+            <h2 className="text-xl font-semibold text-oe-ink mb-6">Recent Mood Logs</h2>
             
             {moodLogs.length === 0 ? (
               <div className="text-center py-12">
@@ -268,7 +268,7 @@ export default function MoodTrackerPage() {
                 <p className="text-gray-500 mb-4">No mood logs yet</p>
                 <button
                   onClick={() => setActiveTab('log')}
-                  className="px-6 py-2 bg-[#0096FF] text-white rounded-full text-sm font-medium hover:bg-[#0077CC] transition-colors cursor-pointer whitespace-nowrap"
+                  className="px-6 py-2 bg-oe-primary text-white rounded-full text-sm font-medium hover:bg-oe-primary-hover transition-colors cursor-pointer whitespace-nowrap"
                 >
                   Log Your First Mood
                 </button>
@@ -309,19 +309,19 @@ export default function MoodTrackerPage() {
             <div className="grid grid-cols-3 gap-4">
               <div className="bg-white rounded-xl shadow-lg p-5 text-center">
                 <p className="text-xs text-gray-500 mb-1">Total Logs</p>
-                <p className="text-2xl font-bold text-[#2A2A2A]">{moodLogs.length}</p>
+                <p className="text-2xl font-bold text-oe-ink">{moodLogs.length}</p>
               </div>
               <div className="bg-white rounded-xl shadow-lg p-5 text-center">
                 <p className="text-xs text-gray-500 mb-1">Average Mood</p>
-                <p className="text-2xl font-bold text-[#0096FF]">{getAverageMood() || '-'}</p>
+                <p className="text-2xl font-bold text-oe-primary">{getAverageMood() || '-'}</p>
               </div>
               <div className="bg-white rounded-xl shadow-lg p-5 text-center">
                 <p className="text-xs text-gray-500 mb-1">Trend</p>
                 <div className="flex items-center justify-center gap-1">
                   {getMoodTrend() === 'up' && (
                     <>
-                      <i className="ri-arrow-up-line text-emerald-500 text-xl"></i>
-                      <span className="text-emerald-500 font-semibold">Up</span>
+                      <i className="ri-arrow-up-line text-forest-500 text-xl"></i>
+                      <span className="text-forest-500 font-semibold">Up</span>
                     </>
                   )}
                   {getMoodTrend() === 'down' && (
@@ -342,7 +342,7 @@ export default function MoodTrackerPage() {
 
             {/* Weekly Chart */}
             <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold text-[#2A2A2A] mb-6">Last 7 Days</h3>
+              <h3 className="text-lg font-semibold text-oe-ink mb-6">Last 7 Days</h3>
               <div className="flex items-end justify-between gap-2 h-40">
                 {getLast7DaysData().map((day, index) => (
                   <div key={index} className="flex-1 flex flex-col items-center">
@@ -368,7 +368,7 @@ export default function MoodTrackerPage() {
 
             {/* Mood Distribution */}
             <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold text-[#2A2A2A] mb-4">Mood Distribution</h3>
+              <h3 className="text-lg font-semibold text-oe-ink mb-4">Mood Distribution</h3>
               <div className="space-y-3">
                 {moods.map((mood) => {
                   const count = moodLogs.filter(log => log.mood_score === mood.score).length;
@@ -395,9 +395,9 @@ export default function MoodTrackerPage() {
             </div>
 
             {moodLogs.length < 5 && (
-              <div className="bg-[#0096FF]/10 rounded-xl p-5 text-center">
-                <i className="ri-lightbulb-line text-[#0096FF] text-2xl mb-2"></i>
-                <p className="text-sm text-[#0096FF]">
+              <div className="bg-oe-primary/10 rounded-xl p-5 text-center">
+                <i className="ri-lightbulb-line text-oe-primary text-2xl mb-2"></i>
+                <p className="text-sm text-oe-primary">
                   Log more moods to unlock detailed insights and patterns!
                 </p>
               </div>

@@ -22,7 +22,7 @@ interface Source {
 
 type Notice = { type: 'success' | 'error'; text: string } | null;
 
-const inputClass = 'w-full px-4 py-3 border-2 border-[#E5E5E5] rounded-xl focus:border-[#0096FF] focus:outline-none';
+const inputClass = 'w-full px-4 py-3 border-2 border-oe-line rounded-xl focus:border-oe-primary focus:outline-none';
 const errorText = (err: unknown, fallback: string) => (err instanceof Error ? err.message : fallback);
 
 /**
@@ -141,17 +141,17 @@ export default function KnowledgeAdminPage() {
   if (!ready) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]">
+    <div className="min-h-screen bg-oe-bg">
       <Navbar />
       <main className="pt-24 md:pt-28 px-6 pb-12">
         <div className="max-w-5xl mx-auto space-y-6">
           <div className="flex items-center justify-between gap-4">
-            <h1 className="text-3xl font-bold text-[#2A2A2A]">Knowledge sources</h1>
-            <Link to="/admin-dashboard" className="text-[#0096FF] font-medium hover:underline">
+            <h1 className="text-3xl font-bold text-oe-ink">Knowledge sources</h1>
+            <Link to="/admin-dashboard" className="text-oe-primary font-medium hover:underline">
               Back to dashboard
             </Link>
           </div>
-          <p className="text-[#6B6B6B]">
+          <p className="text-oe-muted">
             Books and documents the AI Companion may draw on. Add only material we have the right to use, record its
             licence, and have a qualified mental-health professional approve it before switching it on. Scanned books
             (pictures of pages) cannot be read.
@@ -161,7 +161,7 @@ export default function KnowledgeAdminPage() {
             <p
               role="status"
               className={`px-4 py-3 rounded-xl text-sm ${
-                notice.type === 'error' ? 'bg-[#FFE6E6] border border-[#FF4444] text-[#C62828]' : 'bg-green-50 border border-green-300 text-green-800'
+                notice.type === 'error' ? 'bg-oe-crisis-tint border border-oe-crisis text-oe-crisis' : 'bg-forest-50 border border-forest-300 text-forest-800'
               }`}
             >
               {notice.text}
@@ -170,20 +170,20 @@ export default function KnowledgeAdminPage() {
 
           <div className="grid md:grid-cols-2 gap-6">
             <form onSubmit={uploadFile} className="bg-white rounded-3xl shadow-lg p-6 space-y-3">
-              <h2 className="text-xl font-bold text-[#2A2A2A]">Upload a file</h2>
+              <h2 className="text-xl font-bold text-oe-ink">Upload a file</h2>
               <input name="file" type="file" accept=".pdf,.epub,.txt" required aria-label="File (PDF, EPUB or text)" className="block w-full text-sm" />
               <input name="title" required maxLength={200} placeholder="Title" aria-label="Title" className={inputClass} />
               <input name="author" maxLength={200} placeholder="Author (optional)" aria-label="Author" className={inputClass} />
               <input name="licence" required maxLength={500} placeholder="Licence or permission, e.g. CC BY 4.0" aria-label="Licence" className={inputClass} />
-              <button type="submit" disabled={busy} className="px-6 py-3 bg-[#0096FF] text-white rounded-xl font-semibold hover:bg-[#0077CC] disabled:opacity-50 cursor-pointer">
+              <button type="submit" disabled={busy} className="px-6 py-3 bg-oe-primary text-white rounded-xl font-semibold hover:bg-oe-primary-hover disabled:opacity-50 cursor-pointer">
                 {busy ? 'Working…' : 'Add file'}
               </button>
             </form>
 
             <form onSubmit={addEbook} className="bg-white rounded-3xl shadow-lg p-6 space-y-3">
-              <h2 className="text-xl font-bold text-[#2A2A2A]">Add a library ebook</h2>
+              <h2 className="text-xl font-bold text-oe-ink">Add a library ebook</h2>
               {ebooks.length === 0 ? (
-                <p className="text-[#6B6B6B]">No ebooks with files yet.</p>
+                <p className="text-oe-muted">No ebooks with files yet.</p>
               ) : (
                 <>
                   <select name="productId" required aria-label="Ebook" className={inputClass} defaultValue="">
@@ -197,7 +197,7 @@ export default function KnowledgeAdminPage() {
                     ))}
                   </select>
                   <input name="licence" required maxLength={500} defaultValue="Open Ear's own publication" aria-label="Licence" className={inputClass} />
-                  <button type="submit" disabled={busy} className="px-6 py-3 bg-[#0096FF] text-white rounded-xl font-semibold hover:bg-[#0077CC] disabled:opacity-50 cursor-pointer">
+                  <button type="submit" disabled={busy} className="px-6 py-3 bg-oe-primary text-white rounded-xl font-semibold hover:bg-oe-primary-hover disabled:opacity-50 cursor-pointer">
                     {busy ? 'Working…' : 'Add ebook'}
                   </button>
                 </>
@@ -206,13 +206,13 @@ export default function KnowledgeAdminPage() {
           </div>
 
           <div className="bg-white rounded-3xl shadow-lg p-6 overflow-x-auto">
-            <h2 className="text-xl font-bold text-[#2A2A2A] mb-4">Sources</h2>
+            <h2 className="text-xl font-bold text-oe-ink mb-4">Sources</h2>
             {sources.length === 0 ? (
-              <p className="text-[#6B6B6B]">No sources yet.</p>
+              <p className="text-oe-muted">No sources yet.</p>
             ) : (
               <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-gray-100 text-[#6B6B6B]">
+                  <tr className="border-b border-gray-100 text-oe-muted">
                     <th className="py-2 pr-4 font-medium">Source</th>
                     <th className="py-2 pr-4 font-medium">Licence</th>
                     <th className="py-2 pr-4 font-medium">Approved by</th>
@@ -224,16 +224,16 @@ export default function KnowledgeAdminPage() {
                   {sources.map((s) => (
                     <tr key={s.id} className="border-b border-gray-50 align-top">
                       <td className="py-3 pr-4">
-                        <span className="block font-medium text-[#2A2A2A]">{s.title}</span>
-                        <span className="text-[#6B6B6B]">
+                        <span className="block font-medium text-oe-ink">{s.title}</span>
+                        <span className="text-oe-muted">
                           {[s.author, `${s.passageCount} passages`, s.enabled ? 'On' : 'Off'].filter(Boolean).join(' · ')}
                         </span>
                         {s.needsReindex && (
-                          <span className="block text-[#C62828]">Not searched: indexed with an older model. Remove it and add it again.</span>
+                          <span className="block text-oe-crisis">Not searched: indexed with an older model. Remove it and add it again.</span>
                         )}
                       </td>
                       <td className="py-3 pr-4">{s.licence}</td>
-                      <td className="py-3 pr-4">{s.approvedBy ?? <span className="text-[#C62828]">Not yet</span>}</td>
+                      <td className="py-3 pr-4">{s.approvedBy ?? <span className="text-oe-crisis">Not yet</span>}</td>
                       <td className="py-3 pr-4">{s.usesLast30Days}</td>
                       <td className="py-3 text-right whitespace-nowrap space-x-2">
                         {!s.approvedBy && approving === s.id && (
@@ -246,29 +246,29 @@ export default function KnowledgeAdminPage() {
                               onChange={(e) => setApprover(e.target.value)}
                               placeholder="Name and qualification"
                               aria-label={`Professional approving ${s.title}`}
-                              className="px-3 py-2 border-2 border-[#E5E5E5] rounded-xl focus:border-[#0096FF] focus:outline-none"
+                              className="px-3 py-2 border-2 border-oe-line rounded-xl focus:border-oe-primary focus:outline-none"
                             />
-                            <button type="submit" disabled={busy} className="px-3 py-2 rounded-xl bg-[#0096FF] text-white font-medium hover:bg-[#0077CC] cursor-pointer">
+                            <button type="submit" disabled={busy} className="px-3 py-2 rounded-xl bg-oe-primary text-white font-medium hover:bg-oe-primary-hover cursor-pointer">
                               Confirm
                             </button>
                           </form>
                         )}
                         {!s.approvedBy && approving !== s.id && (
-                          <button onClick={() => setApproving(s.id)} disabled={busy} className="px-3 py-2 rounded-xl border-2 border-[#0096FF] text-[#0096FF] font-medium hover:bg-[#E6F5FF] cursor-pointer">
+                          <button onClick={() => setApproving(s.id)} disabled={busy} className="px-3 py-2 rounded-xl border-2 border-oe-primary text-oe-primary font-medium hover:bg-oe-primary-tint cursor-pointer">
                             Approve
                           </button>
                         )}
                         {s.approvedBy && (
-                          <button onClick={() => setEnabled(s, !s.enabled)} disabled={busy} className="px-3 py-2 rounded-xl border-2 border-[#0096FF] text-[#0096FF] font-medium hover:bg-[#E6F5FF] cursor-pointer">
+                          <button onClick={() => setEnabled(s, !s.enabled)} disabled={busy} className="px-3 py-2 rounded-xl border-2 border-oe-primary text-oe-primary font-medium hover:bg-oe-primary-tint cursor-pointer">
                             {s.enabled ? 'Switch off' : 'Switch on'}
                           </button>
                         )}
                         {removing === s.id ? (
-                          <button onClick={() => remove(s)} disabled={busy} className="px-3 py-2 rounded-xl bg-[#C62828] text-white font-medium hover:bg-[#A51F1F] cursor-pointer">
+                          <button onClick={() => remove(s)} disabled={busy} className="px-3 py-2 rounded-xl bg-oe-crisis text-white font-medium hover:bg-oe-crisis cursor-pointer">
                             Confirm remove
                           </button>
                         ) : (
-                          <button onClick={() => setRemoving(s.id)} disabled={busy} className="px-3 py-2 rounded-xl border-2 border-[#C62828] text-[#C62828] font-medium hover:bg-[#FFE6E6] cursor-pointer">
+                          <button onClick={() => setRemoving(s.id)} disabled={busy} className="px-3 py-2 rounded-xl border-2 border-oe-crisis text-oe-crisis font-medium hover:bg-oe-crisis-tint cursor-pointer">
                             Remove
                           </button>
                         )}

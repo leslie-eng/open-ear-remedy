@@ -219,9 +219,9 @@ export default function ProfilePage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed':
-        return 'bg-green-100 text-green-700';
+        return 'bg-forest-100 text-forest-700';
       case 'active':
-        return 'bg-blue-100 text-blue-700';
+        return 'bg-forest-100 text-forest-700';
       case 'failed':
         return 'bg-red-100 text-red-700';
       default:
@@ -254,11 +254,11 @@ export default function ProfilePage() {
   const getTransactionColor = (type: string) => {
     switch (type) {
       case 'purchase':
-        return 'bg-green-100 text-green-600';
+        return 'bg-forest-100 text-forest-600';
       case 'bonus':
         return 'bg-amber-100 text-amber-600';
       case 'refund':
-        return 'bg-blue-100 text-blue-600';
+        return 'bg-forest-100 text-forest-600';
       case 'usage':
         return 'bg-red-100 text-red-600';
       default:
@@ -269,13 +269,13 @@ export default function ProfilePage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'completed':
-        return 'bg-green-100 text-green-700';
+        return 'bg-forest-100 text-forest-700';
       case 'pending':
         return 'bg-amber-100 text-amber-700';
       case 'failed':
         return 'bg-red-100 text-red-700';
       case 'refunded':
-        return 'bg-blue-100 text-blue-700';
+        return 'bg-forest-100 text-forest-700';
       default:
         return 'bg-gray-100 text-gray-700';
     }
@@ -448,22 +448,22 @@ export default function ProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
+      <div className="min-h-screen bg-oe-surface-low flex items-center justify-center">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 border-3 border-[#0096FF] border-t-transparent rounded-full animate-spin"></div>
-          <span className="text-[#6B6B6B]">Loading...</span>
+          <div className="w-8 h-8 border-3 border-oe-primary border-t-transparent rounded-full animate-spin"></div>
+          <span className="text-oe-muted">Loading...</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
+    <div className="min-h-screen bg-oe-surface-low">
       <Navbar />
 
       {/* Success Toast */}
       {showSuccessToast && (
-        <div className="fixed top-24 right-6 z-50 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg flex items-center gap-2 animate-fade-in">
+        <div className="fixed top-24 right-6 z-50 bg-forest-500 text-white px-6 py-3 rounded-xl shadow-lg flex items-center gap-2 animate-fade-in">
           <i className="ri-check-line text-lg"></i>
           <span className="text-sm font-medium">{successMessage}</span>
         </div>
@@ -473,16 +473,16 @@ export default function ProfilePage() {
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-2xl md:text-3xl font-bold text-[#2A2A2A] mb-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
+            <h1 className="text-2xl md:text-3xl font-bold text-oe-ink mb-2">
               My Profile
             </h1>
-            <p className="text-sm text-[#6B6B6B]">Manage your account settings and preferences</p>
+            <p className="text-sm text-oe-muted">Manage your account settings and preferences</p>
           </div>
 
           {/* Profile Card */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             {/* User Info Header */}
-            <div className="bg-gradient-to-r from-[#0096FF] to-[#0077CC] p-6 md:p-8">
+            <div className="bg-oe-primary p-6 md:p-8">
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 md:w-20 md:h-20 bg-white/20 rounded-full flex items-center justify-center">
                   <span className="text-2xl md:text-3xl font-bold text-white">
@@ -513,8 +513,8 @@ export default function ProfilePage() {
                   onClick={() => setActiveTab('profile')}
                   className={`flex-1 md:flex-none px-6 py-4 text-sm font-medium transition-colors cursor-pointer whitespace-nowrap ${
                     activeTab === 'profile'
-                      ? 'text-[#0096FF] border-b-2 border-[#0096FF]'
-                      : 'text-[#6B6B6B] hover:text-[#2A2A2A]'
+                      ? 'text-oe-primary border-b-2 border-oe-primary'
+                      : 'text-oe-muted hover:text-oe-ink'
                   }`}
                 >
                   <i className="ri-user-line mr-2"></i>
@@ -524,8 +524,8 @@ export default function ProfilePage() {
                   onClick={() => setActiveTab('history')}
                   className={`flex-1 md:flex-none px-6 py-4 text-sm font-medium transition-colors cursor-pointer whitespace-nowrap ${
                     activeTab === 'history'
-                      ? 'text-[#0096FF] border-b-2 border-[#0096FF]'
-                      : 'text-[#6B6B6B] hover:text-[#2A2A2A]'
+                      ? 'text-oe-primary border-b-2 border-oe-primary'
+                      : 'text-oe-muted hover:text-oe-ink'
                   }`}
                 >
                   <i className="ri-history-line mr-2"></i>
@@ -535,8 +535,8 @@ export default function ProfilePage() {
                   onClick={() => setActiveTab('purchases')}
                   className={`flex-1 md:flex-none px-6 py-4 text-sm font-medium transition-colors cursor-pointer whitespace-nowrap ${
                     activeTab === 'purchases'
-                      ? 'text-[#0096FF] border-b-2 border-[#0096FF]'
-                      : 'text-[#6B6B6B] hover:text-[#2A2A2A]'
+                      ? 'text-oe-primary border-b-2 border-oe-primary'
+                      : 'text-oe-muted hover:text-oe-ink'
                   }`}
                 >
                   <i className="ri-wallet-line mr-2"></i>
@@ -546,8 +546,8 @@ export default function ProfilePage() {
                   onClick={() => setActiveTab('security')}
                   className={`flex-1 md:flex-none px-6 py-4 text-sm font-medium transition-colors cursor-pointer whitespace-nowrap ${
                     activeTab === 'security'
-                      ? 'text-[#0096FF] border-b-2 border-[#0096FF]'
-                      : 'text-[#6B6B6B] hover:text-[#2A2A2A]'
+                      ? 'text-oe-primary border-b-2 border-oe-primary'
+                      : 'text-oe-muted hover:text-oe-ink'
                   }`}
                 >
                   <i className="ri-shield-keyhole-line mr-2"></i>
@@ -562,38 +562,38 @@ export default function ProfilePage() {
               {activeTab === 'profile' && (
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-sm font-medium text-[#2A2A2A] mb-2">Email Address</label>
+                    <label className="block text-sm font-medium text-oe-ink mb-2">Email Address</label>
                     <div className="relative">
                       <input
                         type="email"
                         value={profile?.email || ''}
                         disabled
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-[#6B6B6B] cursor-not-allowed"
+                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-oe-muted cursor-not-allowed"
                       />
                       <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                        <span className="text-xs bg-gray-200 text-[#6B6B6B] px-2 py-1 rounded-md">Verified</span>
+                        <span className="text-xs bg-gray-200 text-oe-muted px-2 py-1 rounded-md">Verified</span>
                       </div>
                     </div>
-                    <p className="text-xs text-[#6B6B6B] mt-1.5">Email cannot be changed</p>
+                    <p className="text-xs text-oe-muted mt-1.5">Email cannot be changed</p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-[#2A2A2A] mb-2">Phone Number</label>
+                    <label className="block text-sm font-medium text-oe-ink mb-2">Phone Number</label>
                     <input
                       type="tel"
                       value={phoneNumber}
                       onChange={(e) => setPhoneNumber(e.target.value)}
                       placeholder="+1 (555) 123-4567"
-                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-[#2A2A2A] focus:outline-none focus:border-[#0096FF] focus:ring-2 focus:ring-[#0096FF]/20 transition-all"
+                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-oe-ink focus:outline-none focus:border-oe-primary focus:ring-2 focus:ring-oe-primary/20 transition-all"
                     />
-                    <p className="text-xs text-[#6B6B6B] mt-1.5">Used for call notifications</p>
+                    <p className="text-xs text-oe-muted mt-1.5">Used for call notifications</p>
                   </div>
 
                   <div className="pt-4 border-t border-gray-100">
                     <button
                       onClick={handleSaveProfile}
                       disabled={isSaving}
-                      className="px-6 py-3 bg-[#0096FF] text-white rounded-xl text-sm font-semibold hover:bg-[#0077CC] transition-colors disabled:opacity-50 cursor-pointer whitespace-nowrap"
+                      className="px-6 py-3 bg-oe-primary text-white rounded-xl text-sm font-semibold hover:bg-oe-primary-hover transition-colors disabled:opacity-50 cursor-pointer whitespace-nowrap"
                     >
                       {isSaving ? 'Saving...' : 'Save Changes'}
                     </button>
@@ -601,30 +601,30 @@ export default function ProfilePage() {
 
                   {/* Quick Actions */}
                   <div className="pt-6 border-t border-gray-100">
-                    <h3 className="text-sm font-semibold text-[#2A2A2A] mb-4">Quick Actions</h3>
+                    <h3 className="text-sm font-semibold text-oe-ink mb-4">Quick Actions</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <Link
                         to="/pricing"
-                        className="flex items-center gap-3 p-4 bg-[#E6F5FF] rounded-xl hover:bg-[#D6EFFF] transition-colors cursor-pointer"
+                        className="flex items-center gap-3 p-4 bg-oe-primary-tint rounded-xl hover:bg-oe-primary-soft transition-colors cursor-pointer"
                       >
-                        <div className="w-10 h-10 bg-[#0096FF]/20 rounded-full flex items-center justify-center">
-                          <i className="ri-add-circle-line text-[#0096FF] text-lg"></i>
+                        <div className="w-10 h-10 bg-oe-primary/20 rounded-full flex items-center justify-center">
+                          <i className="ri-add-circle-line text-oe-primary text-lg"></i>
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-[#2A2A2A]">Buy Credits</p>
-                          <p className="text-xs text-[#6B6B6B]">Add more minutes to your account</p>
+                          <p className="text-sm font-medium text-oe-ink">Buy Credits</p>
+                          <p className="text-xs text-oe-muted">Add more minutes to your account</p>
                         </div>
                       </Link>
                       <Link
                         to="/call"
-                        className="flex items-center gap-3 p-4 bg-[#E6F5FF] rounded-xl hover:bg-[#D6EFFF] transition-colors cursor-pointer"
+                        className="flex items-center gap-3 p-4 bg-oe-primary-tint rounded-xl hover:bg-oe-primary-soft transition-colors cursor-pointer"
                       >
-                        <div className="w-10 h-10 bg-[#0096FF]/20 rounded-full flex items-center justify-center">
-                          <i className="ri-phone-line text-[#0096FF] text-lg"></i>
+                        <div className="w-10 h-10 bg-oe-primary/20 rounded-full flex items-center justify-center">
+                          <i className="ri-phone-line text-oe-primary text-lg"></i>
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-[#2A2A2A]">Start a Call</p>
-                          <p className="text-xs text-[#6B6B6B]">Connect with support now</p>
+                          <p className="text-sm font-medium text-oe-ink">Start a Call</p>
+                          <p className="text-xs text-oe-muted">Connect with support now</p>
                         </div>
                       </Link>
                     </div>
@@ -638,13 +638,13 @@ export default function ProfilePage() {
                   {callHistory.length === 0 ? (
                     <div className="text-center py-12">
                       <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i className="ri-phone-line text-2xl text-[#6B6B6B]"></i>
+                        <i className="ri-phone-line text-2xl text-oe-muted"></i>
                       </div>
-                      <h3 className="text-lg font-semibold text-[#2A2A2A] mb-2">No calls yet</h3>
-                      <p className="text-sm text-[#6B6B6B] mb-6">Start your first call to see your history here</p>
+                      <h3 className="text-lg font-semibold text-oe-ink mb-2">No calls yet</h3>
+                      <p className="text-sm text-oe-muted mb-6">Start your first call to see your history here</p>
                       <Link
                         to="/call"
-                        className="inline-flex items-center gap-2 px-6 py-3 bg-[#0096FF] text-white rounded-xl text-sm font-semibold hover:bg-[#0077CC] transition-colors cursor-pointer whitespace-nowrap"
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-oe-primary text-white rounded-xl text-sm font-semibold hover:bg-oe-primary-hover transition-colors cursor-pointer whitespace-nowrap"
                       >
                         <i className="ri-phone-line"></i>
                         Start a Call
@@ -658,14 +658,14 @@ export default function ProfilePage() {
                           className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
                         >
                           <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-[#0096FF]/10 rounded-full flex items-center justify-center">
-                              <i className="ri-phone-line text-[#0096FF]"></i>
+                            <div className="w-10 h-10 bg-oe-primary/10 rounded-full flex items-center justify-center">
+                              <i className="ri-phone-line text-oe-primary"></i>
                             </div>
                             <div>
-                              <p className="text-sm font-medium text-[#2A2A2A]">
+                              <p className="text-sm font-medium text-oe-ink">
                                 {formatDate(call.started_at)}
                               </p>
-                              <p className="text-xs text-[#6B6B6B]">
+                              <p className="text-xs text-oe-muted">
                                 Duration: {formatDuration(call.duration_seconds)}
                               </p>
                             </div>
@@ -674,7 +674,7 @@ export default function ProfilePage() {
                             <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(call.status)}`}>
                               {call.status}
                             </span>
-                            <span className="text-sm font-medium text-[#2A2A2A]">
+                            <span className="text-sm font-medium text-oe-ink">
                               -{call.credits_used} credits
                             </span>
                           </div>
@@ -690,14 +690,14 @@ export default function ProfilePage() {
                 <div>
                   {/* Summary Cards */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4">
+                    <div className="bg-oe-primary-tint rounded-xl p-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
-                          <i className="ri-coin-line text-green-600 text-lg"></i>
+                        <div className="w-10 h-10 bg-forest-500/20 rounded-full flex items-center justify-center">
+                          <i className="ri-coin-line text-forest-600 text-lg"></i>
                         </div>
                         <div>
-                          <p className="text-xs text-green-700/70">Total Purchased</p>
-                          <p className="text-xl font-bold text-green-700">
+                          <p className="text-xs text-forest-700/70">Total Purchased</p>
+                          <p className="text-xl font-bold text-forest-700">
                             {transactions
                               .filter(t => t.type === 'purchase' && t.status === 'completed')
                               .reduce((sum, t) => sum + t.credits, 0)} credits
@@ -705,7 +705,7 @@ export default function ProfilePage() {
                         </div>
                       </div>
                     </div>
-                    <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-4">
+                    <div className="bg-oe-accent-tint rounded-xl p-4">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-amber-500/20 rounded-full flex items-center justify-center">
                           <i className="ri-gift-line text-amber-600 text-lg"></i>
@@ -720,14 +720,14 @@ export default function ProfilePage() {
                         </div>
                       </div>
                     </div>
-                    <div className="bg-gradient-to-br from-[#E6F5FF] to-[#D6EFFF] rounded-xl p-4">
+                    <div className="bg-oe-primary-tint rounded-xl p-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-[#0096FF]/20 rounded-full flex items-center justify-center">
-                          <i className="ri-money-dollar-circle-line text-[#0096FF] text-lg"></i>
+                        <div className="w-10 h-10 bg-oe-primary/20 rounded-full flex items-center justify-center">
+                          <i className="ri-money-dollar-circle-line text-oe-primary text-lg"></i>
                         </div>
                         <div>
-                          <p className="text-xs text-[#0077CC]/70">Total Spent</p>
-                          <p className="text-xl font-bold text-[#0077CC]">
+                          <p className="text-xs text-oe-primary-hover/70">Total Spent</p>
+                          <p className="text-xl font-bold text-oe-primary-hover">
                             {formatCurrency(
                               transactions
                                 .filter(t => t.type === 'purchase' && t.status === 'completed')
@@ -743,13 +743,13 @@ export default function ProfilePage() {
                   {transactions.length === 0 ? (
                     <div className="text-center py-12">
                       <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i className="ri-wallet-line text-2xl text-[#6B6B6B]"></i>
+                        <i className="ri-wallet-line text-2xl text-oe-muted"></i>
                       </div>
-                      <h3 className="text-lg font-semibold text-[#2A2A2A] mb-2">No transactions yet</h3>
-                      <p className="text-sm text-[#6B6B6B] mb-6">Purchase credits to see your transaction history here</p>
+                      <h3 className="text-lg font-semibold text-oe-ink mb-2">No transactions yet</h3>
+                      <p className="text-sm text-oe-muted mb-6">Purchase credits to see your transaction history here</p>
                       <Link
                         to="/pricing"
-                        className="inline-flex items-center gap-2 px-6 py-3 bg-[#0096FF] text-white rounded-xl text-sm font-semibold hover:bg-[#0077CC] transition-colors cursor-pointer whitespace-nowrap"
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-oe-primary text-white rounded-xl text-sm font-semibold hover:bg-oe-primary-hover transition-colors cursor-pointer whitespace-nowrap"
                       >
                         <i className="ri-add-circle-line"></i>
                         Buy Credits
@@ -758,10 +758,10 @@ export default function ProfilePage() {
                   ) : (
                     <div className="space-y-3">
                       <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-sm font-semibold text-[#2A2A2A]">Transaction History</h3>
+                        <h3 className="text-sm font-semibold text-oe-ink">Transaction History</h3>
                         <button
                           onClick={() => user && fetchTransactions()}
-                          className="text-sm text-[#0096FF] hover:text-[#0077CC] flex items-center gap-1 cursor-pointer"
+                          className="text-sm text-oe-primary hover:text-oe-primary-hover flex items-center gap-1 cursor-pointer"
                         >
                           <i className="ri-refresh-line"></i>
                           Refresh
@@ -778,10 +778,10 @@ export default function ProfilePage() {
                               <i className={`${getTransactionIcon(transaction.type)}`}></i>
                             </div>
                             <div>
-                              <p className="text-sm font-medium text-[#2A2A2A]">
+                              <p className="text-sm font-medium text-oe-ink">
                                 {transaction.description || `${transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}`}
                               </p>
-                              <p className="text-xs text-[#6B6B6B]">
+                              <p className="text-xs text-oe-muted">
                                 {formatDate(transaction.created_at)}
                               </p>
                             </div>
@@ -792,14 +792,14 @@ export default function ProfilePage() {
                             </span>
                             <div className="text-right">
                               {transaction.amount > 0 && (
-                                <p className="text-xs text-[#6B6B6B]">{formatCurrency(transaction.amount)}</p>
+                                <p className="text-xs text-oe-muted">{formatCurrency(transaction.amount)}</p>
                               )}
-                              <p className={`text-sm font-semibold ${transaction.type === 'usage' ? 'text-red-600' : 'text-green-600'}`}>
+                              <p className={`text-sm font-semibold ${transaction.type === 'usage' ? 'text-red-600' : 'text-forest-600'}`}>
                                 {transaction.type === 'usage' ? '-' : '+'}{transaction.credits} credits
                               </p>
                             </div>
                             <div className="w-8 h-8 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                              <i className="ri-arrow-right-s-line text-[#6B6B6B]"></i>
+                              <i className="ri-arrow-right-s-line text-oe-muted"></i>
                             </div>
                           </div>
                         </div>
@@ -813,7 +813,7 @@ export default function ProfilePage() {
                       <div className="absolute inset-0 bg-black/50" onClick={() => setSelectedTransaction(null)}></div>
                       <div className="relative bg-white rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden">
                         {/* Modal Header */}
-                        <div className="bg-gradient-to-r from-[#0096FF] to-[#0077CC] p-6">
+                        <div className="bg-oe-primary p-6">
                           <div className="flex items-center justify-between">
                             <div>
                               <p className="text-sm text-white/80 mb-1">Transaction Details</p>
@@ -837,24 +837,24 @@ export default function ProfilePage() {
                             <span className={`px-4 py-2 rounded-full text-sm font-semibold ${getStatusBadge(selectedTransaction.status)}`}>
                               {selectedTransaction.status.charAt(0).toUpperCase() + selectedTransaction.status.slice(1)}
                             </span>
-                            <span className="text-sm text-[#6B6B6B]">
+                            <span className="text-sm text-oe-muted">
                               {formatDateTime(selectedTransaction.created_at)}
                             </span>
                           </div>
 
                           {/* Credits Card */}
-                          <div className={`rounded-xl p-5 mb-6 ${selectedTransaction.type === 'usage' ? 'bg-red-50' : 'bg-green-50'}`}>
+                          <div className={`rounded-xl p-5 mb-6 ${selectedTransaction.type === 'usage' ? 'bg-red-50' : 'bg-forest-50'}`}>
                             <div className="flex items-center justify-between">
                               <div>
-                                <p className={`text-sm font-medium ${selectedTransaction.type === 'usage' ? 'text-red-600' : 'text-green-600'}`}>
+                                <p className={`text-sm font-medium ${selectedTransaction.type === 'usage' ? 'text-red-600' : 'text-forest-600'}`}>
                                   Credits {selectedTransaction.type === 'usage' ? 'Used' : 'Added'}
                                 </p>
-                                <p className={`text-3xl font-bold ${selectedTransaction.type === 'usage' ? 'text-red-700' : 'text-green-700'}`}>
+                                <p className={`text-3xl font-bold ${selectedTransaction.type === 'usage' ? 'text-red-700' : 'text-forest-700'}`}>
                                   {selectedTransaction.type === 'usage' ? '-' : '+'}{selectedTransaction.credits}
                                 </p>
                               </div>
-                              <div className={`w-14 h-14 rounded-full flex items-center justify-center ${selectedTransaction.type === 'usage' ? 'bg-red-100' : 'bg-green-100'}`}>
-                                <i className={`${getTransactionIcon(selectedTransaction.type)} text-2xl ${selectedTransaction.type === 'usage' ? 'text-red-600' : 'text-green-600'}`}></i>
+                              <div className={`w-14 h-14 rounded-full flex items-center justify-center ${selectedTransaction.type === 'usage' ? 'bg-red-100' : 'bg-forest-100'}`}>
+                                <i className={`${getTransactionIcon(selectedTransaction.type)} text-2xl ${selectedTransaction.type === 'usage' ? 'text-red-600' : 'text-forest-600'}`}></i>
                               </div>
                             </div>
                           </div>
@@ -862,24 +862,24 @@ export default function ProfilePage() {
                           {/* Transaction Details */}
                           <div className="space-y-4 mb-6">
                             <div className="flex items-center justify-between py-3 border-b border-gray-100">
-                              <span className="text-sm text-[#6B6B6B]">Type</span>
-                              <span className="text-sm font-medium text-[#2A2A2A] capitalize">{selectedTransaction.type}</span>
+                              <span className="text-sm text-oe-muted">Type</span>
+                              <span className="text-sm font-medium text-oe-ink capitalize">{selectedTransaction.type}</span>
                             </div>
                             <div className="flex items-center justify-between py-3 border-b border-gray-100">
-                              <span className="text-sm text-[#6B6B6B]">Description</span>
-                              <span className="text-sm font-medium text-[#2A2A2A] text-right max-w-[200px]">
+                              <span className="text-sm text-oe-muted">Description</span>
+                              <span className="text-sm font-medium text-oe-ink text-right max-w-[200px]">
                                 {selectedTransaction.description || `${selectedTransaction.type.charAt(0).toUpperCase() + selectedTransaction.type.slice(1)} transaction`}
                               </span>
                             </div>
                             {selectedTransaction.amount > 0 && (
                               <div className="flex items-center justify-between py-3 border-b border-gray-100">
-                                <span className="text-sm text-[#6B6B6B]">Amount Paid</span>
-                                <span className="text-sm font-bold text-[#2A2A2A]">{formatCurrency(selectedTransaction.amount)}</span>
+                                <span className="text-sm text-oe-muted">Amount Paid</span>
+                                <span className="text-sm font-bold text-oe-ink">{formatCurrency(selectedTransaction.amount)}</span>
                               </div>
                             )}
                             <div className="flex items-center justify-between py-3 border-b border-gray-100">
-                              <span className="text-sm text-[#6B6B6B]">Transaction ID</span>
-                              <span className="text-xs font-mono text-[#6B6B6B] bg-gray-100 px-2 py-1 rounded">
+                              <span className="text-sm text-oe-muted">Transaction ID</span>
+                              <span className="text-xs font-mono text-oe-muted bg-gray-100 px-2 py-1 rounded">
                                 {selectedTransaction.id.slice(0, 16)}...
                               </span>
                             </div>
@@ -889,14 +889,14 @@ export default function ProfilePage() {
                           <div className="flex gap-3">
                             <button
                               onClick={() => setSelectedTransaction(null)}
-                              className="flex-1 px-6 py-3 bg-gray-100 text-[#2A2A2A] rounded-xl text-sm font-semibold hover:bg-gray-200 transition-colors cursor-pointer whitespace-nowrap"
+                              className="flex-1 px-6 py-3 bg-gray-100 text-oe-ink rounded-xl text-sm font-semibold hover:bg-gray-200 transition-colors cursor-pointer whitespace-nowrap"
                             >
                               Close
                             </button>
                             <button
                               onClick={() => downloadInvoice(selectedTransaction)}
                               disabled={isDownloading}
-                              className="flex-1 px-6 py-3 bg-[#0096FF] text-white rounded-xl text-sm font-semibold hover:bg-[#0077CC] transition-colors disabled:opacity-50 cursor-pointer whitespace-nowrap flex items-center justify-center gap-2"
+                              className="flex-1 px-6 py-3 bg-oe-primary text-white rounded-xl text-sm font-semibold hover:bg-oe-primary-hover transition-colors disabled:opacity-50 cursor-pointer whitespace-nowrap flex items-center justify-center gap-2"
                             >
                               {isDownloading ? (
                                 <>
@@ -923,37 +923,37 @@ export default function ProfilePage() {
                 <div className="space-y-8">
                   {/* Change Password */}
                   <div>
-                    <h3 className="text-lg font-semibold text-[#2A2A2A] mb-4">Change Password</h3>
+                    <h3 className="text-lg font-semibold text-oe-ink mb-4">Change Password</h3>
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-sm font-medium text-[#2A2A2A] mb-2">Current Password</label>
+                        <label className="block text-sm font-medium text-oe-ink mb-2">Current Password</label>
                         <input
                           type="password"
                           value={currentPassword}
                           onChange={(e) => setCurrentPassword(e.target.value)}
                           placeholder="Enter current password"
                           autoComplete="current-password"
-                          className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-[#2A2A2A] focus:outline-none focus:border-[#0096FF] focus:ring-2 focus:ring-[#0096FF]/20 transition-all"
+                          className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-oe-ink focus:outline-none focus:border-oe-primary focus:ring-2 focus:ring-oe-primary/20 transition-all"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-[#2A2A2A] mb-2">New Password</label>
+                        <label className="block text-sm font-medium text-oe-ink mb-2">New Password</label>
                         <input
                           type="password"
                           value={newPassword}
                           onChange={(e) => setNewPassword(e.target.value)}
                           placeholder="Enter new password"
-                          className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-[#2A2A2A] focus:outline-none focus:border-[#0096FF] focus:ring-2 focus:ring-[#0096FF]/20 transition-all"
+                          className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-oe-ink focus:outline-none focus:border-oe-primary focus:ring-2 focus:ring-oe-primary/20 transition-all"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-[#2A2A2A] mb-2">Confirm New Password</label>
+                        <label className="block text-sm font-medium text-oe-ink mb-2">Confirm New Password</label>
                         <input
                           type="password"
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
                           placeholder="Confirm new password"
-                          className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-[#2A2A2A] focus:outline-none focus:border-[#0096FF] focus:ring-2 focus:ring-[#0096FF]/20 transition-all"
+                          className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-oe-ink focus:outline-none focus:border-oe-primary focus:ring-2 focus:ring-oe-primary/20 transition-all"
                         />
                       </div>
                       {passwordError && (
@@ -965,7 +965,7 @@ export default function ProfilePage() {
                       <button
                         onClick={handleChangePassword}
                         disabled={isSaving || !currentPassword || !newPassword || !confirmPassword}
-                        className="px-6 py-3 bg-[#0096FF] text-white rounded-xl text-sm font-semibold hover:bg-[#0077CC] transition-colors disabled:opacity-50 cursor-pointer whitespace-nowrap"
+                        className="px-6 py-3 bg-oe-primary text-white rounded-xl text-sm font-semibold hover:bg-oe-primary-hover transition-colors disabled:opacity-50 cursor-pointer whitespace-nowrap"
                       >
                         {isSaving ? 'Updating...' : 'Update Password'}
                       </button>
@@ -976,10 +976,10 @@ export default function ProfilePage() {
 
                   {/* Sign Out */}
                   <div className="pt-6 border-t border-gray-100">
-                    <h3 className="text-lg font-semibold text-[#2A2A2A] mb-4">Session</h3>
+                    <h3 className="text-lg font-semibold text-oe-ink mb-4">Session</h3>
                     <button
                       onClick={handleSignOut}
-                      className="flex items-center gap-2 px-6 py-3 bg-gray-100 text-[#2A2A2A] rounded-xl text-sm font-semibold hover:bg-gray-200 transition-colors cursor-pointer whitespace-nowrap"
+                      className="flex items-center gap-2 px-6 py-3 bg-gray-100 text-oe-ink rounded-xl text-sm font-semibold hover:bg-gray-200 transition-colors cursor-pointer whitespace-nowrap"
                     >
                       <i className="ri-logout-box-line"></i>
                       Sign Out
@@ -989,7 +989,7 @@ export default function ProfilePage() {
                   {/* Danger Zone */}
                   <div className="pt-6 border-t border-gray-100">
                     <h3 className="text-lg font-semibold text-red-600 mb-2">Danger Zone</h3>
-                    <p className="text-sm text-[#6B6B6B] mb-4">
+                    <p className="text-sm text-oe-muted mb-4">
                       Once you delete your account, there is no going back. Please be certain.
                     </p>
                     <button
@@ -1016,13 +1016,13 @@ export default function ProfilePage() {
               <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <i className="ri-error-warning-line text-3xl text-red-600"></i>
               </div>
-              <h3 className="text-xl font-bold text-[#2A2A2A] mb-2">Delete Account?</h3>
-              <p className="text-sm text-[#6B6B6B]">
+              <h3 className="text-xl font-bold text-oe-ink mb-2">Delete Account?</h3>
+              <p className="text-sm text-oe-muted">
                 This action cannot be undone. All your data, credits, and call history will be permanently deleted.
               </p>
             </div>
             <div className="mb-6">
-              <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
+              <label className="block text-sm font-medium text-oe-ink mb-2">
                 Type <span className="font-bold text-red-600">DELETE</span> to confirm
               </label>
               <input
@@ -1030,11 +1030,11 @@ export default function ProfilePage() {
                 value={deleteConfirmText}
                 onChange={(e) => setDeleteConfirmText(e.target.value)}
                 placeholder="DELETE"
-                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-[#2A2A2A] focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all"
+                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-oe-ink focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all"
               />
             </div>
             <div className="mb-6">
-              <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
+              <label className="block text-sm font-medium text-oe-ink mb-2">
                 {user?.has_password === false ? 'Enter your email address' : 'Enter your password'}
               </label>
               <input
@@ -1043,7 +1043,7 @@ export default function ProfilePage() {
                 onChange={(e) => setDeletePassword(e.target.value)}
                 placeholder={user?.has_password === false ? user.email : 'Your password'}
                 autoComplete={user?.has_password === false ? 'off' : 'current-password'}
-                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-[#2A2A2A] focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all"
+                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-oe-ink focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all"
               />
               {deleteError && (
                 <p className="mt-2 text-sm text-red-500 flex items-center gap-2">
@@ -1055,7 +1055,7 @@ export default function ProfilePage() {
             <div className="flex gap-3">
               <button
                 onClick={closeDeleteModal}
-                className="flex-1 px-6 py-3 bg-gray-100 text-[#2A2A2A] rounded-xl text-sm font-semibold hover:bg-gray-200 transition-colors cursor-pointer whitespace-nowrap"
+                className="flex-1 px-6 py-3 bg-gray-100 text-oe-ink rounded-xl text-sm font-semibold hover:bg-gray-200 transition-colors cursor-pointer whitespace-nowrap"
               >
                 Cancel
               </button>
@@ -1072,13 +1072,13 @@ export default function ProfilePage() {
       )}
 
       {/* Footer */}
-      <footer className="bg-[#0096FF] text-white py-8 px-4 md:px-8 lg:px-14">
+      <footer className="bg-oe-primary text-white py-8 px-4 md:px-8 lg:px-14">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <Link
               to="/"
               className="text-xl font-bold hover:opacity-80 transition-opacity"
-              style={{ fontFamily: 'Poppins, sans-serif' }}
+             
             >
               Open Ear
             </Link>

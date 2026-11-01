@@ -25,7 +25,7 @@ export default function HowItWorksSteps() {
   const listRef = useReveal<HTMLOListElement>();
 
   return (
-    <section aria-labelledby="how-heading" className="bg-oe-cream px-5 md:px-8 py-20 md:py-28">
+    <section aria-labelledby="how-heading" className="bg-oe-bg px-5 md:px-8 py-20 md:py-28">
       <div className="max-w-6xl mx-auto">
         <div ref={headingRef} data-reveal className="text-center max-w-2xl mx-auto mb-12 md:mb-16">
           <h2 id="how-heading" className="font-heading text-3xl md:text-4xl font-bold text-oe-ink mb-3">
@@ -38,10 +38,10 @@ export default function HowItWorksSteps() {
           {STEPS.map((step, i) => (
             <li key={step.title} className="oe-card bg-white rounded-oe-md p-7 shadow-oe-sm border border-oe-line">
               <div className="flex items-center gap-3 mb-5">
-                <span className="w-12 h-12 rounded-full bg-oe-blue-tint text-oe-blue flex items-center justify-center">
+                <span className="w-12 h-12 rounded-full bg-oe-primary-tint text-oe-primary flex items-center justify-center">
                   <i className={`${step.icon} text-2xl`} aria-hidden="true" />
                 </span>
-                <span className="text-sm font-semibold uppercase tracking-wider text-oe-sage">Step {i + 1}</span>
+                <span className="text-sm font-semibold uppercase tracking-wider text-oe-primary">Step {i + 1}</span>
               </div>
               <h3 className="font-heading text-xl font-semibold text-oe-ink mb-2">{step.title}</h3>
               <p className="text-body text-oe-muted">{step.text}</p>
@@ -50,7 +50,7 @@ export default function HowItWorksSteps() {
         </ol>
 
         <p className="text-center mt-10">
-          <Link to="/how-it-works" className="oe-link font-semibold text-oe-blue">
+          <Link to="/how-it-works" className="oe-link font-semibold text-oe-primary">
             Learn more about how Open Ear works
           </Link>
         </p>

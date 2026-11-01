@@ -49,17 +49,17 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]">
+    <div className="min-h-screen bg-oe-bg">
       <Navbar />
       
       <div className="pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20">
           {/* Header */}
           <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold text-[#2A2A2A] mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold text-oe-ink mb-4">
               Contact Us
             </h1>
-            <p className="text-lg text-[#6B6B6B] max-w-2xl mx-auto">
+            <p className="text-lg text-oe-muted max-w-2xl mx-auto">
               Have questions about our ebooks or need support? We're here to help you on your mental wellness journey.
             </p>
           </div>
@@ -68,46 +68,46 @@ export default function ContactPage() {
             {/* Contact Info */}
             <div className="lg:col-span-1">
               <div className="bg-white rounded-xl shadow-sm p-8">
-                <h2 className="text-xl font-semibold text-[#2A2A2A] mb-6">Get in Touch</h2>
+                <h2 className="text-xl font-semibold text-oe-ink mb-6">Get in Touch</h2>
                 
                 <div className="space-y-6">
                   <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-[#E6F5FF] rounded-full flex items-center justify-center flex-shrink-0">
-                      <i className="ri-mail-line text-[#0096FF] text-xl"></i>
+                    <div className="w-12 h-12 bg-oe-primary-tint rounded-full flex items-center justify-center flex-shrink-0">
+                      <i className="ri-mail-line text-oe-primary text-xl"></i>
                     </div>
                     <div>
-                      <h3 className="font-medium text-[#2A2A2A] mb-1">Email Support</h3>
-                      <p className="text-[#6B6B6B] text-sm mb-2">
+                      <h3 className="font-medium text-oe-ink mb-1">Email Support</h3>
+                      <p className="text-oe-muted text-sm mb-2">
                         Get help with your ebook purchases and downloads
                       </p>
-                      <a href="mailto:support@openearemedy.com" className="text-[#0096FF] hover:text-[#0077CC] transition-colors">
+                      <a href="mailto:support@openearemedy.com" className="text-oe-primary hover:text-oe-primary-hover transition-colors">
                         support@openearemedy.com
                       </a>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-[#E6F5FF] rounded-full flex items-center justify-center flex-shrink-0">
-                      <i className="ri-question-line text-[#0096FF] text-xl"></i>
+                    <div className="w-12 h-12 bg-oe-primary-tint rounded-full flex items-center justify-center flex-shrink-0">
+                      <i className="ri-question-line text-oe-primary text-xl"></i>
                     </div>
                     <div>
-                      <h3 className="font-medium text-[#2A2A2A] mb-1">FAQ</h3>
-                      <p className="text-[#6B6B6B] text-sm mb-2">
+                      <h3 className="font-medium text-oe-ink mb-1">FAQ</h3>
+                      <p className="text-oe-muted text-sm mb-2">
                         Find answers to common questions
                       </p>
-                      <a href="#" className="text-[#0096FF] hover:text-[#0077CC] transition-colors">
+                      <a href="#" className="text-oe-primary hover:text-oe-primary-hover transition-colors">
                         View FAQ
                       </a>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-[#E6F5FF] rounded-full flex items-center justify-center flex-shrink-0">
-                      <i className="ri-time-line text-[#0096FF] text-xl"></i>
+                    <div className="w-12 h-12 bg-oe-primary-tint rounded-full flex items-center justify-center flex-shrink-0">
+                      <i className="ri-time-line text-oe-primary text-xl"></i>
                     </div>
                     <div>
-                      <h3 className="font-medium text-[#2A2A2A] mb-1">Response Time</h3>
-                      <p className="text-[#6B6B6B] text-sm">
+                      <h3 className="font-medium text-oe-ink mb-1">Response Time</h3>
+                      <p className="text-oe-muted text-sm">
                         We typically respond within 24 hours
                       </p>
                     </div>
@@ -116,15 +116,15 @@ export default function ContactPage() {
 
                 {/* Quick Links */}
                 <div className="mt-8 pt-6 border-t border-gray-100">
-                  <h3 className="font-medium text-[#2A2A2A] mb-4">Quick Links</h3>
+                  <h3 className="font-medium text-oe-ink mb-4">Quick Links</h3>
                   <div className="space-y-2">
-                    <a href="/library" className="block text-sm text-[#0096FF] hover:text-[#0077CC] transition-colors">
+                    <a href="/library" className="block text-sm text-oe-primary hover:text-oe-primary-hover transition-colors">
                       My Library
                     </a>
-                    <a href="/purchase-history" className="block text-sm text-[#0096FF] hover:text-[#0077CC] transition-colors">
+                    <a href="/purchase-history" className="block text-sm text-oe-primary hover:text-oe-primary-hover transition-colors">
                       Purchase History
                     </a>
-                    <a href="/ebook-store" className="block text-sm text-[#0096FF] hover:text-[#0077CC] transition-colors">
+                    <a href="/ebook-store" className="block text-sm text-oe-primary hover:text-oe-primary-hover transition-colors">
                       Browse Ebooks
                     </a>
                   </div>
@@ -137,30 +137,30 @@ export default function ContactPage() {
               <div className="bg-white rounded-xl shadow-sm p-8">
                 {isSubmitted ? (
                   <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <i className="ri-check-line text-2xl text-green-600"></i>
+                    <div className="w-16 h-16 bg-forest-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <i className="ri-check-line text-2xl text-forest-600"></i>
                     </div>
-                    <h3 className="text-xl font-semibold text-[#2A2A2A] mb-2">
+                    <h3 className="text-xl font-semibold text-oe-ink mb-2">
                       Message Sent Successfully!
                     </h3>
-                    <p className="text-[#6B6B6B] mb-6">
+                    <p className="text-oe-muted mb-6">
                       Thank you for contacting us. We'll get back to you within 24 hours.
                     </p>
                     <button
                       onClick={() => setIsSubmitted(false)}
-                      className="px-6 py-3 bg-[#0096FF] text-white rounded-lg hover:bg-[#0077CC] transition-colors"
+                      className="px-6 py-3 bg-oe-primary text-white rounded-lg hover:bg-oe-primary-hover transition-colors"
                     >
                       Send Another Message
                     </button>
                   </div>
                 ) : (
                   <>
-                    <h2 className="text-xl font-semibold text-[#2A2A2A] mb-6">Send us a Message</h2>
+                    <h2 className="text-xl font-semibold text-oe-ink mb-6">Send us a Message</h2>
                     
                     <form onSubmit={handleSubmit} className="space-y-6">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                          <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
+                          <label className="block text-sm font-medium text-oe-ink mb-2">
                             Name *
                           </label>
                           <input
@@ -169,12 +169,12 @@ export default function ContactPage() {
                             required
                             value={formData.name}
                             onChange={handleInputChange}
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0096FF] focus:border-transparent"
+                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-oe-primary focus:border-transparent"
                             placeholder="Your full name"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
+                          <label className="block text-sm font-medium text-oe-ink mb-2">
                             Email *
                           </label>
                           <input
@@ -183,14 +183,14 @@ export default function ContactPage() {
                             required
                             value={formData.email}
                             onChange={handleInputChange}
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0096FF] focus:border-transparent"
+                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-oe-primary focus:border-transparent"
                             placeholder="your.email@example.com"
                           />
                         </div>
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
+                        <label className="block text-sm font-medium text-oe-ink mb-2">
                           Subject *
                         </label>
                         <select
@@ -198,7 +198,7 @@ export default function ContactPage() {
                           required
                           value={formData.subject}
                           onChange={handleInputChange}
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0096FF] focus:border-transparent"
+                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-oe-primary focus:border-transparent"
                         >
                           <option value="">Select a subject</option>
                           <option value="ebook-support">Ebook Download/Access Issues</option>
@@ -211,7 +211,7 @@ export default function ContactPage() {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
+                        <label className="block text-sm font-medium text-oe-ink mb-2">
                           Message *
                         </label>
                         <textarea
@@ -220,7 +220,7 @@ export default function ContactPage() {
                           rows={6}
                           value={formData.message}
                           onChange={handleInputChange}
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0096FF] focus:border-transparent resize-none"
+                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-oe-primary focus:border-transparent resize-none"
                           placeholder="Please describe your question or issue in detail..."
                         />
                       </div>
@@ -235,7 +235,7 @@ export default function ContactPage() {
                       <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="w-full px-6 py-3 bg-[#0096FF] text-white rounded-xl hover:bg-[#0077CC] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full px-6 py-3 bg-oe-primary text-white rounded-xl hover:bg-oe-primary-hover transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {isSubmitting ? (
                           <div className="flex items-center justify-center gap-2">

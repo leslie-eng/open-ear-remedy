@@ -10,10 +10,10 @@ function App() {
       <CartProvider>
         <BrowserRouter basename={__BASE_PATH__}>
           <Suspense fallback={
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]">
+            <div className="min-h-screen flex items-center justify-center bg-oe-bg">
               <div className="text-center">
-                <div className="w-16 h-16 border-4 border-[#0096FF] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                <p className="text-[#6B6B6B] font-medium">Loading...</p>
+                <div className="w-16 h-16 border-4 border-oe-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-oe-muted font-medium">Loading...</p>
               </div>
             </div>
           }>

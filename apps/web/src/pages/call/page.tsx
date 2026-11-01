@@ -285,7 +285,7 @@ export default function CallPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]">
+    <div className="min-h-screen bg-oe-bg">
       <Navbar />
       {notesGate.noticeOpen && <NotesNotice onChoose={(allow) => void notesGate.choose(allow)} onCancel={notesGate.cancel} />}
       <ConnectingOverlay
@@ -303,30 +303,30 @@ export default function CallPage() {
         <div className="max-w-5xl mx-auto">
           {/* Header */}
           <div className="text-center mb-8 md:mb-12">
-            <div className="inline-flex items-center gap-2 px-4 md:px-6 py-2 bg-[#0096FF]/10 rounded-full mb-4 md:mb-6">
-              <i className="ri-phone-fill text-[#0096FF] text-sm md:text-base"></i>
-              <span className="text-xs md:text-sm font-medium text-[#0096FF]">
+            <div className="inline-flex items-center gap-2 px-4 md:px-6 py-2 bg-oe-primary/10 rounded-full mb-4 md:mb-6">
+              <i className="ri-phone-fill text-oe-primary text-sm md:text-base"></i>
+              <span className="text-xs md:text-sm font-medium text-oe-primary">
                 Voice Support
               </span>
             </div>
             <h1
-              className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#2A2A2A] mb-4"
-              style={{ fontFamily: 'Poppins, sans-serif' }}
+              className="text-3xl md:text-4xl lg:text-5xl font-bold text-oe-ink mb-4"
+             
             >
               Connect Through Voice
             </h1>
-            <p className="text-base md:text-lg text-[#6B6B6B] max-w-2xl mx-auto">
+            <p className="text-base md:text-lg text-oe-muted max-w-2xl mx-auto">
               Real-time emotional support when you need it most. {CREDITS_PER_CALL_MINUTE} credits per
               minute.
             </p>
             {user && (
               <div className="mt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-md">
-                  <i className="ri-copper-coin-fill text-[#0096FF]"></i>
-                  <span className="font-semibold text-[#2A2A2A]">
+                  <i className="ri-copper-coin-fill text-oe-primary"></i>
+                  <span className="font-semibold text-oe-ink">
                     {credits} Credits
                   </span>
-                  <span className="text-xs text-[#6B6B6B]">
+                  <span className="text-xs text-oe-muted">
                     ({Math.floor(availableSeconds / 60)} min{passSecondsLeft > 0 ? ' incl. Monthly Pass' : ''})
                   </span>
                 </div>
@@ -334,7 +334,7 @@ export default function CallPage() {
                   <button
                     onClick={claimFreeCredits}
                     disabled={claimingFreeCredits}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-full shadow-md hover:bg-green-600 transition-all disabled:opacity-50 whitespace-nowrap cursor-pointer text-sm font-medium animate-pulse"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-forest-500 text-white rounded-full shadow-md hover:bg-forest-600 transition-all disabled:opacity-50 whitespace-nowrap cursor-pointer text-sm font-medium animate-pulse"
                   >
                     <i className="ri-gift-fill"></i>
                     {claimingFreeCredits
@@ -345,9 +345,9 @@ export default function CallPage() {
               </div>
             )}
             {!user && (
-              <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-200 rounded-full">
-                <i className="ri-gift-fill text-green-600"></i>
-                <span className="text-green-700 font-medium text-sm">
+              <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-forest-50 border border-forest-200 rounded-full">
+                <i className="ri-gift-fill text-forest-600"></i>
+                <span className="text-forest-700 font-medium text-sm">
                   First-time users get {FREE_TRIAL_CREDITS} FREE credits!
                 </span>
               </div>
@@ -359,21 +359,21 @@ export default function CallPage() {
             <div
               className={`max-w-2xl mx-auto mb-6 p-4 border rounded-2xl flex items-start gap-3 ${
                 callError.includes('✓')
-                  ? 'bg-green-50 border-green-200'
+                  ? 'bg-forest-50 border-forest-200'
                   : 'bg-red-50 border-red-200'
               }`}
             >
               <i
                 className={`text-xl mt-0.5 ${
                   callError.includes('✓')
-                    ? 'ri-checkbox-circle-fill text-green-500'
+                    ? 'ri-checkbox-circle-fill text-forest-500'
                     : 'ri-error-warning-fill text-red-500'
                 }`}
               ></i>
               <p
                 className={`text-sm ${
                   callError.includes('✓')
-                    ? 'text-green-700'
+                    ? 'text-forest-700'
                     : 'text-red-700'
                 }`}
               >
@@ -388,24 +388,24 @@ export default function CallPage() {
             <div className="text-center mb-8 md:mb-12">
               {call.state.phase !== 'live' ? (
                 <>
-                  <div className="w-24 h-24 md:w-32 md:h-32 bg-gradient-to-br from-[#0096FF] to-[#0077CC] rounded-full flex items-center justify-center mx-auto mb-6 md:mb-8 shadow-lg">
+                  <div className="w-24 h-24 md:w-32 md:h-32 bg-oe-primary rounded-full flex items-center justify-center mx-auto mb-6 md:mb-8 shadow-lg">
                     <i className="ri-phone-fill text-4xl md:text-5xl text-white"></i>
                   </div>
-                  <h2 className="text-2xl md:text-3xl font-bold text-[#2A2A2A] mb-3">
+                  <h2 className="text-2xl md:text-3xl font-bold text-oe-ink mb-3">
                     Ready to Connect
                   </h2>
-                  <p className="text-sm md:text-base text-[#6B6B6B]">
+                  <p className="text-sm md:text-base text-oe-muted">
                     Talk with a listener from your browser, or book an appointment
                   </p>
                   {call.state.phase === 'ended' && call.state.endReason && (
-                    <p role="status" className="mt-4 mx-auto max-w-md text-sm md:text-base text-[#2A2A2A] bg-[#E6F5FF] rounded-xl p-3">
+                    <p role="status" className="mt-4 mx-auto max-w-md text-sm md:text-base text-oe-ink bg-oe-primary-tint rounded-xl p-3">
                       {END_MESSAGES[call.state.endReason]}
                       {call.state.billedSeconds > 0 && ` Talk time: ${formatTime(call.state.billedSeconds)}.`}
                     </p>
                   )}
                   {user && (
                     <div className="mt-6 mx-auto max-w-sm text-left">
-                      <label htmlFor="display-name" className="block text-sm font-medium text-[#2A2A2A] mb-2">
+                      <label htmlFor="display-name" className="block text-sm font-medium text-oe-ink mb-2">
                         Name the listener will see (optional)
                       </label>
                       <input
@@ -415,9 +415,9 @@ export default function CallPage() {
                         value={displayName}
                         onChange={(e) => setDisplayName(e.target.value)}
                         placeholder="Anonymous"
-                        className="w-full px-4 py-3 border-2 border-[#E5E5E5] rounded-xl focus:border-[#0096FF] focus:outline-none text-sm md:text-base"
+                        className="w-full px-4 py-3 border-2 border-oe-line rounded-xl focus:border-oe-primary focus:outline-none text-sm md:text-base"
                       />
-                      <p className="text-xs text-[#6B6B6B] mt-2">
+                      <p className="text-xs text-oe-muted mt-2">
                         Listeners never see your email or phone number. Calls are never recorded.
                       </p>
                     </div>
@@ -425,16 +425,16 @@ export default function CallPage() {
                 </>
               ) : (
                 <>
-                  <div className="w-24 h-24 md:w-32 md:h-32 bg-gradient-to-br from-[#0096FF] to-[#0077CC] rounded-full flex items-center justify-center mx-auto mb-6 md:mb-8 shadow-lg animate-pulse">
+                  <div className="w-24 h-24 md:w-32 md:h-32 bg-oe-primary rounded-full flex items-center justify-center mx-auto mb-6 md:mb-8 shadow-lg animate-pulse">
                     <i className="ri-phone-fill text-4xl md:text-5xl text-white"></i>
                   </div>
-                  <h2 className="text-2xl md:text-3xl font-bold text-[#2A2A2A] mb-3">
+                  <h2 className="text-2xl md:text-3xl font-bold text-oe-ink mb-3">
                     Call in Progress
                   </h2>
-                  <div className="text-3xl md:text-4xl font-bold text-[#0096FF] mb-2" aria-live="off">
+                  <div className="text-3xl md:text-4xl font-bold text-oe-primary mb-2" aria-live="off">
                     {formatTime(call.state.elapsed)}
                   </div>
-                  <p className="text-sm md:text-base text-[#6B6B6B]">
+                  <p className="text-sm md:text-base text-oe-muted">
                     Up to {formatTime(call.state.maxSeconds)} on your balance
                   </p>
 
@@ -461,19 +461,19 @@ export default function CallPage() {
                 <>
                   <button
                     onClick={() => void startCall()}
-                    className="w-full sm:w-auto px-8 md:px-12 py-3 md:py-4 bg-[#0096FF] text-white rounded-2xl font-semibold hover:bg-[#0077CC] transition-all flex items-center justify-center gap-3 whitespace-nowrap cursor-pointer"
+                    className="w-full sm:w-auto px-8 md:px-12 py-3 md:py-4 bg-oe-primary text-white rounded-2xl font-semibold hover:bg-oe-primary-hover transition-all flex items-center justify-center gap-3 whitespace-nowrap cursor-pointer"
                   >
                     <i className="ri-phone-fill text-lg md:text-xl"></i>
                     Start Call
                   </button>
                   <button
                     onClick={openBookingModal}
-                    className="w-full sm:w-auto px-8 md:px-12 py-3 md:py-4 bg-white text-[#0096FF] border-2 border-[#0096FF] rounded-2xl font-semibold hover:bg-[#0077CC] hover:text-white transition-all flex items-center justify-center gap-3 whitespace-nowrap cursor-pointer"
+                    className="w-full sm:w-auto px-8 md:px-12 py-3 md:py-4 bg-white text-oe-primary border-2 border-oe-primary rounded-2xl font-semibold hover:bg-oe-primary-hover hover:text-white transition-all flex items-center justify-center gap-3 whitespace-nowrap cursor-pointer"
                   >
                     <i className="ri-calendar-fill text-lg md:text-xl"></i>
                     Book Appointment
                   </button>
-                  <Link to="/listener-chat" className="text-sm font-medium text-[#0096FF] hover:underline">
+                  <Link to="/listener-chat" className="text-sm font-medium text-oe-primary hover:underline">
                     Prefer to type? Text a Listener
                   </Link>
                 </>
@@ -498,7 +498,7 @@ export default function CallPage() {
                 className={`w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center transition-all cursor-pointer ${
                   call.state.muted
                     ? 'bg-red-500 hover:bg-red-600'
-                    : 'bg-[#F5F5F5] hover:bg-[#E6F5FF]'
+                    : 'bg-oe-surface hover:bg-oe-primary-tint'
                 } ${
                   call.state.phase !== 'live' ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
@@ -507,7 +507,7 @@ export default function CallPage() {
                   className={`${
                     call.state.muted
                       ? 'ri-mic-off-fill text-white'
-                      : 'ri-mic-fill text-[#2A2A2A]'
+                      : 'ri-mic-fill text-oe-ink'
                   } text-xl md:text-2xl`}
                 ></i>
               </button>
@@ -515,28 +515,28 @@ export default function CallPage() {
 
             {/* Info Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-              <div className="bg-[#E6F5FF] rounded-2xl p-4 md:p-6 text-center">
-                <i className="ri-shield-check-fill text-2xl md:text-3xl text-[#0096FF] mb-2 md:mb-3 block"></i>
-                <p className="text-xs md:text-sm font-semibold text-[#2A2A2A] mb-1">
+              <div className="bg-oe-primary-tint rounded-2xl p-4 md:p-6 text-center">
+                <i className="ri-shield-check-fill text-2xl md:text-3xl text-oe-primary mb-2 md:mb-3 block"></i>
+                <p className="text-xs md:text-sm font-semibold text-oe-ink mb-1">
                   Secure & Private
                 </p>
-                <p className="text-xs text-[#6B6B6B]">End-to-end encrypted</p>
+                <p className="text-xs text-oe-muted">End-to-end encrypted</p>
               </div>
 
-              <div className="bg-[#E6F5FF] rounded-2xl p-4 md:p-6 text-center">
-                <i className="ri-time-fill text-2xl md:text-3xl text-[#0096FF] mb-2 md:mb-3 block"></i>
-                <p className="text-xs md:text-sm font-semibold text-[#2A2A2A] mb-1">
+              <div className="bg-oe-primary-tint rounded-2xl p-4 md:p-6 text-center">
+                <i className="ri-time-fill text-2xl md:text-3xl text-oe-primary mb-2 md:mb-3 block"></i>
+                <p className="text-xs md:text-sm font-semibold text-oe-ink mb-1">
                   Available 24/7
                 </p>
-                <p className="text-xs text-[#6B6B6B]">Connect anytime</p>
+                <p className="text-xs text-oe-muted">Connect anytime</p>
               </div>
 
-              <div className="bg-[#E6F5FF] rounded-2xl p-4 md:p-6 text-center">
-                <i className="ri-heart-3-fill text-2xl md:text-3xl text-[#0096FF] mb-2 md:mb-3 block"></i>
-                <p className="text-xs md:text-sm font-semibold text-[#2A2A2A] mb-1">
+              <div className="bg-oe-primary-tint rounded-2xl p-4 md:p-6 text-center">
+                <i className="ri-heart-3-fill text-2xl md:text-3xl text-oe-primary mb-2 md:mb-3 block"></i>
+                <p className="text-xs md:text-sm font-semibold text-oe-ink mb-1">
                   Judgment‑Free
                 </p>
-                <p className="text-xs text-[#6B6B6B]">Safe space to share</p>
+                <p className="text-xs text-oe-muted">Safe space to share</p>
               </div>
             </div>
           </div>
@@ -550,21 +550,21 @@ export default function CallPage() {
             {/* Verification Sent State */}
             {verificationSent ? (
               <div className="text-center">
-                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <i className="ri-mail-check-fill text-4xl text-green-600"></i>
+                <div className="w-20 h-20 bg-forest-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <i className="ri-mail-check-fill text-4xl text-forest-600"></i>
                 </div>
-                <h2 className="text-2xl md:text-3xl font-bold text-[#2A2A2A] mb-3">
+                <h2 className="text-2xl md:text-3xl font-bold text-oe-ink mb-3">
                   Verify Your Email
                 </h2>
-                <p className="text-sm md:text-base text-[#6B6B6B] mb-2">
+                <p className="text-sm md:text-base text-oe-muted mb-2">
                   We've sent a verification link to:
                 </p>
-                <p className="text-sm md:text-base font-semibold text-[#0096FF] mb-6">
+                <p className="text-sm md:text-base font-semibold text-oe-primary mb-6">
                   {email}
                 </p>
-                <div className="bg-[#E6F5FF] rounded-xl p-4 mb-6">
-                  <p className="text-sm text-[#2A2A2A]">
-                    <i className="ri-information-fill text-[#0096FF] mr-2"></i>
+                <div className="bg-oe-primary-tint rounded-xl p-4 mb-6">
+                  <p className="text-sm text-oe-ink">
+                    <i className="ri-information-fill text-oe-primary mr-2"></i>
                     Click the link in your email to activate your account and start using Open Ear.
                   </p>
                 </div>
@@ -572,8 +572,8 @@ export default function CallPage() {
                 {authError && (
                   <div className={`mb-4 px-4 py-3 rounded-xl text-sm ${
                     authError.includes('resent')
-                      ? 'bg-green-50 border border-green-200 text-green-700'
-                      : 'bg-[#FFE6E6] border border-[#FF4444] text-[#FF4444]'
+                      ? 'bg-forest-50 border border-forest-200 text-forest-700'
+                      : 'bg-oe-crisis-tint border border-oe-crisis text-oe-crisis'
                   }`}>
                     {authError}
                   </div>
@@ -583,7 +583,7 @@ export default function CallPage() {
                   <button
                     onClick={handleResendVerification}
                     disabled={resendingVerification}
-                    className="w-full px-6 py-3 bg-white border-2 border-[#0096FF] text-[#0096FF] rounded-xl font-semibold hover:border-[#0077CC] hover:bg-[#E6F5FF] transition-all disabled:opacity-50 whitespace-nowrap cursor-pointer"
+                    className="w-full px-6 py-3 bg-white border-2 border-oe-primary text-oe-primary rounded-xl font-semibold hover:border-oe-primary-hover hover:bg-oe-primary-tint transition-all disabled:opacity-50 whitespace-nowrap cursor-pointer"
                   >
                     {resendingVerification ? (
                       <span className="flex items-center justify-center gap-2">
@@ -604,26 +604,26 @@ export default function CallPage() {
                       setIsSignUp(false);
                       setAuthError('');
                     }}
-                    className="w-full px-6 py-3 bg-[#0096FF] text-white rounded-xl font-semibold hover:bg-[#0077CC] transition-all whitespace-nowrap cursor-pointer"
+                    className="w-full px-6 py-3 bg-oe-primary text-white rounded-xl font-semibold hover:bg-oe-primary-hover transition-all whitespace-nowrap cursor-pointer"
                   >
                     Back to Sign In
                   </button>
                 </div>
                 
-                <p className="text-xs text-[#6B6B6B] mt-6">
+                <p className="text-xs text-oe-muted mt-6">
                   Didn't receive the email? Check your spam folder or try a different email address.
                 </p>
               </div>
             ) : (
               <>
                 <div className="text-center mb-6">
-                  <div className="w-16 h-16 md:w-20 md:h-20 bg-[#0096FF]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i className={`${forgotPassword ? 'ri-lock-unlock-fill' : 'ri-user-fill'} text-3xl md:text-4xl text-[#0096FF]`}></i>
+                  <div className="w-16 h-16 md:w-20 md:h-20 bg-oe-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i className={`${forgotPassword ? 'ri-lock-unlock-fill' : 'ri-user-fill'} text-3xl md:text-4xl text-oe-primary`}></i>
                   </div>
-                  <h2 className="text-2xl md:text-3xl font-bold text-[#2A2A2A] mb-2">
+                  <h2 className="text-2xl md:text-3xl font-bold text-oe-ink mb-2">
                     {forgotPassword ? 'Reset Password' : isSignUp ? 'Create Account' : 'Welcome Back'}
                   </h2>
-                  <p className="text-sm md:text-base text-[#6B6B6B]">
+                  <p className="text-sm md:text-base text-oe-muted">
                     {forgotPassword ? 'Enter your email to receive a reset link' : isSignUp ? 'Sign up to start calling' : 'Sign in to continue'}
                   </p>
                 </div>
@@ -632,9 +632,9 @@ export default function CallPage() {
                   <>
                     {/* Divider */}
                     <div className="flex items-center gap-3 mb-5">
-                      <div className="flex-1 h-px bg-[#E5E5E5]"></div>
-                      <span className="text-xs text-[#6B6B6B]">Sign in with email</span>
-                      <div className="flex-1 h-px bg-[#E5E5E5]"></div>
+                      <div className="flex-1 h-px bg-oe-line"></div>
+                      <span className="text-xs text-oe-muted">Sign in with email</span>
+                      <div className="flex-1 h-px bg-oe-line"></div>
                     </div>
                   </>
                 )}
@@ -642,14 +642,14 @@ export default function CallPage() {
                 <form onSubmit={handleAuth} className="space-y-4">
                   {!forgotPassword && isSignUp && (
                     <div>
-                      <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
+                      <label className="block text-sm font-medium text-oe-ink mb-2">
                         Full Name
                       </label>
                       <input
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="w-full px-4 py-3 border-2 border-[#E5E5E5] rounded-xl focus:border-[#0096FF] focus:outline-none text-sm md:text-base"
+                        className="w-full px-4 py-3 border-2 border-oe-line rounded-xl focus:border-oe-primary focus:outline-none text-sm md:text-base"
                         placeholder="Enter your name"
                         required
                       />
@@ -657,14 +657,14 @@ export default function CallPage() {
                   )}
 
                   <div>
-                    <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
+                    <label className="block text-sm font-medium text-oe-ink mb-2">
                       Email
                     </label>
                     <input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full px-4 py-3 border-2 border-[#E5E5E5] rounded-xl focus:border-[#0096FF] focus:outline-none text-sm md:text-base"
+                      className="w-full px-4 py-3 border-2 border-oe-line rounded-xl focus:border-oe-primary focus:outline-none text-sm md:text-base"
                       placeholder="your@email.com"
                       required
                     />
@@ -672,14 +672,14 @@ export default function CallPage() {
 
                   {!forgotPassword && (
                     <div>
-                      <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
+                      <label className="block text-sm font-medium text-oe-ink mb-2">
                         Password
                       </label>
                       <input
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full px-4 py-3 border-2 border-[#E5E5E5] rounded-xl focus:border-[#0096FF] focus:outline-none text-sm md:text-base"
+                        className="w-full px-4 py-3 border-2 border-oe-line rounded-xl focus:border-oe-primary focus:outline-none text-sm md:text-base"
                         placeholder={isSignUp ? 'Min. 6 characters' : '••••••••'}
                         required
                       />
@@ -695,7 +695,7 @@ export default function CallPage() {
                           setForgotPassword(true);
                           setAuthError('');
                         }}
-                        className="text-sm text-[#0096FF] font-medium hover:underline cursor-pointer"
+                        className="text-sm text-oe-primary font-medium hover:underline cursor-pointer"
                       >
                         Forgot password?
                       </button>
@@ -705,8 +705,8 @@ export default function CallPage() {
                   {authError && (
                     <div className={`px-4 py-3 rounded-xl text-sm ${
                       authError.includes('Check your email') || authError.includes('reset link sent') || authError.includes('resent')
-                        ? 'bg-[#E6F5FF] border border-[#0096FF] text-[#0096FF]'
-                        : 'bg-[#FFE6E6] border border-[#FF4444] text-[#FF4444]'
+                        ? 'bg-oe-primary-tint border border-oe-primary text-oe-primary'
+                        : 'bg-oe-crisis-tint border border-oe-crisis text-oe-crisis'
                     }`}>
                       {authError}
                     </div>
@@ -715,7 +715,7 @@ export default function CallPage() {
                   <button
                     type="submit"
                     disabled={isAuthLoading}
-                    className="w-full px-6 py-3 md:py-4 bg-[#0096FF] text-white rounded-xl text-base md:text-lg font-semibold hover:bg-[#0077CC] transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
+                    className="w-full px-6 py-3 md:py-4 bg-oe-primary text-white rounded-xl text-base md:text-lg font-semibold hover:bg-oe-primary-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
                   >
                     {isAuthLoading
                       ? 'Please wait...'
@@ -734,7 +734,7 @@ export default function CallPage() {
                         setForgotPassword(false);
                         setAuthError('');
                       }}
-                      className="text-sm md:text-base text-[#0096FF] font-semibold hover:underline cursor-pointer flex items-center justify-center gap-1 mx-auto"
+                      className="text-sm md:text-base text-oe-primary font-semibold hover:underline cursor-pointer flex items-center justify-center gap-1 mx-auto"
                     >
                       <i className="ri-arrow-left-line"></i>
                       Back to Sign In
@@ -745,7 +745,7 @@ export default function CallPage() {
                         setIsSignUp(!isSignUp);
                         setAuthError('');
                       }}
-                      className="text-sm md:text-base text-[#0096FF] font-semibold hover:underline cursor-pointer"
+                      className="text-sm md:text-base text-oe-primary font-semibold hover:underline cursor-pointer"
                     >
                       {isSignUp
                         ? 'Already have an account? Sign In'
@@ -763,7 +763,7 @@ export default function CallPage() {
                 setVerificationSent(false);
                 setAuthError('');
               }}
-              className="absolute top-4 right-4 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-[#6B6B6B] hover:text-[#2A2A2A] transition-colors cursor-pointer"
+              className="absolute top-4 right-4 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-oe-muted hover:text-oe-ink transition-colors cursor-pointer"
             >
               <i className="ri-close-line text-xl md:text-2xl"></i>
             </button>
@@ -776,37 +776,37 @@ export default function CallPage() {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl p-6 md:p-10 max-w-md w-full shadow-2xl relative">
             <div className="text-center mb-6 md:mb-8">
-              <div className="w-16 h-16 md:w-20 md:h-20 bg-[#0096FF]/10 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6">
-                <i className="ri-calendar-fill text-3xl md:text-4xl text-[#0096FF]"></i>
+              <div className="w-16 h-16 md:w-20 md:h-20 bg-oe-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6">
+                <i className="ri-calendar-fill text-3xl md:text-4xl text-oe-primary"></i>
               </div>
-              <h2 className="text-2xl md:text-3xl font-bold text-[#2A2A2A] mb-2">
+              <h2 className="text-2xl md:text-3xl font-bold text-oe-ink mb-2">
                 Book Appointment
               </h2>
-              <p className="text-sm md:text-base text-[#6B6B6B]">
+              <p className="text-sm md:text-base text-oe-muted">
                 Schedule a call at your convenience
               </p>
             </div>
 
             <form onSubmit={handleBookAppointment} className="space-y-4 md:space-y-5">
               <div>
-                <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
+                <label className="block text-sm font-medium text-oe-ink mb-2">
                   Phone Number
                 </label>
                 <input
                   type="tel"
                   value={bookingPhoneNumber}
                   onChange={(e) => setBookingPhoneNumber(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-[#E5E5E5] rounded-xl focus:border-[#0096FF] focus:outline-none text-sm md:text-base"
+                  className="w-full px-4 py-3 border-2 border-oe-line rounded-xl focus:border-oe-primary focus:outline-none text-sm md:text-base"
                   placeholder="+233201234567"
                   required
                 />
-                <p className="text-xs text-[#6B6B6B] mt-1">
+                <p className="text-xs text-oe-muted mt-1">
                   Include country code
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
+                <label className="block text-sm font-medium text-oe-ink mb-2">
                   Date
                 </label>
                 <input
@@ -814,45 +814,45 @@ export default function CallPage() {
                   value={bookingDate}
                   onChange={(e) => setBookingDate(e.target.value)}
                   min={getMinDate()}
-                  className="w-full px-4 py-3 border-2 border-[#E5E5E5] rounded-xl focus:border-[#0096FF] focus:outline-none text-sm md:text-base"
+                  className="w-full px-4 py-3 border-2 border-oe-line rounded-xl focus:border-oe-primary focus:outline-none text-sm md:text-base"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
+                <label className="block text-sm font-medium text-oe-ink mb-2">
                   Time
                 </label>
                 <input
                   type="time"
                   value={bookingTime}
                   onChange={(e) => setBookingTime(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-[#E5E5E5] rounded-xl focus:border-[#0096FF] focus:outline-none text-sm md:text-base"
+                  className="w-full px-4 py-3 border-2 border-oe-line rounded-xl focus:border-oe-primary focus:outline-none text-sm md:text-base"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
+                <label className="block text-sm font-medium text-oe-ink mb-2">
                   Notes (Optional)
                 </label>
                 <textarea
                   value={bookingNotes}
                   onChange={(e) => setBookingNotes(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-[#E5E5E5] rounded-xl focus:border-[#0096FF] focus:outline-none text-sm md:text-base resize-none"
+                  className="w-full px-4 py-3 border-2 border-oe-line rounded-xl focus:border-oe-primary focus:outline-none text-sm md:text-base resize-none"
                   rows={3}
                   placeholder="Any specific topics you'd like to discuss..."
                 />
               </div>
 
               {bookingError && (
-                <div className="bg-[#FFE6E6] border border-[#FF4444] text-[#FF4444] px-4 py-3 rounded-xl text-sm">
+                <div className="bg-oe-crisis-tint border border-oe-crisis text-oe-crisis px-4 py-3 rounded-xl text-sm">
                   {bookingError}
                 </div>
               )}
 
               {bookingSuccess && (
-                <div className="bg-[#E6F5FF] border border-[#0096FF] text-[#0096FF] px-4 py-3 rounded-xl text-sm">
+                <div className="bg-oe-primary-tint border border-oe-primary text-oe-primary px-4 py-3 rounded-xl text-sm">
                   ✓ Appointment booked! Admin notified and calendar updated.
                   Check your email for confirmation.
                 </div>
@@ -861,7 +861,7 @@ export default function CallPage() {
               <button
                 type="submit"
                 disabled={bookingLoading}
-                className="w-full px-6 py-3 md:py-4 bg-[#0096FF] text-white rounded-xl text-base md:text-lg font-semibold hover:bg-[#0077CC] transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
+                className="w-full px-6 py-3 md:py-4 bg-oe-primary text-white rounded-xl text-base md:text-lg font-semibold hover:bg-oe-primary-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
               >
                 {bookingLoading ? 'Booking...' : 'Confirm Booking'}
               </button>
@@ -869,7 +869,7 @@ export default function CallPage() {
 
             <button
               onClick={() => setShowBookingModal(false)}
-              className="absolute top-4 right-4 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-[#6B6B6B] hover:text-[#2A2A2A] transition-colors cursor-pointer"
+              className="absolute top-4 right-4 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center text-oe-muted hover:text-oe-ink transition-colors cursor-pointer"
             >
               <i className="ri-close-line text-xl md:text-2xl"></i>
             </button>

@@ -48,7 +48,7 @@ export default function PurchaseHistoryPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed':
-        return 'text-green-600 bg-green-50';
+        return 'text-forest-600 bg-forest-50';
       case 'pending':
         return 'text-yellow-600 bg-yellow-50';
       case 'failed':
@@ -65,14 +65,14 @@ export default function PurchaseHistoryPage() {
 
   if (!authLoading && !user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]">
+      <div className="min-h-screen bg-oe-bg">
         <Navbar />
         <div className="pt-24 pb-16 text-center">
-          <p className="text-[#6B6B6B] mb-4">Sign in to view purchase history.</p>
+          <p className="text-oe-muted mb-4">Sign in to view purchase history.</p>
           <Link
             to="/signin"
             state={{ returnTo: '/purchase-history' }}
-            className="text-[#0096FF] font-medium hover:underline"
+            className="text-oe-primary font-medium hover:underline"
           >
             Sign in
           </Link>
@@ -82,39 +82,39 @@ export default function PurchaseHistoryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]">
+    <div className="min-h-screen bg-oe-bg">
       <Navbar />
       <div className="pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20">
           <div className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-[#2A2A2A] mb-2">Purchase History</h1>
-            <p className="text-[#6B6B6B]">Your ebook orders</p>
+            <h1 className="text-3xl md:text-4xl font-bold text-oe-ink mb-2">Purchase History</h1>
+            <p className="text-oe-muted">Your ebook orders</p>
           </div>
 
           {loading || authLoading ? (
             <div className="text-center py-16">
-              <div className="w-12 h-12 border-4 border-[#0096FF] border-t-transparent rounded-full animate-spin mx-auto" />
+              <div className="w-12 h-12 border-4 border-oe-primary border-t-transparent rounded-full animate-spin mx-auto" />
             </div>
           ) : error ? (
             <div className="bg-white rounded-xl shadow-sm p-12 text-center max-w-md mx-auto">
               <i className="ri-error-warning-line text-6xl text-red-500 mb-4 block" />
-              <h3 className="text-xl font-semibold text-[#2A2A2A] mb-2">Something went wrong</h3>
-              <p className="text-[#6B6B6B] mb-6">{error}</p>
+              <h3 className="text-xl font-semibold text-oe-ink mb-2">Something went wrong</h3>
+              <p className="text-oe-muted mb-6">{error}</p>
               <button
                 onClick={() => void loadOrders()}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-[#0096FF] text-white rounded-lg"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-oe-primary text-white rounded-lg"
               >
                 Try again
               </button>
             </div>
           ) : orders.length === 0 ? (
             <div className="bg-white rounded-xl shadow-sm p-12 text-center max-w-md mx-auto">
-              <i className="ri-receipt-line text-6xl text-[#6B6B6B] mb-4 block" />
-              <h3 className="text-xl font-semibold text-[#2A2A2A] mb-2">No purchases yet</h3>
-              <p className="text-[#6B6B6B] mb-6">Completed ebook checkouts will appear here.</p>
+              <i className="ri-receipt-line text-6xl text-oe-muted mb-4 block" />
+              <h3 className="text-xl font-semibold text-oe-ink mb-2">No purchases yet</h3>
+              <p className="text-oe-muted mb-6">Completed ebook checkouts will appear here.</p>
               <Link
                 to="/ebook-store"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-[#0096FF] text-white rounded-lg"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-oe-primary text-white rounded-lg"
               >
                 Browse store
               </Link>
@@ -123,12 +123,12 @@ export default function PurchaseHistoryPage() {
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                 <div className="bg-white rounded-xl shadow-sm p-6">
-                  <p className="text-sm text-[#6B6B6B]">Completed orders</p>
-                  <p className="text-2xl font-bold text-[#2A2A2A]">{completedOrders.length}</p>
+                  <p className="text-sm text-oe-muted">Completed orders</p>
+                  <p className="text-2xl font-bold text-oe-ink">{completedOrders.length}</p>
                 </div>
                 <div className="bg-white rounded-xl shadow-sm p-6">
-                  <p className="text-sm text-[#6B6B6B]">Total spent</p>
-                  <p className="text-2xl font-bold text-[#2A2A2A]">
+                  <p className="text-sm text-oe-muted">Total spent</p>
+                  <p className="text-2xl font-bold text-oe-ink">
                     {mixedCurrencies ? '—' : formatMoney(totalSpent, totalSpentCurrency)}
                   </p>
                 </div>
@@ -141,14 +141,14 @@ export default function PurchaseHistoryPage() {
                   >
                     <div className="min-w-0">
                       {order.items.map((item) => (
-                        <h3 key={item.ebook_id} className="font-semibold text-[#2A2A2A]">
+                        <h3 key={item.ebook_id} className="font-semibold text-oe-ink">
                           {item.title}
                         </h3>
                       ))}
-                      <p className="text-sm text-[#6B6B6B]">
+                      <p className="text-sm text-oe-muted">
                         {formatMoney(order.total, order.currency)}
                       </p>
-                      <p className="text-xs text-[#9CA3AF] mt-1">
+                      <p className="text-xs text-oe-faint mt-1">
                         {formatDate(order.completed_at || order.created_at)} · Ref{' '}
                         <span className="font-mono">{order.reference}</span>
                       </p>
