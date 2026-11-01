@@ -2,12 +2,14 @@ import {
   ANONYMOUS_CALLER,
   LISTENER_COOLDOWN_MS,
   LOW_TIME_WARNING_SECONDS,
+  MAX_CHAT_MESSAGE_CHARS,
   RECONNECT_GRACE_MS,
   RING_TIMEOUT_MS,
 } from '@openear/shared/calls';
 import { callSecondsAvailable } from '@openear/shared/pricing';
 import { query } from '../db.js';
 import * as billing from '../services/billing.js';
+import * as notes from '../services/notes.js';
 
 const realClock = {
   now: () => Date.now(),
@@ -16,7 +18,9 @@ const realClock = {
 };
 
 /**
- * Runs every call: who is online, ringing, matching, timing, billing and ending.
+ * Runs every Conversation, voice Call or Text Chat: who is online, ringing, matching, timing,
+ * billing and ending. Both modes follow the same rules; a Text Chat starts its billed time when
+ * the Listener accepts (there is no audio to wait for) and relays typed messages, never storing them.
  * Transport-agnostic: the WebSocket layer feeds events in and delivers `send(userId, message)`.
  * State changes happen synchronously before any await, so two listeners accepting at the
  * same moment can never both win.
@@ -91,7 +95,22 @@ export function createCallCoordinator({ send, clock = realClock }) {
     }
   }
 
-  async function startCall(callerId) {
+  /** Starts the billed time, the low-time warning and the time limit. */
+  async function startConnected(call) {
+    call.status = 'connected';
+    call.connectedAt = clock.now();
+    const warnInMs = Math.max(0, call.maxSeconds - LOW_TIME_WARNING_SECONDS) * 1000;
+    call.timers.lowTime = clock.setTimeout(() => {
+      send(call.callerId, { type: 'call:low-time', callId: call.id, secondsLeft: Math.min(LOW_TIME_WARNING_SECONDS, call.maxSeconds) });
+    }, warnInMs);
+    call.timers.limit = clock.setTimeout(() => endCall(call, 'time_limit'), call.maxSeconds * 1000);
+    const started = { type: 'call:started', callId: call.id, maxSeconds: call.maxSeconds };
+    send(call.callerId, started);
+    send(call.listenerId, started);
+    await query(`UPDATE call_history SET status = 'connected', connected_at = $2 WHERE id = $1`, [call.id, new Date(call.connectedAt)]);
+  }
+
+  async function startCall(callerId, mode) {
     const free = [...listeners.entries()].filter(([, s]) => isFree(s)).map(([id]) => id);
     if (!free.length) {
       return refuse(callerId, 'NO_LISTENERS_AVAILABLE', 'No listener is free right now. Please try again soon, or talk with our AI chat while you wait.');
@@ -102,16 +121,16 @@ export function createCallCoordinator({ send, clock = realClock }) {
       return refuse(callerId, 'INSUFFICIENT_BALANCE', 'You need at least 1 minute of call time. Top up credits or get a Monthly Pass.');
     }
     const { rows } = await query(
-      `INSERT INTO call_history (user_id, status, started_at) VALUES ($1, 'ringing', $2) RETURNING id`,
-      [callerId, new Date(clock.now())],
+      `INSERT INTO call_history (user_id, status, started_at, mode) VALUES ($1, 'ringing', $2, $3) RETURNING id`,
+      [callerId, new Date(clock.now()), mode],
     );
     const callId = rows[0].id;
     const name = await callerName(callerId);
-    const call = { id: callId, callerId, callerName: name, listenerId: null, status: 'ringing', rung: free, maxSeconds, timers: {} };
+    const call = { id: callId, mode, callerId, callerName: name, listenerId: null, status: 'ringing', rung: free, maxSeconds, timers: {} };
     calls.set(callId, call);
     call.timers.ring = clock.setTimeout(() => endCall(call, 'no_answer'), RING_TIMEOUT_MS);
     send(callerId, { type: 'call:ringing', callId, timeoutMs: RING_TIMEOUT_MS });
-    for (const listenerId of free) send(listenerId, { type: 'call:incoming', callId, callerName: name });
+    for (const listenerId of free) send(listenerId, { type: 'call:incoming', callId, callerName: name, mode });
     return { callId };
   }
 
@@ -150,14 +169,16 @@ export function createCallCoordinator({ send, clock = realClock }) {
       sendStatus(listenerId);
     },
 
-    async requestCall(callerId) {
+    /** Starts a Conversation; `mode` is 'voice' (a Call) or 'text' (a Text Chat). */
+    async requestCall(callerId, { mode = 'voice' } = {}) {
+      if (mode !== 'voice' && mode !== 'text') mode = 'voice';
       // Claimed synchronously so two quick requests can't both start a call.
       if (requesting.has(callerId) || callOf(callerId)) {
         return refuse(callerId, 'ALREADY_IN_CALL', 'You already have a call in progress.');
       }
       requesting.add(callerId);
       try {
-        return await startCall(callerId);
+        return await startCall(callerId, mode);
       } finally {
         requesting.delete(callerId);
       }
@@ -179,26 +200,19 @@ export function createCallCoordinator({ send, clock = realClock }) {
       for (const other of call.rung) {
         if (other !== listenerId) send(other, { type: 'call:taken', callId });
       }
-      send(call.callerId, { type: 'call:matched', callId, role: 'caller' });
-      send(listenerId, { type: 'call:matched', callId, role: 'listener', callerName: call.callerName });
+      send(call.callerId, { type: 'call:matched', callId, role: 'caller', mode: call.mode });
+      // The Listener sees earlier notes about this person (none if they turned notes off).
+      const earlier = await notes.notesAbout(call.callerId, { viewerId: listenerId }).catch(() => []);
+      send(listenerId, { type: 'call:matched', callId, role: 'listener', mode: call.mode, callerName: call.callerName, notes: earlier });
       await query(`UPDATE call_history SET status = 'connecting', listener_user_id = $2 WHERE id = $1`, [callId, listenerId]);
+      if (call.mode === 'text') await startConnected(call);
     },
 
     /** Either side reports audio flowing; the first report starts the billed time. */
     async connected(userId, callId) {
       const call = participantCall(userId, callId);
-      if (!call || call.status !== 'connecting') return;
-      call.status = 'connected';
-      call.connectedAt = clock.now();
-      const warnInMs = Math.max(0, call.maxSeconds - LOW_TIME_WARNING_SECONDS) * 1000;
-      call.timers.lowTime = clock.setTimeout(() => {
-        send(call.callerId, { type: 'call:low-time', callId, secondsLeft: Math.min(LOW_TIME_WARNING_SECONDS, call.maxSeconds) });
-      }, warnInMs);
-      call.timers.limit = clock.setTimeout(() => endCall(call, 'time_limit'), call.maxSeconds * 1000);
-      const started = { type: 'call:started', callId, maxSeconds: call.maxSeconds };
-      send(call.callerId, started);
-      send(call.listenerId, started);
-      await query(`UPDATE call_history SET status = 'connected', connected_at = $2 WHERE id = $1`, [callId, new Date(call.connectedAt)]);
+      if (!call || call.mode !== 'voice' || call.status !== 'connecting') return;
+      await startConnected(call);
     },
 
     /** A user's connection closed. Ringing calls are cancelled; live calls get a grace period. */
@@ -237,6 +251,22 @@ export function createCallCoordinator({ send, clock = realClock }) {
       if (!call || !call.listenerId) return;
       const peer = call.callerId === userId ? call.listenerId : call.callerId;
       send(peer, { type: 'signal', callId, payload });
+    },
+
+    /** Passes a typed message to the other side of a live Text Chat. Never stored. */
+    async chatMessage(userId, callId, text) {
+      const call = participantCall(userId, callId);
+      if (!call || call.mode !== 'text' || call.status !== 'connected' || typeof text !== 'string') return;
+      const body = text.trim();
+      if (!body || body.length > MAX_CHAT_MESSAGE_CHARS) return;
+      const fromClient = call.callerId === userId;
+      send(fromClient ? call.listenerId : call.callerId, {
+        type: 'chat:message',
+        callId,
+        from: fromClient ? 'client' : 'listener',
+        text: body,
+        at: clock.now(),
+      });
     },
 
     /** The listener on a call (live or finished) reports the caller for admins to review. */

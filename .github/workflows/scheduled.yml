@@ -4,7 +4,7 @@ name: Scheduled
 on:
   schedule:
     - cron: "*/10 * * * *" # keep the API awake
-    - cron: "0 3 * * *" # 06:00 Nairobi: Monthly Pass reminders
+    - cron: "0 3 * * *" # 06:00 Nairobi: Monthly Pass reminders, expired notes
   workflow_dispatch:
     inputs:
       job:
@@ -22,7 +22,7 @@ jobs:
       - run: curl --fail --silent --show-error --retry 3 --retry-delay 20 --max-time 90 https://api.openearemedy.com/api/health
 
   pass-reminders:
-    # Emails people whose Monthly Pass ends within 3 days, once per pass.
+    # Emails people whose Monthly Pass ends within 3 days, once per pass; deletes notes over 12 months old.
     if: github.event.schedule == '0 3 * * *' || inputs.job == 'pass-reminders'
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -39,3 +39,7 @@ jobs:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           CLIENT_URL: https://openearemedy.com
           EMAIL_FROM: Open Ear <noreply@openearemedy.com>
+      # Listener notes are kept for 12 months.
+      - run: npm run jobs:purge-notes -w @openear/api
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}

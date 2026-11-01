@@ -9,7 +9,8 @@
     "db:migrate": "node src/migrate.js",
     "test": "vitest run",
     "jobs:pass-reminders": "node src/jobs/pass-reminders.js",
-    "review:companion": "node src/jobs/companion-review.js"
+    "review:companion": "node src/jobs/companion-review.js",
+    "jobs:purge-notes": "node src/jobs/purge-notes.js"
   },
   "engines": {
     "node": ">=20"

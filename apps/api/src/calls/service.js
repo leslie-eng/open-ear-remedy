@@ -46,7 +46,7 @@ async function handle(session, msg) {
       if (!isListener) return listenerOnly();
       return coordinator.listenerOffline(userId);
     case 'call:request':
-      return coordinator.requestCall(userId);
+      return coordinator.requestCall(userId, { mode: msg.mode === 'text' ? 'text' : 'voice' });
     case 'call:accept':
       if (!isListener) return listenerOnly();
       return isId(msg.callId) && coordinator.accept(userId, msg.callId);
@@ -58,6 +58,8 @@ async function handle(session, msg) {
     case 'call:report':
       if (!isListener) return listenerOnly();
       return isId(msg.callId) && coordinator.report(userId, msg.callId, msg.reason);
+    case 'chat:message':
+      return isId(msg.callId) && coordinator.chatMessage(userId, msg.callId, msg.text);
     case 'signal':
       return isId(msg.callId) && msg.payload && typeof msg.payload === 'object' && coordinator.signal(userId, msg.callId, msg.payload);
     default:

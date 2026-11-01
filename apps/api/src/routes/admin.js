@@ -5,6 +5,7 @@ import { asyncHandler, requireAdmin } from '../middleware.js';
 import { sendRawEmail } from '../email.js';
 import { mapAdminEbook } from '../services/ebooks.js';
 import * as billing from '../services/billing.js';
+import * as notes from '../services/notes.js';
 import { coordinator } from '../calls/service.js';
 import { escapeHtml } from '../util.js';
 import {
@@ -281,6 +282,15 @@ router.delete(
 );
 
 /** Credit corrections (refunds, goodwill). A reason is required and every change is recorded. */
+// Listener notes about a person (Admins may read them; the person never can).
+router.get(
+  '/users/:id/notes',
+  requireAdmin,
+  asyncHandler(async (req, res) => {
+    res.json({ notes: await notes.notesAbout(req.params.id) });
+  }),
+);
+
 router.post(
   '/users/:id/credits',
   requireAdmin,
