@@ -53,7 +53,9 @@ export function generateToken(bytes = 32) {
 
 export async function findUserById(id) {
   const { rows } = await query(
-    `SELECT id, email, full_name, display_name, email_verified_at, token_version, created_at FROM users WHERE id = $1`,
+    `SELECT id, email, full_name, display_name, email_verified_at, token_version, created_at,
+       password_hash IS NOT NULL AS has_password
+     FROM users WHERE id = $1`,
     [id],
   );
   return rows[0] || null;
@@ -87,5 +89,7 @@ export function publicUser(user) {
     user_metadata: { full_name: user.full_name || '' },
     email_confirmed_at: user.email_verified_at,
     created_at: user.created_at,
+    // False for accounts made with Google: they confirm sensitive actions without a password.
+    has_password: user.has_password ?? Boolean(user.password_hash),
   };
 }

@@ -175,7 +175,8 @@ export default function ProfilePage() {
     try {
       await apiFetch('/api/user/account', {
         method: 'DELETE',
-        body: JSON.stringify({ password: deletePassword }),
+        // Accounts made with Google have no password: they confirm with their email instead.
+        body: JSON.stringify(user?.has_password === false ? { confirm: deletePassword } : { password: deletePassword }),
       });
       setShowDeleteModal(false);
       signOut();
@@ -1031,14 +1032,14 @@ export default function ProfilePage() {
             </div>
             <div className="mb-6">
               <label className="block text-sm font-medium text-[#2A2A2A] mb-2">
-                Enter your password
+                {user?.has_password === false ? 'Enter your email address' : 'Enter your password'}
               </label>
               <input
-                type="password"
+                type={user?.has_password === false ? 'email' : 'password'}
                 value={deletePassword}
                 onChange={(e) => setDeletePassword(e.target.value)}
-                placeholder="Your password"
-                autoComplete="current-password"
+                placeholder={user?.has_password === false ? user.email : 'Your password'}
+                autoComplete={user?.has_password === false ? 'off' : 'current-password'}
                 className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-[#2A2A2A] focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all"
               />
               {deleteError && (

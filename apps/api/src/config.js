@@ -65,6 +65,9 @@ export const config = {
   turnKeyId: process.env.CLOUDFLARE_TURN_KEY_ID || '',
   turnApiToken: process.env.CLOUDFLARE_TURN_API_TOKEN || '',
   adminEmail: process.env.ADMIN_EMAIL || '',
+  // Sign in with Google: the OAuth client ID (public). The client secret is not needed.
+  googleClientId: process.env.GOOGLE_CLIENT_ID || '',
+  googleJwksUrl: process.env.GOOGLE_JWKS_URL || 'https://www.googleapis.com/oauth2/v3/certs',
   // Number of reverse proxies in front of the app (LiteSpeed/Apache on cPanel, Render's LB).
   trustProxy: parseInt(process.env.TRUST_PROXY || '1', 10),
   // Local-disk storage for development; production uses S3-compatible storage (Neon) when configured.

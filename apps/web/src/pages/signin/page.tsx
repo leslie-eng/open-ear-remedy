@@ -2,6 +2,8 @@
 import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useSEO } from '../../utils/seo';
 import Navbar from '../../components/feature/Navbar';
+import GoogleSignInButton from '../../components/feature/GoogleSignInButton';
+import { googleSignInAvailable } from '../../lib/googleIdentity';
 import { useAuth } from '../../contexts/AuthContext';
 import { ApiError } from '../../lib/api';
 
@@ -40,7 +42,7 @@ export default function SignInPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const { user, signUp, signIn, verifyOtp, resendOtp } = useAuth();
+  const { user, signUp, signIn, signInWithGoogle, verifyOtp, resendOtp } = useAuth();
 
   const returnTo = safeReturnPath(location.state);
 
@@ -62,6 +64,20 @@ export default function SignInPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleGoogle = async (credential: string) => {
+    setError('');
+    setSuccess('');
+    setLoading(true);
+    try {
+      await signInWithGoogle(credential);
+      navigate(postSignInPath(), { replace: true });
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Google sign-in failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -323,6 +339,21 @@ export default function SignInPage() {
             <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-start gap-2">
               <i className="ri-checkbox-circle-fill text-green-500 text-base mt-0.5"></i>
               <p className="text-green-700 text-xs">{success}</p>
+            </div>
+          )}
+
+          {googleSignInAvailable && (
+            <div className="mb-4">
+              <GoogleSignInButton
+                text={isSignUp ? 'signup_with' : 'signin_with'}
+                onCredential={(credential) => void handleGoogle(credential)}
+                onError={setError}
+              />
+              <div className="flex items-center gap-3 mt-4" aria-hidden="true">
+                <span className="h-px flex-1 bg-[#E5E5E5]" />
+                <span className="text-xs text-[#6B6B6B]">or with email</span>
+                <span className="h-px flex-1 bg-[#E5E5E5]" />
+              </div>
             </div>
           )}
 

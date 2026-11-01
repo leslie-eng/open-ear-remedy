@@ -71,8 +71,12 @@ router.delete(
   rateLimit({ windowMs: 15 * 60 * 1000, max: 5, key: (req) => req.user.id }),
   asyncHandler(async (req, res) => {
     const user = await findUserByEmail(req.user.email);
-    if (!(await comparePassword(req.body?.password, user.password_hash))) {
-      return res.status(400).json({ error: 'Password is incorrect' });
+    // Accounts made with Google have no password: they confirm by typing their email instead.
+    const confirmed = user.password_hash
+      ? await comparePassword(req.body?.password, user.password_hash)
+      : String(req.body?.confirm ?? '').trim().toLowerCase() === user.email;
+    if (!confirmed) {
+      return res.status(400).json({ error: user.password_hash ? 'Password is incorrect' : 'Type your email address to confirm' });
     }
     // Related rows (credits, history, library, orders...) cascade.
     await query(`DELETE FROM verification_tokens WHERE email = $1`, [user.email]);

@@ -52,6 +52,7 @@ Go to **Cloudflare dashboard → Realtime → TURN Server → Create**. Copy the
    | `RESEND_API_KEY` | Resend → API Keys |
    | `ADMIN_EMAIL` | where contact-form and appointment emails go |
    | `PAYSTACK_SECRET_KEY`, `PAYSTACK_WEBHOOK_SECRET` | Paystack → Settings → API Keys & Webhooks (Kenyan account) |
+   | `GOOGLE_CLIENT_ID` | Google Cloud Console → Credentials → OAuth client (Web). Add the site's addresses under **Authorized JavaScript origins** |
    | `OPENROUTER_API_KEY` | https://openrouter.ai/keys (chat replies and Knowledge Source search) |
 
    `JWT_SECRET` is generated for you. `PUBLIC_API_URL`, `CLIENT_URL`, `CORS_ORIGINS`, `EMAIL_FROM` and `OPENROUTER_MODEL` already have values in the blueprint.
@@ -73,6 +74,7 @@ Go to **Cloudflare dashboard → Realtime → TURN Server → Create**. Copy the
    | `VITE_API_URL` | `https://api.openearemedy.com` |
    | `VITE_WS_URL` | `wss://api.openearemedy.com/ws` |
    | `VITE_SITE_URL` | `https://openearemedy.com` |
+   | `VITE_GOOGLE_CLIENT_ID` | the Google OAuth client ID (same as `GOOGLE_CLIENT_ID` on Render) |
 
    These values are built into the site, so **redeploy** after changing them.
 3. **Add the domains.** Add `openearemedy.com` and `www.openearemedy.com` under **Domains**, and follow Vercel's DNS instructions.
