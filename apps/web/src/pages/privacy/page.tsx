@@ -1,5 +1,6 @@
 
 import { Link } from 'react-router-dom';
+import SiteFooter from '../../components/feature/SiteFooter';
 import Navbar from '../../components/feature/Navbar';
 import { useSEO } from '../../utils/seo';
 
@@ -299,37 +300,7 @@ export default function PrivacyPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-oe-primary text-white py-10 md:py-12 px-4 md:px-8 lg:px-14">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div>
-              <h3 className="text-xl font-bold mb-2">Open Ear</h3>
-              <p className="text-sm text-white/80">A safe place to share what's on your mind.</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="w-8 h-8 border border-white/40 rounded-full flex items-center justify-center hover:border-white hover:bg-white/10 transition-all cursor-pointer">
-                <i className="ri-instagram-line text-sm"></i>
-              </a>
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="w-8 h-8 border border-white/40 rounded-full flex items-center justify-center hover:border-white hover:bg-white/10 transition-all cursor-pointer">
-                <i className="ri-twitter-x-line text-sm"></i>
-              </a>
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="w-8 h-8 border border-white/40 rounded-full flex items-center justify-center hover:border-white hover:bg-white/10 transition-all cursor-pointer">
-                <i className="ri-facebook-fill text-sm"></i>
-              </a>
-            </div>
-          </div>
-          <div className="border-t border-white/20 mt-8 pt-6">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              <p className="text-xs text-white/70">© 2026 Open Ear. All rights reserved.</p>
-              <div className="flex items-center gap-6">
-                <Link to="/privacy" className="text-xs text-white hover:text-white/80 transition-colors cursor-pointer">Privacy Policy</Link>
-                <Link to="/terms" className="text-xs text-white/70 hover:text-white transition-colors cursor-pointer">Terms</Link>
-                <a href="https://readdy.ai/?ref=logo" target="_blank" rel="noopener noreferrer" className="text-xs text-white/70 hover:text-white transition-colors cursor-pointer">Powered by Readdy</a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
