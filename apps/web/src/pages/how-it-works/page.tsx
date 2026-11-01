@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import SiteFooter from '../../components/feature/SiteFooter';
 import Navbar from '../../components/feature/Navbar';
 import { useSEO, generateWebPageSchema, generateFAQSchema } from '../../utils/seo';
 
@@ -399,97 +400,7 @@ export default function HowItWorksPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-oe-primary text-white py-10 md:py-12 px-4 md:px-8 lg:px-14">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8 mb-8">
-            <div className="md:col-span-2">
-              <h3 className="text-xl md:text-2xl font-bold mb-4">
-                Open Ear
-              </h3>
-              <p className="text-xs text-white/80 leading-relaxed mb-4">
-                We provide a safe, judgment-free space for emotional support. Whether you need to talk or chat, we're here to listen.
-              </p>
-              <div className="flex items-center gap-3">
-                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="w-8 h-8 border border-white/40 rounded-full flex items-center justify-center hover:border-white hover:bg-white/10 transition-all cursor-pointer">
-                  <i className="ri-instagram-line text-sm"></i>
-                </a>
-                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="w-8 h-8 border border-white/40 rounded-full flex items-center justify-center hover:border-white hover:bg-white/10 transition-all cursor-pointer">
-                  <i className="ri-twitter-x-line text-sm"></i>
-                </a>
-                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="w-8 h-8 border border-white/40 rounded-full flex items-center justify-center hover:border-white hover:bg-white/10 transition-all cursor-pointer">
-                  <i className="ri-facebook-fill text-sm"></i>
-                </a>
-                <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="w-8 h-8 border border-white/40 rounded-full flex items-center justify-center hover:border-white hover:bg-white/10 transition-all cursor-pointer">
-                  <i className="ri-linkedin-fill text-sm"></i>
-                </a>
-              </div>
-            </div>
-
-            <div>
-              <h4 className="font-semibold text-sm mb-3">Product</h4>
-              <ul className="space-y-2 text-white/80 text-xs">
-                <li>
-                  <Link to="/" className="hover:text-white transition-colors cursor-pointer">
-                    Home
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/call" className="hover:text-white transition-colors cursor-pointer">
-                    Voice Call
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/chat" className="hover:text-white transition-colors cursor-pointer">
-                    AI Chat
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/pricing" className="hover:text-white transition-colors cursor-pointer">
-                    Pricing
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-semibold text-sm mb-3">Company</h4>
-              <ul className="space-y-2 text-white/80 text-xs">
-                <li>
-                  <Link to="/about" className="hover:text-white transition-colors cursor-pointer">
-                    About
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/how-it-works" className="hover:text-white transition-colors cursor-pointer">
-                    How It Works
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/privacy" className="hover:text-white transition-colors cursor-pointer">
-                    Privacy
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/contact" className="hover:text-white transition-colors cursor-pointer">
-                    Contact
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="border-t border-white/20 pt-6">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-3">
-              <p className="text-xs text-white/70">
-                © 2026 Open Ear. All rights reserved.
-              </p>
-              <a href="https://readdy.ai/?ref=logo" target="_blank" rel="noopener noreferrer" className="text-xs text-white/70 hover:text-white transition-colors cursor-pointer">
-                Website Builder
-              </a>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

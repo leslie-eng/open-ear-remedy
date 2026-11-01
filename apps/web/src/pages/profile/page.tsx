@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import SiteFooter from '../../components/feature/SiteFooter';
 import Navbar from '../../components/feature/Navbar';
 import NotesSettingsCard from '../../components/feature/NotesSettingsCard';
 import { useAuth, type AuthUser } from '../../contexts/AuthContext';
@@ -1072,30 +1073,7 @@ export default function ProfilePage() {
       )}
 
       {/* Footer */}
-      <footer className="bg-oe-primary text-white py-8 px-4 md:px-8 lg:px-14">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <Link
-              to="/"
-              className="text-xl font-bold hover:opacity-80 transition-opacity"
-             
-            >
-              Open Ear
-            </Link>
-            <div className="flex items-center gap-6">
-              <Link to="/pricing" className="text-sm text-white/80 hover:text-white transition-colors cursor-pointer">
-                Pricing
-              </Link>
-              <Link to="/how-it-works" className="text-sm text-white/80 hover:text-white transition-colors cursor-pointer">
-                How It Works
-              </Link>
-              <a href="https://readdy.ai/?ref=logo" target="_blank" rel="noopener noreferrer" className="text-sm text-white/80 hover:text-white transition-colors cursor-pointer">
-                Powered by Readdy
-              </a>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import SiteFooter from '../../components/feature/SiteFooter';
 import Navbar from '../../components/feature/Navbar';
 import MpesaPaymentModal from '../../components/feature/MpesaPaymentModal';
 import { useAuth } from '../../contexts/AuthContext';
@@ -373,85 +374,7 @@ export default function PricingPage() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-oe-primary text-white py-8">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-6 mb-6">
-            <div>
-              <h3 className="text-base font-bold mb-3">Open Ear</h3>
-              <p className="text-white/80 text-xs">
-                Voice & chat support available 24/7
-              </p>
-            </div>
-            <div>
-              <h4 className="font-semibold text-sm mb-3">Product</h4>
-              <ul className="space-y-1.5 text-white/80 text-xs">
-                <li>
-                  <button onClick={() => navigate('/')} className="hover:text-white transition-colors cursor-pointer">
-                    Home
-                  </button>
-                </li>
-                <li>
-                  <button onClick={() => navigate('/pricing')} className="hover:text-white transition-colors cursor-pointer">
-                    Pricing
-                  </button>
-                </li>
-                <li>
-                  <button onClick={() => navigate('/call')} className="hover:text-white transition-colors cursor-pointer">
-                    Voice Support
-                  </button>
-                </li>
-                <li>
-                  <button onClick={() => navigate('/chat')} className="hover:text-white transition-colors cursor-pointer">
-                    AI Chat
-                  </button>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-sm mb-3">Company</h4>
-              <ul className="space-y-1.5 text-white/80 text-xs">
-                <li>
-                  <button onClick={() => navigate('/how-it-works')} className="hover:text-white transition-colors cursor-pointer">
-                    How It Works
-                  </button>
-                </li>
-                <li>
-                  <button onClick={() => navigate('/privacy')} className="hover:text-white transition-colors cursor-pointer">
-                    Privacy
-                  </button>
-                </li>
-                <li>
-                  <button onClick={() => navigate('/terms')} className="hover:text-white transition-colors cursor-pointer">
-                    Terms of Service
-                  </button>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors cursor-pointer">
-                    Contact Us
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-sm mb-3">Connect</h4>
-              <div className="flex gap-3">
-                <a href="#" className="w-8 h-8 flex items-center justify-center bg-white/10 rounded-lg hover:bg-white/20 transition-colors cursor-pointer">
-                  <i className="ri-twitter-fill text-base"></i>
-                </a>
-                <a href="#" className="w-8 h-8 flex items-center justify-center bg-white/10 rounded-lg hover:bg-white/20 transition-colors cursor-pointer">
-                  <i className="ri-facebook-fill text-base"></i>
-                </a>
-                <a href="#" className="w-8 h-8 flex items-center justify-center bg-white/10 rounded-lg hover:bg-white/20 transition-colors cursor-pointer">
-                  <i className="ri-instagram-fill text-base"></i>
-                </a>
-              </div>
-            </div>
-          </div>
-          <div className="border-t border-white/20 pt-6 text-center text-white/80 text-xs">
-            <p>© 2026 Open Ear. All rights reserved. <a href="https://readdy.ai/?ref=logo" className="hover:text-white transition-colors cursor-pointer">Powered by Readdy</a></p>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
 
       {/* Auth Modal */}
       {showAuthModal && (

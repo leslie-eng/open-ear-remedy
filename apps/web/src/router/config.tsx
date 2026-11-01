@@ -2,6 +2,9 @@ import { lazy } from 'react';
 import { RouteObject } from 'react-router-dom';
 
 const HomePage = lazy(() => import('../pages/home/page'));
+const CheckInPage = lazy(() => import('../pages/check-in/page'));
+const CheckInReflectionPage = lazy(() => import('../pages/check-in/reflection'));
+const CheckInOptionsPage = lazy(() => import('../pages/check-in/options'));
 const PricingPage = lazy(() => import('../pages/pricing/page'));
 const DashboardPage = lazy(() => import('../pages/dashboard/page'));
 const CallPage = lazy(() => import('../pages/call/page'));
@@ -39,6 +42,9 @@ const routes: RouteObject[] = [
     path: '/',
     element: <HomePage />,
   },
+  { path: '/check-in', element: <CheckInPage /> },
+  { path: '/check-in/reflection', element: <CheckInReflectionPage /> },
+  { path: '/check-in/options', element: <CheckInOptionsPage /> },
   {
     path: '/pricing',
     element: <PricingPage />,

@@ -8,6 +8,7 @@ import { useSEO } from '../../utils/seo';
  * serves (e.g. Finland, Ghana). Keep this page short, plain and fast to load.
  */
 const EMERGENCY_NUMBERS = [
+  { region: 'Kenya (or call 112)', number: '999' },
   { region: 'EU and many other countries', number: '112' },
   { region: 'United States and Canada', number: '911' },
   { region: 'United Kingdom', number: '999' },
@@ -44,7 +45,7 @@ export default function CrisisHelpPage() {
           </h2>
           <ul className="space-y-3">
             {EMERGENCY_NUMBERS.map((item) => (
-              <li key={item.number} className="flex items-center justify-between gap-4 text-body">
+              <li key={item.region} className="flex items-center justify-between gap-4 text-body">
                 <span className="text-oe-muted">{item.region}</span>
                 <a href={`tel:${item.number}`} className="oe-btn rounded-oe-sm bg-oe-crisis px-5 py-2 font-bold text-white">
                   {item.number}

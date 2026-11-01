@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Navbar from '../../components/feature/Navbar';
+import SiteFooter from '../../components/feature/SiteFooter';
+import MicCheck from '../../components/feature/MicCheck';
 import { useAuth } from '../../contexts/AuthContext';
 import { apiFetch } from '../../lib/api';
 import { useSEO, generateWebPageSchema } from '../../utils/seo';
@@ -22,6 +24,29 @@ const END_MESSAGES: Record<string, string> = {
   dropped: 'The connection was lost, so the call ended. You were only charged up to the moment it dropped.',
   time_limit: 'Your call time ran out, so the call ended.',
 };
+
+const SAFE_BASELINE = [
+  {
+    icon: 'ri-hourglass-line',
+    title: 'You set the pace',
+    body: 'Silence is welcome. You don’t have to fill every gap with words. The Listener follows your lead.',
+  },
+  {
+    icon: 'ri-shield-keyhole-line',
+    title: 'No diagnosis, never recorded',
+    body: 'Listeners aren’t clinicians and calls are never recorded. A Listener may keep a short private note, which you can turn off.',
+  },
+  {
+    icon: 'ri-logout-box-r-line',
+    title: 'Leave anytime',
+    body: 'If it doesn’t feel right, or you need to step away, end the call with one tap. No hard feelings.',
+  },
+  {
+    icon: 'ri-chat-off-line',
+    title: 'No unasked-for advice',
+    body: 'Listeners listen. They won’t try to fix things unless you ask for another pair of eyes.',
+  },
+];
 
 async function sendLowCreditNotification(currentCredits: number) {
   if (currentCredits > 50) return;
@@ -284,8 +309,10 @@ export default function CallPage() {
       .padStart(2, '0')}`;
   };
 
+  const isLive = call.state.phase === 'live';
+
   return (
-    <div className="min-h-screen bg-oe-bg">
+    <div className="min-h-screen bg-oe-bg text-oe-ink">
       <Navbar />
       {notesGate.noticeOpen && <NotesNotice onChoose={(allow) => void notesGate.choose(allow)} onCancel={notesGate.cancel} />}
       <ConnectingOverlay
@@ -299,114 +326,107 @@ export default function CallPage() {
         action={{ label: 'Cancel', onClick: call.hangup }}
       />
 
-      <div className="pt-20 md:pt-24 px-6 pb-12">
-        <div className="max-w-5xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-8 md:mb-12">
-            <div className="inline-flex items-center gap-2 px-4 md:px-6 py-2 bg-oe-primary/10 rounded-full mb-4 md:mb-6">
-              <i className="ri-phone-fill text-oe-primary text-sm md:text-base"></i>
-              <span className="text-xs md:text-sm font-medium text-oe-primary">
-                Voice Support
-              </span>
-            </div>
-            <h1
-              className="text-3xl md:text-4xl lg:text-5xl font-bold text-oe-ink mb-4"
-             
-            >
-              Connect Through Voice
-            </h1>
-            <p className="text-base md:text-lg text-oe-muted max-w-2xl mx-auto">
-              Real-time emotional support when you need it most. {CREDITS_PER_CALL_MINUTE} credits per
-              minute.
+      <main className="oe-route mx-auto max-w-[1120px] px-5 pb-20 pt-28 md:px-8">
+        {isLive ? (
+          <section className="mx-auto max-w-xl rounded-3xl border border-oe-line bg-white p-8 text-center md:p-12">
+            <p className="inline-flex items-center gap-2 rounded-full bg-oe-primary-tint px-3 py-1 text-xs font-medium text-oe-primary-deep">
+              <span aria-hidden="true" className="oe-breathe" /> You&rsquo;re talking with a Listener
             </p>
-            {user && (
-              <div className="mt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-md">
-                  <i className="ri-copper-coin-fill text-oe-primary"></i>
-                  <span className="font-semibold text-oe-ink">
-                    {credits} Credits
-                  </span>
-                  <span className="text-xs text-oe-muted">
-                    ({Math.floor(availableSeconds / 60)} min{passSecondsLeft > 0 ? ' incl. Monthly Pass' : ''})
-                  </span>
-                </div>
-                {isFirstTimeUser && (
-                  <button
-                    onClick={claimFreeCredits}
-                    disabled={claimingFreeCredits}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-forest-500 text-white rounded-full shadow-md hover:bg-forest-600 transition-all disabled:opacity-50 whitespace-nowrap cursor-pointer text-sm font-medium animate-pulse"
-                  >
-                    <i className="ri-gift-fill"></i>
-                    {claimingFreeCredits
-                      ? 'Claiming...'
-                      : `Claim ${FREE_TRIAL_CREDITS} Free Credits!`}
-                  </button>
-                )}
-              </div>
+            <p className="mt-8 font-heading text-6xl font-semibold text-oe-ink" aria-live="off">
+              {formatTime(call.state.elapsed)}
+            </p>
+            <p className="mt-2 text-sm text-oe-muted">Up to {formatTime(call.state.maxSeconds)} on your balance</p>
+            {call.state.peerReconnecting && (
+              <p role="status" className="mx-auto mt-6 max-w-md rounded-xl bg-oe-accent-tint p-3 text-sm font-medium text-oe-accent">
+                The connection is unstable. Trying to reconnect…
+              </p>
             )}
-            {!user && (
-              <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-forest-50 border border-forest-200 rounded-full">
-                <i className="ri-gift-fill text-forest-600"></i>
-                <span className="text-forest-700 font-medium text-sm">
-                  First-time users get {FREE_TRIAL_CREDITS} FREE credits!
-                </span>
-              </div>
+            {call.state.lowTimeWarning && (
+              <p role="alert" className="mx-auto mt-6 max-w-md rounded-xl bg-orange-100 p-3 text-sm font-medium text-orange-700">
+                About 2 minutes of call time left. The call will end when it runs out.
+              </p>
             )}
-          </div>
-
-          {/* Error Message */}
-          {callError && (
-            <div
-              className={`max-w-2xl mx-auto mb-6 p-4 border rounded-2xl flex items-start gap-3 ${
-                callError.includes('✓')
-                  ? 'bg-forest-50 border-forest-200'
-                  : 'bg-red-50 border-red-200'
-              }`}
-            >
-              <i
-                className={`text-xl mt-0.5 ${
-                  callError.includes('✓')
-                    ? 'ri-checkbox-circle-fill text-forest-500'
-                    : 'ri-error-warning-fill text-red-500'
+            <p className="mt-8 text-sm text-oe-muted">Silence is welcome. You can leave whenever you want.</p>
+            <div className="mt-8 flex items-center justify-center gap-4">
+              <button
+                onClick={call.toggleMute}
+                aria-label={call.state.muted ? 'Unmute microphone' : 'Mute microphone'}
+                aria-pressed={call.state.muted}
+                className={`flex h-14 w-14 cursor-pointer items-center justify-center rounded-full ${
+                  call.state.muted ? 'bg-oe-crisis text-white' : 'bg-oe-surface text-oe-ink hover:bg-oe-primary-tint'
                 }`}
-              ></i>
+              >
+                <i className={`${call.state.muted ? 'ri-mic-off-line' : 'ri-mic-line'} text-2xl`} aria-hidden="true" />
+              </button>
+              <button
+                onClick={call.hangup}
+                className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-oe-crisis px-8 py-4 font-semibold text-white hover:opacity-90"
+              >
+                <i className="ri-phone-line rotate-[135deg]" aria-hidden="true" /> End call
+              </button>
+            </div>
+          </section>
+        ) : (
+          <>
+            <p className="inline-flex items-center gap-2 rounded-full bg-oe-accent-tint px-3 py-1 text-xs font-medium uppercase tracking-wide text-oe-accent">
+              <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-oe-accent" /> Getting ready · Zero pressure
+            </p>
+            <h1 className="mt-4 text-4xl font-bold md:text-5xl">Getting ready to connect.</h1>
+            <p className="mt-3 max-w-2xl text-lg text-oe-muted">
+              Take 30 seconds to settle in. There&rsquo;s no performance here, just an honest conversation with someone who
+              listens.
+            </p>
+
+            {call.state.phase === 'ended' && call.state.endReason && (
+              <p role="status" className="mt-6 max-w-2xl rounded-2xl bg-oe-primary-tint px-5 py-3 text-sm text-oe-ink">
+                {END_MESSAGES[call.state.endReason]}
+                {call.state.billedSeconds > 0 && ` Talk time: ${formatTime(call.state.billedSeconds)}.`}
+              </p>
+            )}
+            {callError && (
               <p
-                className={`text-sm ${
-                  callError.includes('✓')
-                    ? 'text-forest-700'
-                    : 'text-red-700'
+                role="alert"
+                className={`mt-6 max-w-2xl rounded-2xl px-5 py-3 text-sm ${
+                  callError.includes('✓') ? 'bg-oe-primary-tint text-oe-primary-deep' : 'bg-oe-crisis-tint text-oe-crisis'
                 }`}
               >
                 {callError}
               </p>
-            </div>
-          )}
+            )}
 
-          {/* Call Interface */}
-          <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12">
-            {/* Call Status */}
-            <div className="text-center mb-8 md:mb-12">
-              {call.state.phase !== 'live' ? (
-                <>
-                  <div className="w-24 h-24 md:w-32 md:h-32 bg-oe-primary rounded-full flex items-center justify-center mx-auto mb-6 md:mb-8 shadow-lg">
-                    <i className="ri-phone-fill text-4xl md:text-5xl text-white"></i>
+            <div className="mt-10 grid gap-5 lg:grid-cols-2">
+              <div className="space-y-5">
+                <section className="rounded-3xl border border-oe-line bg-white p-6 md:p-8">
+                  <div className="flex items-start gap-4">
+                    <span aria-hidden="true" className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-oe-primary-soft text-2xl text-oe-primary-deep">
+                      <i className="ri-user-heart-line" />
+                    </span>
+                    <div>
+                      <h2 className="font-sans text-lg font-semibold">A trained Listener</h2>
+                      <p className="text-sm text-oe-muted">The first free Listener will pick up. You won&rsquo;t need to explain who you are.</p>
+                      <div className="mt-3 flex flex-wrap gap-2 text-xs">
+                        {['Calm presence', 'Slow pace', 'Non-judgmental'].map((t) => (
+                          <span key={t} className="rounded-full bg-oe-surface px-3 py-1 text-oe-ink">
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                  <h2 className="text-2xl md:text-3xl font-bold text-oe-ink mb-3">
-                    Ready to Connect
-                  </h2>
-                  <p className="text-sm md:text-base text-oe-muted">
-                    Talk with a listener from your browser, or book an appointment
-                  </p>
-                  {call.state.phase === 'ended' && call.state.endReason && (
-                    <p role="status" className="mt-4 mx-auto max-w-md text-sm md:text-base text-oe-ink bg-oe-primary-tint rounded-xl p-3">
-                      {END_MESSAGES[call.state.endReason]}
-                      {call.state.billedSeconds > 0 && ` Talk time: ${formatTime(call.state.billedSeconds)}.`}
-                    </p>
-                  )}
-                  {user && (
-                    <div className="mt-6 mx-auto max-w-sm text-left">
-                      <label htmlFor="display-name" className="block text-sm font-medium text-oe-ink mb-2">
-                        Name the listener will see (optional)
+                  <blockquote className="mt-6 rounded-2xl bg-oe-surface-low px-5 py-4 text-sm italic text-oe-muted">
+                    &ldquo;Take your time. We don&rsquo;t have to solve your life in twenty minutes. We just start right where you
+                    are.&rdquo;
+                  </blockquote>
+                  <div className="mt-5">
+                    <MicCheck disabled={callInProgress} />
+                  </div>
+                </section>
+
+                <section className="rounded-3xl border border-oe-line bg-white p-6 md:p-8">
+                  {user ? (
+                    <>
+                      <label htmlFor="display-name" className="block text-sm font-medium">
+                        Name the Listener will see (optional)
                       </label>
                       <input
                         id="display-name"
@@ -415,133 +435,99 @@ export default function CallPage() {
                         value={displayName}
                         onChange={(e) => setDisplayName(e.target.value)}
                         placeholder="Anonymous"
-                        className="w-full px-4 py-3 border-2 border-oe-line rounded-xl focus:border-oe-primary focus:outline-none text-sm md:text-base"
+                        className="mt-2 w-full rounded-xl border border-oe-line bg-oe-surface-low px-4 py-3 focus:border-oe-primary focus:outline-none focus:ring-2 focus:ring-oe-primary/30"
                       />
-                      <p className="text-xs text-oe-muted mt-2">
-                        Listeners never see your email or phone number. Calls are never recorded.
-                      </p>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <>
-                  <div className="w-24 h-24 md:w-32 md:h-32 bg-oe-primary rounded-full flex items-center justify-center mx-auto mb-6 md:mb-8 shadow-lg animate-pulse">
-                    <i className="ri-phone-fill text-4xl md:text-5xl text-white"></i>
-                  </div>
-                  <h2 className="text-2xl md:text-3xl font-bold text-oe-ink mb-3">
-                    Call in Progress
-                  </h2>
-                  <div className="text-3xl md:text-4xl font-bold text-oe-primary mb-2" aria-live="off">
-                    {formatTime(call.state.elapsed)}
-                  </div>
-                  <p className="text-sm md:text-base text-oe-muted">
-                    Up to {formatTime(call.state.maxSeconds)} on your balance
-                  </p>
-
-                  {call.state.peerReconnecting && (
-                    <p role="status" className="mt-4 mx-auto max-w-md p-3 rounded-xl bg-yellow-100 border-2 border-yellow-400 text-sm font-medium text-yellow-700">
-                      The connection is unstable. Trying to reconnect…
+                      <p className="mt-2 text-xs text-oe-muted">Listeners never see your email or phone number.</p>
+                      <div className="mt-5 flex flex-wrap items-center gap-3 text-sm">
+                        <span className="inline-flex items-center gap-2 rounded-full bg-oe-surface px-4 py-2">
+                          <i className="ri-copper-coin-line text-oe-primary" aria-hidden="true" />
+                          <strong>{credits}</strong> credits
+                          <span className="text-oe-muted">
+                            ({Math.floor(availableSeconds / 60)} min{passSecondsLeft > 0 ? ' incl. Monthly Pass' : ''})
+                          </span>
+                        </span>
+                        {isFirstTimeUser && (
+                          <button
+                            onClick={claimFreeCredits}
+                            disabled={claimingFreeCredits}
+                            className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-oe-primary-tint px-4 py-2 font-medium text-oe-primary-deep disabled:opacity-50"
+                          >
+                            <i className="ri-gift-line" aria-hidden="true" />
+                            {claimingFreeCredits ? 'Claiming…' : `Claim ${FREE_TRIAL_CREDITS} free credits`}
+                          </button>
+                        )}
+                        <Link to="/pricing" className="text-oe-primary hover:underline">
+                          Top up
+                        </Link>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-sm text-oe-muted">
+                      You&rsquo;ll be asked to sign in when you&rsquo;re ready, so we can keep track of your call time. New here?{' '}
+                      {FREE_TRIAL_CREDITS} free credits ({CREDITS_PER_CALL_MINUTE} credits a minute).
                     </p>
                   )}
-                  {call.state.lowTimeWarning && (
-                    <div role="alert" className="mt-4 mx-auto max-w-md p-3 rounded-xl flex items-center justify-center gap-2 bg-orange-100 border-2 border-orange-400">
-                      <i className="ri-alert-fill text-lg text-orange-600"></i>
-                      <span className="text-sm font-medium text-orange-700">
-                        About 2 minutes of call time left. The call will end when it runs out.
+                </section>
+              </div>
+
+              <section className="rounded-3xl border border-oe-line bg-white p-6 md:p-8">
+                <div className="flex items-center justify-between">
+                  <h2 className="font-sans text-xl font-semibold">Safe baseline</h2>
+                  <span className="rounded-full bg-oe-primary-tint px-3 py-1 text-xs text-oe-primary-deep">Open Ear principles</span>
+                </div>
+                <p className="mt-2 text-sm text-oe-muted">
+                  Every call is designed to take the pressure off. You are in control from the first second.
+                </p>
+                <ul className="mt-6 space-y-3">
+                  {SAFE_BASELINE.map((item) => (
+                    <li key={item.title} className="flex gap-4 rounded-2xl bg-oe-surface-low p-4">
+                      <span aria-hidden="true" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-oe-accent-tint text-oe-accent">
+                        <i className={item.icon} />
                       </span>
-                    </div>
-                  )}
-                </>
-              )}
+                      <span>
+                        <span className="block font-semibold">{item.title}</span>
+                        <span className="mt-0.5 block text-sm leading-relaxed text-oe-muted">{item.body}</span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
             </div>
 
-            {/* Call Action Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-6 mb-8">
-              {!callInProgress ? (
-                <>
-                  <button
-                    onClick={() => void startCall()}
-                    className="w-full sm:w-auto px-8 md:px-12 py-3 md:py-4 bg-oe-primary text-white rounded-2xl font-semibold hover:bg-oe-primary-hover transition-all flex items-center justify-center gap-3 whitespace-nowrap cursor-pointer"
-                  >
-                    <i className="ri-phone-fill text-lg md:text-xl"></i>
-                    Start Call
-                  </button>
-                  <button
-                    onClick={openBookingModal}
-                    className="w-full sm:w-auto px-8 md:px-12 py-3 md:py-4 bg-white text-oe-primary border-2 border-oe-primary rounded-2xl font-semibold hover:bg-oe-primary-hover hover:text-white transition-all flex items-center justify-center gap-3 whitespace-nowrap cursor-pointer"
-                  >
-                    <i className="ri-calendar-fill text-lg md:text-xl"></i>
-                    Book Appointment
-                  </button>
-                  <Link to="/listener-chat" className="text-sm font-medium text-oe-primary hover:underline">
-                    Prefer to type? Text a Listener
-                  </Link>
-                </>
-              ) : (
-                <button
-                  onClick={call.hangup}
-                  className="px-8 md:px-12 py-3 md:py-4 bg-red-500 text-white rounded-2xl font-semibold hover:bg-red-600 transition-all flex items-center gap-3 whitespace-nowrap cursor-pointer"
-                >
-                  <i className="ri-phone-fill text-lg md:text-xl"></i>
-                  End Call
+            <div className="mt-5 flex flex-col items-center justify-between gap-4 rounded-3xl bg-oe-surface p-5 sm:flex-row">
+              <div className="flex flex-wrap items-center gap-3">
+                <Link to="/check-in/reflection" className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-medium text-oe-primary-deep">
+                  <i className="ri-time-line" aria-hidden="true" /> I need a few more minutes
+                </Link>
+                <Link to="/listener-chat" className="px-2 text-sm font-medium text-oe-primary hover:underline">
+                  Prefer to type?
+                </Link>
+                <button onClick={openBookingModal} className="cursor-pointer px-2 text-sm font-medium text-oe-primary hover:underline">
+                  Book a time instead
                 </button>
-              )}
-            </div>
-
-            {/* Call Controls */}
-            <div className="flex items-center justify-center gap-4 md:gap-6 mb-8">
+              </div>
               <button
-                onClick={call.toggleMute}
-                disabled={call.state.phase !== 'live'}
-                aria-label={call.state.muted ? 'Unmute microphone' : 'Mute microphone'}
-                aria-pressed={call.state.muted}
-                className={`w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center transition-all cursor-pointer ${
-                  call.state.muted
-                    ? 'bg-red-500 hover:bg-red-600'
-                    : 'bg-oe-surface hover:bg-oe-primary-tint'
-                } ${
-                  call.state.phase !== 'live' ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
+                onClick={() => void startCall()}
+                className="oe-btn inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-oe-primary px-8 py-4 text-lg font-semibold text-white hover:bg-oe-primary-hover sm:w-auto"
               >
-                <i
-                  className={`${
-                    call.state.muted
-                      ? 'ri-mic-off-fill text-white'
-                      : 'ri-mic-fill text-oe-ink'
-                  } text-xl md:text-2xl`}
-                ></i>
+                Find a Listener now <i className="ri-arrow-right-line" aria-hidden="true" />
               </button>
             </div>
+            <p className="mt-4 text-center text-xs text-oe-muted">
+              Calls are private and never recorded · In danger? Call{' '}
+              <a href="tel:999" className="font-semibold text-oe-crisis underline">
+                999
+              </a>{' '}
+              or{' '}
+              <a href="tel:112" className="font-semibold text-oe-crisis underline">
+                112
+              </a>
+            </p>
+          </>
+        )}
+      </main>
 
-            {/* Info Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-              <div className="bg-oe-primary-tint rounded-2xl p-4 md:p-6 text-center">
-                <i className="ri-shield-check-fill text-2xl md:text-3xl text-oe-primary mb-2 md:mb-3 block"></i>
-                <p className="text-xs md:text-sm font-semibold text-oe-ink mb-1">
-                  Secure & Private
-                </p>
-                <p className="text-xs text-oe-muted">End-to-end encrypted</p>
-              </div>
-
-              <div className="bg-oe-primary-tint rounded-2xl p-4 md:p-6 text-center">
-                <i className="ri-time-fill text-2xl md:text-3xl text-oe-primary mb-2 md:mb-3 block"></i>
-                <p className="text-xs md:text-sm font-semibold text-oe-ink mb-1">
-                  Available 24/7
-                </p>
-                <p className="text-xs text-oe-muted">Connect anytime</p>
-              </div>
-
-              <div className="bg-oe-primary-tint rounded-2xl p-4 md:p-6 text-center">
-                <i className="ri-heart-3-fill text-2xl md:text-3xl text-oe-primary mb-2 md:mb-3 block"></i>
-                <p className="text-xs md:text-sm font-semibold text-oe-ink mb-1">
-                  Judgment‑Free
-                </p>
-                <p className="text-xs text-oe-muted">Safe space to share</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <SiteFooter />
 
       {/* Auth Modal */}
       {showAuthModal && (
