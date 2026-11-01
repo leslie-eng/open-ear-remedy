@@ -21,9 +21,13 @@ async function sendViaResend({ to, subject, html }) {
   });
 
   if (!res.ok) {
+    // Logged in full (e.g. "domain is not verified"); the person gets a plain, retryable message.
     const text = await res.text();
-    console.error('Resend error:', text);
-    throw new Error('Failed to send email');
+    console.error(`Resend error ${res.status}:`, text);
+    const err = new Error('We couldn’t send the email right now. Please try again in a few minutes.');
+    err.status = 503;
+    err.expose = true;
+    throw err;
   }
   return { ok: true };
 }
