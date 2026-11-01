@@ -1,25 +1,6 @@
-import http from 'node:http';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { startFakeOpenRouter, useFakeOpenRouter } from './fake-openrouter.js';
 import { testDatabaseUrl } from './test-env.js';
-
-/** Stands in for OpenRouter: records what it was sent and answers with `reply` (or fails). */
-function startFakeOpenRouter() {
-  const fake = { requests: [], reply: 'I hear you.', fail: false };
-  const server = http.createServer((req, res) => {
-    let body = '';
-    req.on('data', (c) => (body += c));
-    req.on('end', () => {
-      fake.requests.push({ url: req.url, auth: req.headers.authorization, body: JSON.parse(body) });
-      if (fake.fail) {
-        res.writeHead(500, { 'Content-Type': 'application/json' }).end('{"error":{"message":"upstream down"}}');
-        return;
-      }
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ choices: [{ message: { role: 'assistant', content: fake.reply } }] }));
-    });
-  });
-  return { fake, server };
-}
 
 // Everything that reads the app config is imported in beforeAll, after the fake provider's
 // address is known, so the app talks to it instead of OpenRouter.
@@ -34,11 +15,8 @@ describe.skipIf(!testDatabaseUrl())('AI chat', () => {
   let resetData;
 
   beforeAll(async () => {
-    provider = startFakeOpenRouter();
-    await new Promise((r) => provider.server.listen(0, r));
-    process.env.OPENROUTER_BASE_URL = `http://127.0.0.1:${provider.server.address().port}/api/v1`;
-    process.env.OPENROUTER_API_KEY = 'sk-or-test';
-    process.env.OPENROUTER_MODEL = 'test/model';
+    provider = await startFakeOpenRouter();
+    useFakeOpenRouter(provider.baseUrl);
 
     ({ app } = await import('../src/app.js'));
     billing = await import('../src/services/billing.js');
@@ -51,12 +29,11 @@ describe.skipIf(!testDatabaseUrl())('AI chat', () => {
   });
   afterAll(() => {
     app?.close();
-    provider?.server.close();
+    provider?.close();
   });
   beforeEach(async () => {
     await resetData();
-    provider.fake.requests = [];
-    provider.fake.fail = false;
+    provider.reset();
   });
 
   async function userWithCredits(credits) {
@@ -81,7 +58,7 @@ describe.skipIf(!testDatabaseUrl())('AI chat', () => {
     expect((await res.json()).response).toBe('I hear you.');
     expect(await billing.getBalance(user.id)).toMatchObject({ credits: 4 });
 
-    const [sent] = provider.fake.requests;
+    const [sent] = provider.calls('chat/completions');
     expect(sent.url).toBe('/api/v1/chat/completions');
     expect(sent.auth).toBe('Bearer sk-or-test');
     expect(sent.body.model).toBe('test/model');
@@ -92,7 +69,7 @@ describe.skipIf(!testDatabaseUrl())('AI chat', () => {
     const user = await userWithCredits(5);
     await send(user.token, { message: 'Hi' });
 
-    const system = provider.fake.requests[0].body.messages[0];
+    const system = provider.calls('chat/completions')[0].body.messages[0];
     expect(system.role).toBe('system');
     expect(system.content).toContain('openearemedy.com/crisis-help');
   });

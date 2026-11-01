@@ -55,6 +55,11 @@ export const config = {
   // AI chat through OpenRouter (OpenAI-compatible API). OPENROUTER_MODEL switches models without a code change.
   openRouterApiKey: process.env.OPENROUTER_API_KEY || '',
   openRouterModel: process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.3-70b-instruct',
+  // AI Companion knowledge search (RAG). RAG_ENABLED=false is the kill switch.
+  openRouterEmbeddingModel: process.env.OPENROUTER_EMBEDDING_MODEL || 'openai/text-embedding-3-small',
+  ragEnabled: process.env.RAG_ENABLED !== 'false',
+  // Cosine similarity a passage needs before the Companion is shown it (0-1). Tune with the review script.
+  ragMinSimilarity: parseFloat(process.env.RAG_MIN_SIMILARITY || '0.35'),
   openRouterBaseUrl: (process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1').replace(/\/$/, ''),
   // Cloudflare TURN relay for calls (Dashboard → Realtime → TURN). Required in production.
   turnKeyId: process.env.CLOUDFLARE_TURN_KEY_ID || '',
