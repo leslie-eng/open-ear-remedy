@@ -50,8 +50,17 @@ export const config = {
     .filter(Boolean),
   resendApiKey: process.env.RESEND_API_KEY || '',
   emailFrom: process.env.EMAIL_FROM || 'Open Ear <noreply@openearemedy.com>',
-  paystackSecretKey: process.env.PAYSTACK_SECRET_KEY || '',
-  paystackWebhookSecret: process.env.PAYSTACK_WEBHOOK_SECRET || '',
+  // M-Pesa Express (Daraja STK Push). Sandbox by default; production: https://api.safaricom.co.ke
+  daraja: {
+    baseUrl: (process.env.DARAJA_BASE_URL || 'https://sandbox.safaricom.co.ke').trim().replace(/\/$/, ''),
+    consumerKey: (process.env.DARAJA_CONSUMER_KEY || '').trim(),
+    consumerSecret: (process.env.DARAJA_CONSUMER_SECRET || '').trim(),
+    shortCode: (process.env.DARAJA_SHORT_CODE || '').trim(),
+    passkey: (process.env.DARAJA_PASSKEY || '').trim(),
+    // Paybill: CustomerPayBillOnline. Till (Buy Goods): CustomerBuyGoodsOnline, with DARAJA_TILL_NUMBER.
+    transactionType: (process.env.DARAJA_TRANSACTION_TYPE || 'CustomerPayBillOnline').trim(),
+    tillNumber: (process.env.DARAJA_TILL_NUMBER || '').trim(),
+  },
   // AI chat through OpenRouter (OpenAI-compatible API). OPENROUTER_MODEL switches models without a code change.
   openRouterApiKey: process.env.OPENROUTER_API_KEY || '',
   openRouterModel: process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.3-70b-instruct',

@@ -1,6 +1,6 @@
 import { query } from '../db.js';
 
-/** Paystack stores purchase amounts in minor units (cents/kobo). */
+/** Purchase amounts are stored in minor units (cents). */
 export function minorToMajor(amount) {
   return Math.round((Number(amount) || 0)) / 100;
 }

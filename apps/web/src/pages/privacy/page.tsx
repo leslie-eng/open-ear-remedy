@@ -171,7 +171,7 @@ export default function PrivacyPage() {
               </p>
               <ul className="space-y-3">
                 {[
-                  { title: 'Service Providers', desc: 'Third-party vendors who assist in providing our services (e.g., Cloudflare for call relay and file storage, Paystack for payments)' },
+                  { title: 'Service Providers', desc: 'Third-party vendors who assist in providing our services (e.g., Cloudflare for call audio relay, Neon for data and file storage, Safaricom M-Pesa for payments, OpenRouter for AI chat)' },
                   { title: 'Legal Requirements', desc: 'When required by law or to protect our rights and safety' },
                   { title: 'Business Transfers', desc: 'In connection with a merger, acquisition, or sale of assets' },
                   { title: 'With Your Consent', desc: 'When you explicitly authorize us to share your information' },

@@ -8,7 +8,7 @@ CREATE TABLE monthly_passes (
   call_seconds_total INTEGER NOT NULL CHECK (call_seconds_total >= 0),
   call_seconds_used INTEGER NOT NULL DEFAULT 0 CHECK (call_seconds_used BETWEEN 0 AND call_seconds_total),
   ai_messages_per_day INTEGER NOT NULL CHECK (ai_messages_per_day >= 0),
-  -- Paystack reference; unique so a repeated webhook can't grant the same pass twice.
+  -- Payment reference; unique so a repeated webhook can't grant the same pass twice.
   reference TEXT UNIQUE,
   reminder_sent_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

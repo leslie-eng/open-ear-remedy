@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import Navbar from '../../components/feature/Navbar';
+import MpesaPaymentModal from '../../components/feature/MpesaPaymentModal';
 import { useSEO } from '../../utils/seo';
 import { useAuth } from '../../contexts/AuthContext';
 import { apiFetch } from '../../lib/api';
@@ -176,7 +177,8 @@ export default function DashboardPage() {
   const [callHistory, setCallHistory] = useState<CallHistoryItem[]>([]);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [loadingPkg, setLoadingPkg] = useState<number | null>(null);
+  // The pack being paid for with M-Pesa (the payment window is open while set).
+  const [payingPkg, setPayingPkg] = useState<MinutePackage | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [selectedPkg, setSelectedPkg] = useState<MinutePackage | null>(null);
   const [notification, setNotification] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
@@ -270,39 +272,16 @@ export default function DashboardPage() {
       setShowAuthModal(true);
       return;
     }
-    await initiatePaystackCheckout(pkg);
+    setPayingPkg(pkg);
   };
 
-  const initiatePaystackCheckout = async (pkg: MinutePackage) => {
-    setLoadingPkg(pkg.id);
-
-    try {
-      const data = await apiFetch<{ url?: string; authorization_url?: string }>(
-        '/api/payments/checkout',
-        {
-          method: 'POST',
-          body: JSON.stringify({ offerId: pkg.packId }),
-        },
-      );
-
-      const payUrl = data.url ?? data.authorization_url;
-      if (payUrl) {
-        window.location.href = payUrl;
-      } else {
-        throw new Error('No payment authorization URL returned from Paystack.');
-      }
-    } catch (error) {
-      console.error('Checkout error:', error);
-      setNotification({
-        type: 'error',
-        message:
-          error instanceof Error
-            ? error.message
-            : 'Unable to start Paystack checkout. Please try again.',
-      });
-    } finally {
-      setLoadingPkg(null);
-    }
+  const startPayment = async (phone: string) => {
+    if (!payingPkg) throw new Error('Choose a pack first.');
+    const { paymentId } = await apiFetch<{ paymentId: string }>('/api/payments/checkout', {
+      method: 'POST',
+      body: JSON.stringify({ offerId: payingPkg.packId, phone }),
+    });
+    return paymentId;
   };
 
   const displayMinutes = credits !== null ? callMinutesFor(credits) : 0;
@@ -310,6 +289,19 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]">
       <Navbar transparent={false} />
+
+      {payingPkg && (
+        <MpesaPaymentModal
+          title={`${payingPkg.credits} credits`}
+          amountLabel={formatPrice(payingPkg.price)}
+          start={startPayment}
+          onPaid={() => {
+            setNotification({ type: 'success', message: `${payingPkg.credits} credits added.` });
+            void fetchCredits();
+          }}
+          onClose={() => setPayingPkg(null)}
+        />
+      )}
 
       {/* Notification Toast */}
       {notification && (
@@ -473,21 +465,14 @@ export default function DashboardPage() {
 
                 <button
                   onClick={() => handleBuyMinutes(pkg)}
-                  disabled={loadingPkg !== null}
+                  disabled={payingPkg !== null}
                   className={`w-full px-6 py-3 rounded-xl font-semibold transition-all whitespace-nowrap cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed ${
                     pkg.popular
                       ? 'bg-[#0096FF] text-white hover:bg-[#0077CC]'
                       : 'bg-[#F5F5F5] text-[#2A2A2A] hover:bg-[#0096FF] hover:text-white'
                   }`}
                 >
-                  {loadingPkg === pkg.id ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <i className="ri-loader-4-line animate-spin"></i>
-                      Processing...
-                    </span>
-                  ) : (
-                    'Purchase'
-                  )}
+                  Purchase
                 </button>
               </div>
             ))}

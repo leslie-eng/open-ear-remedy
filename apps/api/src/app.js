@@ -8,7 +8,7 @@ import userRoutes from './routes/user.js';
 import callsRoutes from './routes/calls.js';
 import chatRoutes from './routes/chat.js';
 import knowledgeRoutes from './routes/knowledge.js';
-import paymentsRoutes, { paystackWebhookHandler } from './routes/payments.js';
+import paymentsRoutes from './routes/payments.js';
 import appointmentsRoutes from './routes/appointments.js';
 import adminRoutes from './routes/admin.js';
 import notificationsRoutes from './routes/notifications.js';
@@ -38,21 +38,6 @@ app.use(
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   }),
-);
-
-app.post(
-  '/api/payments/webhook',
-  express.raw({ type: 'application/json' }),
-  (req, _res, next) => {
-    req.rawBody = req.body?.toString?.('utf8') || '';
-    try {
-      req.body = JSON.parse(req.rawBody);
-    } catch {
-      req.body = {};
-    }
-    next();
-  },
-  paystackWebhookHandler(),
 );
 
 app.use(express.json({ limit: '200kb' }));

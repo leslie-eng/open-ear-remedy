@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Navbar from '../../components/feature/Navbar';
+import MpesaPaymentModal from '../../components/feature/MpesaPaymentModal';
 import { useAuth } from '../../contexts/AuthContext';
 import { apiFetch } from '../../lib/api';
 import { useSEO, generateWebPageSchema, generateProductSchema, generateFAQSchema } from '../../utils/seo';
@@ -24,8 +25,8 @@ export default function PricingPage() {
   const [searchParams] = useSearchParams();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<CheckoutOffer | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  // The offer being paid for with M-Pesa (the payment window is open while set).
+  const [paying, setPaying] = useState<CheckoutOffer | null>(null);
   const [notification, setNotification] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
 
   // Check for purchase status from URL params
@@ -115,41 +116,16 @@ export default function PricingPage() {
       return;
     }
 
-    await initiatePaystackCheckout(plan);
+    setPaying(plan);
   };
 
-  const initiatePaystackCheckout = async (plan: CheckoutOffer) => {
-    setIsLoading(true);
-    setLoadingPlan(plan.name);
-
-    try {
-      const data = await apiFetch<{ url?: string; authorization_url?: string }>(
-        '/api/payments/checkout',
-        {
-          method: 'POST',
-          body: JSON.stringify({ offerId: plan.id }),
-        },
-      );
-
-      const payUrl = data.url ?? data.authorization_url;
-      if (payUrl) {
-        // Use window.location.assign for better compatibility
-        window.location.assign(payUrl);
-      } else {
-        throw new Error('No payment authorization URL returned from Paystack.');
-      }
-    } catch (error) {
-      console.error('Checkout error:', error);
-      setNotification({
-        type: 'error',
-        message:
-          error instanceof Error
-            ? error.message
-            : 'Unable to start Paystack checkout. Please try again.',
-      });
-      setIsLoading(false);
-      setLoadingPlan(null);
-    }
+  const startPayment = async (phone: string) => {
+    if (!paying) throw new Error('Choose a plan first.');
+    const { paymentId } = await apiFetch<{ paymentId: string }>('/api/payments/checkout', {
+      method: 'POST',
+      body: JSON.stringify({ offerId: paying.id, phone }),
+    });
+    return paymentId;
   };
 
   const handleSignIn = () => {
@@ -160,6 +136,21 @@ export default function PricingPage() {
   return (
     <div className="min-h-screen bg-white">
       <Navbar transparent={false} />
+
+      {paying && (
+        <MpesaPaymentModal
+          title={paying.name}
+          amountLabel={formatPrice(paying.price)}
+          start={startPayment}
+          onPaid={() =>
+            setNotification({
+              type: 'success',
+              message: 'id' in paying && paying.id === MONTHLY_PASS.id ? 'Your Monthly Pass is ready.' : 'Your credits have been added.',
+            })
+          }
+          onClose={() => setPaying(null)}
+        />
+      )}
 
       {/* Notification Toast */}
       {notification && (
@@ -271,21 +262,14 @@ export default function PricingPage() {
 
               <button
                 onClick={() => handleSelectPlan(plan)}
-                disabled={isLoading}
+                disabled={paying !== null}
                 className={`w-full py-2.5 rounded-lg font-medium text-sm transition-all cursor-pointer whitespace-nowrap disabled:opacity-70 disabled:cursor-not-allowed ${
                   plan.popular
                     ? 'bg-[#0096FF] text-white hover:bg-[#0085e6]'
                     : 'bg-gray-50 text-gray-900 hover:bg-gray-100 border border-gray-200'
                 }`}
               >
-                {loadingPlan === plan.name ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <i className="ri-loader-4-line animate-spin"></i>
-                    Processing...
-                  </span>
-                ) : (
-                  `Buy ${plan.credits} Credits`
-                )}
+                {`Buy ${plan.credits} Credits`}
               </button>
             </div>
           ))}
@@ -307,17 +291,17 @@ export default function PricingPage() {
           </div>
           <button
             onClick={() => handleSelectPlan(MONTHLY_PASS)}
-            disabled={isLoading}
+            disabled={paying !== null}
             className="px-6 py-3 rounded-xl bg-[#0A6EB4] text-white font-semibold hover:bg-[#085A94] disabled:opacity-50 whitespace-nowrap cursor-pointer"
           >
-            {loadingPlan === MONTHLY_PASS.name ? 'Opening checkout…' : `Get the pass for ${formatPrice(MONTHLY_PASS.price)}`}
+            {`Get the pass for ${formatPrice(MONTHLY_PASS.price)}`}
           </button>
         </div>
 
         {/* Secure Payment Badge */}
         <div className="flex items-center justify-center gap-2 mt-6 text-gray-500">
           <i className="ri-shield-check-fill text-green-500"></i>
-          <span className="text-xs">Secure payment powered by Paystack</span>
+          <span className="text-xs">Pay securely with M-Pesa</span>
         </div>
 
         {/* Credit Usage Examples */}

@@ -8,7 +8,7 @@
 | Database | Neon Postgres | |
 | Covers and ebooks | Neon S3-compatible storage (one private bucket) | |
 | Call audio relay | Cloudflare Realtime TURN | |
-| Email / payments / AI chat | Resend / Paystack (KES) / OpenRouter | |
+| Email / payments / AI chat | Resend / M-Pesa Express via Safaricom Daraja / OpenRouter | |
 
 ```text
 Browser ── https://openearemedy.com ──────────► Vercel (static site)
@@ -51,7 +51,7 @@ Go to **Cloudflare dashboard → Realtime → TURN Server → Create**. Copy the
    | `CLOUDFLARE_TURN_KEY_ID`, `CLOUDFLARE_TURN_API_TOKEN` | from step 2 |
    | `RESEND_API_KEY` | Resend → API Keys |
    | `ADMIN_EMAIL` | where contact-form and appointment emails go |
-   | `PAYSTACK_SECRET_KEY`, `PAYSTACK_WEBHOOK_SECRET` | Paystack → Settings → API Keys & Webhooks (Kenyan account) |
+   | `DARAJA_CONSUMER_KEY`, `DARAJA_CONSUMER_SECRET`, `DARAJA_SHORT_CODE`, `DARAJA_PASSKEY` | Daraja portal → your app (see §5) |
    | `GOOGLE_CLIENT_ID` | Google Cloud Console → Credentials → OAuth client (Web). Add the site's addresses under **Authorized JavaScript origins** |
    | `OPENROUTER_API_KEY` | https://openrouter.ai/keys (chat replies and Knowledge Source search) |
 
@@ -79,15 +79,12 @@ Go to **Cloudflare dashboard → Realtime → TURN Server → Create**. Copy the
    These values are built into the site, so **redeploy** after changing them.
 3. **Add the domains.** Add `openearemedy.com` and `www.openearemedy.com` under **Domains**, and follow Vercel's DNS instructions.
 
-## 5. Paystack
+## 5. M-Pesa (Daraja)
 
-Under **Settings → API Keys & Webhooks**, set the webhook URL to:
+1. **Sandbox first.** On https://developer.safaricom.co.ke create an app with **M-Pesa Express** enabled. Copy its Consumer Key and Secret. The sandbox shortcode is `174379`; its passkey is on the M-Pesa Express simulator page.
+2. **Going live** needs your own **Paybill** or **Till** (a registered business) and Safaricom's go-live approval, which gives you a production shortcode and passkey. Then on Render set `DARAJA_BASE_URL=https://api.safaricom.co.ke` and the production values. For a Till, also set `DARAJA_TRANSACTION_TYPE=CustomerBuyGoodsOnline` and `DARAJA_TILL_NUMBER`.
 
-```text
-https://api.openearemedy.com/api/payments/webhook
-```
-
-The webhook only grants something when the signature, the amount and the currency (KES) all match.
+There is no webhook to register: each payment tells Safaricom where to send its result (`/api/payments/mpesa/callback/…` on `PUBLIC_API_URL`). Callbacks are not trusted on their own; the API asks Safaricom to confirm every payment before granting anything.
 
 ## 6. Resend
 
@@ -110,7 +107,7 @@ Verify `openearemedy.com` under **Domains** (add the DNS records Resend shows). 
 - [ ] **Two-phone call test** on different networks (for example Wi-Fi and mobile data), so that audio goes through TURN.
 - [ ] **Crisis Help numbers:** a qualified person verifies `/crisis-help` and adds Kenyan resources.
 - [ ] **AI Companion review:** add the approved Knowledge Sources (admin → **AI knowledge**), run `npm run review:companion -w @openear/api` with the production `DATABASE_URL` and `OPENROUTER_API_KEY`, and have your mental-health professional review the 30 conversations in the file it writes. Until then, set `RAG_ENABLED=false` on Render.
-- [ ] **Test payment:** buy a Credit Pack with Paystack test keys and check the Credits arrive. Then switch to live keys.
+- [ ] **Test payment:** with the sandbox keys, buy a Credit Pack (use the sandbox test phone number shown on the Daraja simulator) and check the Credits arrive. Then switch to production keys and make one real KSh 50 purchase.
 - [ ] **Rotate leaked secrets:** any secrets that were ever committed to git must be rotated.
 
 ---
@@ -123,6 +120,6 @@ Verify `openearemedy.com` under **Domains** (add the DNS records Resend shows). 
 | Calls never connect / "could not connect the audio" | TURN variables are missing or wrong on Render |
 | Listener shows offline after a deploy | Expected: the console reconnects and comes back online by itself within seconds |
 | Cover images broken | `PUBLIC_API_URL` is not `https://api.openearemedy.com`, or the storage variables are wrong |
-| Paystack paid but no Credits | Webhook URL or `PAYSTACK_WEBHOOK_SECRET` mismatch; check the Render logs |
+| M-Pesa paid but no Credits | The payment page confirms with Safaricom while it is open; check the Render logs for "M-Pesa confirm failed" and that the Daraja keys match the environment (sandbox vs production) |
 | Deploy never goes live / crashes at start | Migration error. Check `DATABASE_URL_UNPOOLED` and the Render logs |
 | First request takes ~1 minute | The API was asleep. Check that the **Scheduled** workflow is running under GitHub **Actions** |

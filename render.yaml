@@ -58,10 +58,20 @@ services:
         value: Open Ear <noreply@openearemedy.com>
       - key: ADMIN_EMAIL
         sync: false
-      - key: PAYSTACK_SECRET_KEY
+      # M-Pesa Express (Daraja). Production base URL: https://api.safaricom.co.ke
+      - key: DARAJA_BASE_URL
+        value: https://sandbox.safaricom.co.ke
+      - key: DARAJA_CONSUMER_KEY
         sync: false
-      - key: PAYSTACK_WEBHOOK_SECRET
+      - key: DARAJA_CONSUMER_SECRET
         sync: false
+      - key: DARAJA_SHORT_CODE
+        sync: false
+      - key: DARAJA_PASSKEY
+        sync: false
+      # CustomerPayBillOnline (Paybill) or CustomerBuyGoodsOnline (Till, also set DARAJA_TILL_NUMBER)
+      - key: DARAJA_TRANSACTION_TYPE
+        value: CustomerPayBillOnline
       - key: OPENROUTER_API_KEY
         sync: false
       - key: OPENROUTER_MODEL
