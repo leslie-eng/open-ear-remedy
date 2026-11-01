@@ -43,7 +43,7 @@ export default function CallPage() {
     description:
       'Connect through secure voice calls for real-time emotional support. Available 24/7 with credit-based pricing. Start a call instantly or book an appointment for later.',
     keywords:
-      'voice call support, phone therapy, real-time counseling, emotional support calls, mental health hotline',
+      'voice call support, talk to a listener, someone to listen, emotional support calls, feeling depressed',
     canonical: '/call',
     ogType: 'website',
     schema: generateWebPageSchema(

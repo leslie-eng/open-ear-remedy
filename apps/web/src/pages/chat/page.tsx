@@ -38,7 +38,7 @@ export default function ChatPage() {
   useSEO({
     title: 'AI Chat Support - 24/7 Emotional Support | Open Ear',
     description: `Chat with our AI assistant anytime for emotional support. Available 24/7, private and confidential. ${PER_MESSAGE} per message.`,
-    keywords: 'AI chat support, emotional support chat, mental health chatbot, 24/7 support, online counseling',
+    keywords: 'AI chat support, emotional support chat, 24/7 support, someone to talk to, feeling low',
     canonical: '/chat',
     ogType: 'website',
     schema: generateWebPageSchema('AI Chat Support', '24/7 AI-powered emotional support chat', '/chat'),

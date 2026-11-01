@@ -23,7 +23,7 @@ export default function HowItWorksPage() {
     },
     {
       question: 'What if I need help in a crisis?',
-      answer: 'If you\'re in crisis or having thoughts of self-harm, please contact emergency services (911) or a crisis hotline immediately. Open Ear provides emotional support but is not equipped for crisis intervention. We can provide resources and encourage you to seek immediate professional help.'
+      answer: 'If you\'re in crisis or having thoughts of self-harm, please contact emergency services (999 or 112 in Kenya) or see our Crisis Help page immediately. Open Ear provides emotional support but is not equipped for crisis intervention. We can provide resources and encourage you to seek immediate professional help.'
     },
     {
       question: 'How does pricing work?',
@@ -34,7 +34,7 @@ export default function HowItWorksPage() {
   useSEO({
     title: 'How It Works - Simple Steps to Emotional Support | Open Ear',
     description: 'Getting emotional support is simple and fast with Open Ear. Choose your method, connect instantly, share freely, and feel supported. No appointments needed, available 24/7 with complete privacy.',
-    keywords: 'how emotional support works, online therapy process, mental health support steps, AI chat support, voice call therapy, instant counseling',
+    keywords: 'how emotional support works, talk to someone, be heard, AI chat support, call a listener, text a listener',
     canonical: '/how-it-works',
     ogType: 'website',
     schema: {
