@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { CREDITS_PER_CALL_MINUTE } from '@openear/shared/pricing';
 import { MAX_CHAT_MESSAGE_CHARS } from '@openear/shared/calls';
 import Navbar from '../../components/feature/Navbar';
@@ -35,6 +35,9 @@ export default function ListenerChatPage() {
   const { user, loading } = useAuth();
   const chat = useTextChatSession();
   const notesGate = useNotesNoticeGate();
+  // Joining a booked text chat from the dashboard: /listener-chat?booking=<id>.
+  const [searchParams] = useSearchParams();
+  const bookingId = searchParams.get('booking');
   const [displayName, setDisplayName] = useState('');
   const [draft, setDraft] = useState('');
   const [error, setError] = useState('');
@@ -53,7 +56,7 @@ export default function ListenerChatPage() {
       setError(err instanceof Error ? err.message : 'Could not save your display name.');
       return;
     }
-    await notesGate.gate(chat.start);
+    await notesGate.gate(() => chat.start(bookingId ?? undefined));
   };
 
   const submit = (e: FormEvent) => {
@@ -91,6 +94,14 @@ export default function ListenerChatPage() {
                 <p role="status" className="mb-4 rounded-xl bg-oe-primary-tint px-4 py-3 text-sm text-oe-ink">
                   {END_LABELS[chat.state.endReason] ?? 'The chat has ended.'}
                   {chat.state.billedSeconds > 0 && ` Chat time ${formatTime(chat.state.billedSeconds)}.`}
+                  {chat.state.billedSeconds > 0 && chat.state.callId && (
+                    <>
+                      {' '}
+                      <Link to={`/book?again=${chat.state.callId}`} className="font-medium text-oe-primary underline">
+                        Book again with this Listener
+                      </Link>
+                    </>
+                  )}
                 </p>
               )}
               {(error || chat.state.error) && (
@@ -110,7 +121,7 @@ export default function ListenerChatPage() {
                 className="mb-4 w-full rounded-xl border-2 border-oe-line px-4 py-3 focus:border-oe-primary focus:outline-none"
               />
               <button onClick={() => void begin()} className="w-full cursor-pointer rounded-2xl bg-oe-primary py-3 font-semibold text-white hover:bg-oe-primary-hover">
-                {phase === 'ended' ? 'Start another chat' : 'Find a Listener'}
+                {bookingId && phase !== 'ended' ? 'Join my booked chat' : phase === 'ended' ? 'Start another chat' : 'Find a Listener'}
               </button>
               <p className="mt-4 text-center text-sm">
                 <Link to="/call" className="text-oe-primary hover:underline">
@@ -118,11 +129,15 @@ export default function ListenerChatPage() {
                 </Link>
               </p>
             </div>
-          ) : phase === 'ringing' ? (
+          ) : phase === 'ringing' || phase === 'waiting' ? (
             <div className="rounded-3xl bg-white p-8 text-center shadow-lg" role="status" aria-live="polite">
               <i className="ri-chat-heart-line mb-3 block text-4xl text-oe-primary" aria-hidden="true"></i>
-              <p className="font-semibold text-oe-ink">Finding a Listener…</p>
-              <p className="mt-1 text-sm text-oe-muted">This usually takes under a minute. You are not charged until someone joins.</p>
+              <p className="font-semibold text-oe-ink">{phase === 'waiting' ? 'Waiting for your Listener to join…' : 'Finding a Listener…'}</p>
+              <p className="mt-1 text-sm text-oe-muted">
+                {phase === 'waiting'
+                  ? 'They’ll be with you shortly. Stay on this page; you’re only charged once you’re chatting.'
+                  : 'This usually takes under a minute. You are not charged until someone joins.'}
+              </p>
               <button onClick={chat.end} className="mt-6 cursor-pointer rounded-xl border-2 border-oe-line px-6 py-2 font-medium text-oe-ink">
                 Cancel
               </button>

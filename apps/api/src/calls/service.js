@@ -46,7 +46,10 @@ async function handle(session, msg) {
       if (!isListener) return listenerOnly();
       return coordinator.listenerOffline(userId);
     case 'call:request':
-      return coordinator.requestCall(userId, { mode: msg.mode === 'text' ? 'text' : 'voice' });
+      return coordinator.requestCall(userId, {
+        mode: msg.mode === 'text' ? 'text' : 'voice',
+        bookingId: isId(msg.bookingId) ? msg.bookingId : null,
+      });
     case 'call:accept':
       if (!isListener) return listenerOnly();
       return isId(msg.callId) && coordinator.accept(userId, msg.callId);

@@ -9,6 +9,7 @@ import {
 import { callSecondsAvailable } from '@openear/shared/pricing';
 import { query } from '../db.js';
 import * as billing from '../services/billing.js';
+import * as bookings from '../services/bookings.js';
 import * as notes from '../services/notes.js';
 
 const realClock = {
@@ -76,6 +77,7 @@ export function createCallCoordinator({ send, clock = realClock }) {
        WHERE id = $1`,
       [call.id, STATUS_FOR[reason] ?? 'completed', reason, new Date(endedAt), billedSeconds, charge.credits, charge.passSeconds],
     );
+    if (call.bookingId && call.connectedAt) await bookings.finishBookedConversation(call.bookingId, call.id);
 
     const ended = { type: 'call:ended', callId: call.id, reason, billedSeconds };
     send(call.callerId, ended);
@@ -134,6 +136,66 @@ export function createCallCoordinator({ send, clock = realClock }) {
     return { callId };
   }
 
+  /**
+   * Joins a booked Conversation: rings nobody, connects the person straight to their booked
+   * Listener (even in their quiet time) for at most the booked length. The credit hold is given
+   * back as it starts, so normal per-second billing charges only the time used.
+   */
+  async function startBookedCall(callerId, bookingId) {
+    const now = new Date(clock.now());
+    let booking;
+    try {
+      booking = await bookings.markClientJoined(callerId, bookingId, { now });
+    } catch (err) {
+      if (err.code) return refuse(callerId, err.code, err.message);
+      throw err;
+    }
+    const listener = listeners.get(booking.listenerId);
+    if (!listener || listener.offline || listener.busyCallId) {
+      return refuse(
+        callerId,
+        'LISTENER_NOT_READY',
+        listener?.busyCallId
+          ? 'Your Listener is just finishing another conversation. Please stay here; we’ll keep trying.'
+          : 'Your Listener hasn’t joined yet. Please stay here; we’ll keep trying.',
+      );
+    }
+    // Claimed synchronously so nothing else can match this Listener meanwhile.
+    listener.busyCallId = `booking:${bookingId}`;
+    try {
+      await bookings.startBookedConversation(bookingId);
+      const { credits, pass } = await billing.getBalance(callerId, { now });
+      const maxSeconds = Math.min(booking.minutes * 60, callSecondsAvailable({ credits, passSecondsLeft: pass?.callSecondsLeft ?? 0 }));
+      if (maxSeconds < 60) {
+        listener.busyCallId = null;
+        return refuse(callerId, 'INSUFFICIENT_BALANCE', 'You need at least 1 minute of call time. Top up credits or get a Monthly Pass.');
+      }
+      const { rows } = await query(
+        `INSERT INTO call_history (user_id, listener_user_id, status, started_at, mode, booking_id)
+         VALUES ($1, $2, 'connecting', $3, $4, $5) RETURNING id`,
+        [callerId, booking.listenerId, now, booking.mode, bookingId],
+      );
+      const callId = rows[0].id;
+      const name = await callerName(callerId);
+      const call = {
+        id: callId, mode: booking.mode, callerId, callerName: name, listenerId: booking.listenerId,
+        status: 'connecting', rung: [], maxSeconds, bookingId, timers: {},
+      };
+      calls.set(callId, call);
+      listener.busyCallId = callId;
+      listener.cooldownUntil = null;
+
+      send(callerId, { type: 'call:matched', callId, role: 'caller', mode: call.mode });
+      const earlier = await notes.notesAbout(callerId, { viewerId: booking.listenerId }).catch(() => []);
+      send(booking.listenerId, { type: 'call:matched', callId, role: 'listener', mode: call.mode, callerName: name, notes: earlier, booked: true });
+      if (call.mode === 'text') await startConnected(call);
+      return { callId };
+    } catch (err) {
+      if (listener.busyCallId === `booking:${bookingId}`) listener.busyCallId = null;
+      throw err;
+    }
+  }
+
   /** The live call a user is the caller or matched listener of, or null. */
   function callOf(userId) {
     for (const call of calls.values()) {
@@ -160,6 +222,8 @@ export function createCallCoordinator({ send, clock = realClock }) {
       if (state) state.offline = false;
       else listeners.set(listenerId, { busyCallId: null, cooldownUntil: null, offline: false });
       sendStatus(listenerId);
+      // Being in the console near a booked time counts as turning up for it.
+      await bookings.markListenerPresent(listenerId, { now: new Date(clock.now()) });
     },
 
     async listenerOffline(listenerId) {
@@ -169,8 +233,11 @@ export function createCallCoordinator({ send, clock = realClock }) {
       sendStatus(listenerId);
     },
 
-    /** Starts a Conversation; `mode` is 'voice' (a Call) or 'text' (a Text Chat). */
-    async requestCall(callerId, { mode = 'voice' } = {}) {
+    /**
+     * Starts a Conversation; `mode` is 'voice' (a Call) or 'text' (a Text Chat). With `bookingId`
+     * it joins that booked Conversation instead (its own mode applies).
+     */
+    async requestCall(callerId, { mode = 'voice', bookingId = null } = {}) {
       if (mode !== 'voice' && mode !== 'text') mode = 'voice';
       // Claimed synchronously so two quick requests can't both start a call.
       if (requesting.has(callerId) || callOf(callerId)) {
@@ -178,7 +245,7 @@ export function createCallCoordinator({ send, clock = realClock }) {
       }
       requesting.add(callerId);
       try {
-        return await startCall(callerId, mode);
+        return bookingId ? await startBookedCall(callerId, bookingId) : await startCall(callerId, mode);
       } finally {
         requesting.delete(callerId);
       }

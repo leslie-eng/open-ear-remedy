@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { MAX_CHAT_MESSAGE_CHARS, MAX_NOTE_CHARS, type ListenerNote } from '@openear/shared/calls';
 import { Link } from 'react-router-dom';
+import ListenerSchedule from '../../components/feature/ListenerSchedule';
 import Navbar from '../../components/feature/Navbar';
 import { useAuth } from '../../contexts/AuthContext';
 import { useListenerSession } from '../../hooks/useListenerSession';
@@ -160,7 +161,7 @@ function Console() {
 
       {session.active && (
         <div className="bg-white rounded-3xl shadow-lg p-6 md:p-8 text-center">
-          <p className="text-sm text-oe-muted mb-1">{session.active.mode === 'text' ? 'Text chat with' : 'On a call with'}</p>
+          <p className="text-sm text-oe-muted mb-1">{session.active.booked ? 'Booked ' : ''}{session.active.mode === 'text' ? (session.active.booked ? 'text chat with' : 'Text chat with') : session.active.booked ? 'call with' : 'On a call with'}</p>
           <h2 className="text-2xl font-bold text-oe-ink mb-4">{session.active.callerName}</h2>
           <div className="text-3xl font-bold text-oe-primary mb-2">
             {session.active.phase === 'live' ? formatTime(session.active.elapsed) : session.active.mode === 'text' ? 'Starting…' : 'Connecting audio…'}
@@ -343,6 +344,7 @@ function Console() {
           )}
         </div>
       )}
+      <ListenerSchedule refreshKey={session.lastCall?.callId ?? null} />
     </div>
   );
 }
