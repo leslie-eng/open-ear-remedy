@@ -76,6 +76,18 @@ describe.skipIf(!testDatabaseUrl())('M-Pesa payments (Daraja)', () => {
     expect(Buffer.from(push.Password, 'base64').toString()).toBe(`174379test-passkey${push.Timestamp}`);
   });
 
+  it('gives Safaricom a public HTTPS callback address even in local development', async () => {
+    const { config } = await import('../src/config.js');
+    const saved = config.publicApiUrl;
+    config.publicApiUrl = 'http://localhost:3000'; // what PUBLIC_API_URL is locally
+    try {
+      await pay(await person());
+      expect(daraja.calls('/mpesa/stkpush')[0].body.CallBackURL).toMatch(/^https:\/\/api\.openearemedy\.com\/api\/payments\/mpesa\/callback\//);
+    } finally {
+      config.publicApiUrl = saved;
+    }
+  });
+
   it.each(['12345', '0812345678', '+44 7700 900123', ''])('refuses the phone number "%s" without prompting', async (phone) => {
     const user = await person();
     const { res } = await pay(user, 'starter', phone);

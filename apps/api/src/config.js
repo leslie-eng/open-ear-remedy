@@ -60,6 +60,8 @@ export const config = {
     // Paybill: CustomerPayBillOnline. Till (Buy Goods): CustomerBuyGoodsOnline, with DARAJA_TILL_NUMBER.
     transactionType: (process.env.DARAJA_TRANSACTION_TYPE || 'CustomerPayBillOnline').trim(),
     tillNumber: (process.env.DARAJA_TILL_NUMBER || '').trim(),
+    // Where Safaricom posts results. Must be public HTTPS; defaults to PUBLIC_API_URL.
+    callbackBaseUrl: (process.env.DARAJA_CALLBACK_BASE_URL || '').trim().replace(/\/$/, ''),
   },
   // AI chat through OpenRouter (OpenAI-compatible API). OPENROUTER_MODEL switches models without a code change.
   openRouterApiKey: process.env.OPENROUTER_API_KEY || '',

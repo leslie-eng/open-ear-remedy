@@ -28,8 +28,15 @@ export function callbackToken() {
   return crypto.createHmac('sha256', config.jwtSecret).update('daraja-callback').digest('hex').slice(0, 32);
 }
 
+// Safaricom refuses http:// and localhost callback URLs. Locally the payment window confirms by
+// asking Safaricom directly, so any public HTTPS address will do; callbacks for local test
+// payments that reach production fail its token check and are ignored.
+const FALLBACK_CALLBACK_BASE = 'https://api.openearemedy.com';
+
 function callbackUrl() {
-  return `${config.publicApiUrl}/api/payments/mpesa/callback/${callbackToken()}`;
+  const base = config.daraja.callbackBaseUrl || config.publicApiUrl;
+  const usable = /^https:\/\//.test(base) && !/localhost|127\.0\.0\.1/.test(base);
+  return `${usable ? base : FALLBACK_CALLBACK_BASE}/api/payments/mpesa/callback/${callbackToken()}`;
 }
 
 /** Records the payment, then sends the prompt. Returns the payment id. */
