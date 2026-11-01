@@ -192,7 +192,7 @@ export default function TermsPage() {
                 </ul>
               </div>
               <p className="text-sm md:text-base text-[#6B6B6B] leading-relaxed">
-                If you are experiencing a mental health crisis, suicidal thoughts, or any emergency situation, please contact emergency services (911), a crisis hotline, or seek immediate professional help.
+                If you are experiencing a mental health crisis, suicidal thoughts, or any emergency situation, please contact emergency services (999 or 112 in Kenya), a crisis line listed on our Crisis Help page, or seek immediate professional help.
               </p>
             </div>
 

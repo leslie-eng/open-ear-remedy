@@ -21,20 +21,32 @@ A staff member who manages Listeners, ebooks, Call Reports and Credit Adjustment
 
 ## Calls
 
+**Conversation**:
+A live, unrecorded exchange between one person and one Listener: either a Call or a Text Chat. Both follow the same rules and price.
+_Avoid_: session, ticket
+
 **Call**:
-A live, unrecorded voice conversation between one Caller and one Listener, held in the browser.
-_Avoid_: session, phone call, ticket
+A Conversation by voice, held in the browser.
+_Avoid_: phone call
+
+**Text Chat**:
+A Conversation by typing, with a Listener in real time. Nothing typed is saved.
+_Avoid_: live chat, messaging, DM
 
 **Ringing**:
 The time a Call waits for a Listener to accept it; it is offered to every available Listener and the first to accept takes it.
 
 **Connected Time**:
-The part of a Call from when audio first connects until it ends; the only part that is charged.
+The part of a Conversation that is charged: for a Call, from when audio first connects; for a Text Chat, from when the Listener joins; until it ends.
 _Avoid_: duration, talk time
 
 **Cooldown**:
 A short quiet period after each Call during which a Listener is not offered new Calls.
 _Avoid_: break, pause
+
+**Listener Note**:
+A Listener's brief private note after a Conversation, shown to later Listeners talking with the same person, never to the person. Kept 12 months.
+_Avoid_: case notes, file, record
 
 **Call Report**:
 A Listener's account of a Call that went wrong, sent to Admins for review.

@@ -13,3 +13,6 @@ apps/web/out/
 
 # AI Companion review output (may be shared with reviewers, not committed)
 companion-review-*.md
+
+# Local design reference (not committed)
+design_flow/

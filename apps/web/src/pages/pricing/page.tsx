@@ -78,7 +78,7 @@ export default function PricingPage() {
   useSEO({
     title: 'Pricing Plans - Credit-Based Support | Open Ear',
     description: `Flexible credit-based pricing for emotional support. ${CREDIT_PACKS.map((p) => `${p.credits} credits for ${formatPrice(p.price)}`).join(', ')}. Use for voice calls or AI chat.`,
-    keywords: 'emotional support pricing, therapy pricing, mental health credits, affordable counseling, pay per use therapy, mental wellness plans',
+    keywords: 'emotional support pricing, talk to someone, listener credits, affordable emotional support, pay per minute, monthly pass',
     canonical: '/pricing',
     ogType: 'website',
     schema: {

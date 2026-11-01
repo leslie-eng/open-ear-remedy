@@ -11,6 +11,9 @@ import {
 } from '@openear/shared/pricing';
 import type { Balance } from '../../hooks/useBalance';
 import { useCallSession } from '../../hooks/useCallSession';
+import { useNotesNoticeGate } from '../../hooks/useNotesNoticeGate';
+import NotesNotice from '../../components/feature/NotesNotice';
+import { Link } from 'react-router-dom';
 
 const END_MESSAGES: Record<string, string> = {
   hangup: 'Call ended.',
@@ -40,7 +43,7 @@ export default function CallPage() {
     description:
       'Connect through secure voice calls for real-time emotional support. Available 24/7 with credit-based pricing. Start a call instantly or book an appointment for later.',
     keywords:
-      'voice call support, phone therapy, real-time counseling, emotional support calls, mental health hotline',
+      'voice call support, talk to a listener, someone to listen, emotional support calls, feeling depressed',
     canonical: '/call',
     ogType: 'website',
     schema: generateWebPageSchema(
@@ -94,6 +97,7 @@ export default function CallPage() {
     }
   }, []);
 
+  const notesGate = useNotesNoticeGate();
   const call = useCallSession({
     onEnded: () => {
       void fetchCredits();
@@ -162,7 +166,8 @@ export default function CallPage() {
       setCallError(error instanceof Error ? error.message : 'Could not save your display name.');
       return;
     }
-    await call.start();
+    // First Conversation: tell them about Listener notes before connecting.
+    await notesGate.gate(() => void call.start());
   };
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -282,6 +287,7 @@ export default function CallPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#E6F5FF] via-white to-[#E6F5FF]">
       <Navbar />
+      {notesGate.noticeOpen && <NotesNotice onChoose={(allow) => void notesGate.choose(allow)} onCancel={notesGate.cancel} />}
       <ConnectingOverlay
         open={['preparing', 'ringing', 'connecting'].includes(call.state.phase)}
         title={call.state.phase === 'connecting' ? 'Connecting you to a listener…' : 'Finding a listener for you…'}
@@ -467,6 +473,9 @@ export default function CallPage() {
                     <i className="ri-calendar-fill text-lg md:text-xl"></i>
                     Book Appointment
                   </button>
+                  <Link to="/listener-chat" className="text-sm font-medium text-[#0096FF] hover:underline">
+                    Prefer to type? Text a Listener
+                  </Link>
                 </>
               ) : (
                 <button

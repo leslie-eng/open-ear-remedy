@@ -106,7 +106,7 @@ export default function HomePage() {
   useSEO({
     title: 'Open Ear | Emotional Support by Call and Chat',
     description: 'Open Ear is your safe, judgment-free space for emotional support. Talk by call or chat anytime, with flexible pay-as-you-go options and instant access to support.',
-    keywords: 'Open Ear, OpenEar, Open Ear support, emotional support, mental wellness support, call support, chat support, safe space to talk, therapy alternative',
+    keywords: 'Open Ear, OpenEar, Open Ear support, emotional support, mental wellness support, call support, chat support, safe space to talk, someone to listen',
     canonical: '/',
     ogType: 'website',
     schema: {

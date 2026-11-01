@@ -52,7 +52,7 @@ describe.skipIf(!hasTestDatabase)('call coordinator', () => {
     const { callId } = last(caller, 'call:ringing');
     expect(callId).toBeTruthy();
     for (const listener of [a, b]) {
-      expect(last(listener, 'call:incoming')).toEqual({ type: 'call:incoming', callId, callerName: 'Anonymous' });
+      expect(last(listener, 'call:incoming')).toEqual({ type: 'call:incoming', callId, callerName: 'Anonymous', mode: 'voice' });
     }
   });
 
@@ -94,8 +94,8 @@ describe.skipIf(!hasTestDatabase)('call coordinator', () => {
 
     await Promise.all([calls.accept(first, callId), calls.accept(second, callId)]);
 
-    expect(last(caller, 'call:matched')).toEqual({ type: 'call:matched', callId, role: 'caller' });
-    expect(last(first, 'call:matched')).toEqual({ type: 'call:matched', callId, role: 'listener', callerName: 'Anonymous' });
+    expect(last(caller, 'call:matched')).toEqual({ type: 'call:matched', callId, role: 'caller', mode: 'voice' });
+    expect(last(first, 'call:matched')).toEqual({ type: 'call:matched', callId, role: 'listener', mode: 'voice', callerName: 'Anonymous', notes: [] });
     expect(received(second, 'call:matched')).toHaveLength(0);
     expect(last(second, 'call:taken')).toEqual({ type: 'call:taken', callId });
 

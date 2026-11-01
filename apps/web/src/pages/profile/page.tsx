@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import Navbar from '../../components/feature/Navbar';
+import NotesSettingsCard from '../../components/feature/NotesSettingsCard';
 import { useAuth, type AuthUser } from '../../contexts/AuthContext';
 import { apiFetch } from '../../lib/api';
 import { useSEO } from '../../utils/seo';
@@ -970,6 +971,8 @@ export default function ProfilePage() {
                       </button>
                     </div>
                   </div>
+
+                  <NotesSettingsCard />
 
                   {/* Sign Out */}
                   <div className="pt-6 border-t border-gray-100">
