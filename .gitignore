@@ -10,3 +10,6 @@ apps/api/.env
 apps/api/uploads
 packages/*/dist
 apps/web/out/
+
+# AI Companion review output (may be shared with reviewers, not committed)
+companion-review-*.md

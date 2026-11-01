@@ -84,6 +84,17 @@ export async function apiUpload(
   return data as CoverUploadResult | EbookUploadResult;
 }
 
+/** POSTs multipart form data (file uploads) and returns the JSON reply. */
+export async function apiPostForm<T = unknown>(path: string, form: FormData): Promise<T> {
+  const headers: HeadersInit = {};
+  const token = getAccessToken();
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const res = await fetch(apiUrl(path), { method: 'POST', headers, body: form });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new ApiError((data as { error?: string }).error || 'Upload failed', res.status);
+  return data as T;
+}
+
 /* ---------- Ebook store types & helpers ---------- */
 
 export interface Ebook {

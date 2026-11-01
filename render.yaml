@@ -63,6 +63,11 @@ services:
         sync: false
       - key: OPENROUTER_MODEL
         value: meta-llama/llama-3.3-70b-instruct
+      - key: OPENROUTER_EMBEDDING_MODEL
+        value: openai/text-embedding-3-small
+      # Kill switch for the AI Companion's knowledge search.
+      - key: RAG_ENABLED
+        value: "true"
 
 # Monthly Pass reminder emails run from GitHub Actions (.github/workflows/scheduled.yml):
 # Render cron jobs are not free.

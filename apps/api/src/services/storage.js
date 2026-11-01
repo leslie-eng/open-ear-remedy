@@ -11,7 +11,7 @@ import { config } from '../config.js';
  *   ebook  - private files, only reachable through short-lived signed download URLs
  *
  * Adapters: any S3-compatible store in production (when the S3 env vars are set), local disk for development.
- * Callers only see: saveFile, publicUrl, downloadUrl, coverHandler, plus the local-only download helper used by app.js.
+ * Callers only see: saveFile, readFile, publicUrl, downloadUrl, coverHandler, plus the local-only download helper used by app.js.
  */
 
 const DOWNLOAD_TTL_SECONDS = 5 * 60;
@@ -81,6 +81,14 @@ function createS3Storage(s3) {
       return `${s3.publicUrl || `${config.publicApiUrl}/uploads`}/${key}`;
     },
 
+    /** The stored file's bytes, or null if it does not exist. */
+    async readFile(key) {
+      const res = await client.fetch(objectUrl(key));
+      if (res.status === 404) return null;
+      if (!res.ok) throw new Error(`Storage read failed (${res.status}): ${await res.text()}`);
+      return Buffer.from(await res.arrayBuffer());
+    },
+
     async downloadUrl(key, filename) {
       const head = await client.fetch(objectUrl(key), { method: 'HEAD' });
       if (!head.ok) return null;
@@ -120,6 +128,10 @@ function createLocalStorage(dir) {
 
     publicUrl(key) {
       return `${config.publicApiUrl}/uploads/${key}`;
+    },
+
+    async readFile(key) {
+      return fs.existsSync(fileFor(key)) ? fs.promises.readFile(fileFor(key)) : null;
     },
 
     async downloadUrl(key, filename) {

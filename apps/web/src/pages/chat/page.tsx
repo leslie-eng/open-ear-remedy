@@ -5,16 +5,33 @@ import { useAuth } from '../../contexts/AuthContext';
 import { apiFetch } from '../../lib/api';
 import { useSEO, generateWebPageSchema } from '../../utils/seo';
 import TypingIndicator from '../../components/ui/TypingIndicator';
+import CrisisLink from '../../components/ui/CrisisLink';
 import { CREDITS_PER_CHAT_MESSAGE } from '@openear/shared/pricing';
 import { canSendChatMessage, type Balance } from '../../hooks/useBalance';
 
 const PER_MESSAGE = `${CREDITS_PER_CHAT_MESSAGE} credit${CREDITS_PER_CHAT_MESSAGE === 1 ? '' : 's'}`;
+
+interface Source {
+  title: string;
+  author: string | null;
+}
+
+interface ChatReply {
+  response: string;
+  balance: Balance;
+  /** Approved knowledge sources the reply drew on. */
+  sources: Source[];
+  /** The message mentioned suicide or self-harm: always show Crisis Help. */
+  crisisHelp: boolean;
+}
 
 interface Message {
   id: string;
   content: string;
   sender: 'user' | 'ai';
   timestamp: Date;
+  sources?: Source[];
+  crisisHelp?: boolean;
 }
 
 export default function ChatPage() {
@@ -127,7 +144,7 @@ export default function ChatPage() {
   const generateAIResponse = async (
     userMessage: string,
     conversationHistory: Message[],
-  ): Promise<{ response: string; balance: Balance }> => {
+  ): Promise<ChatReply> => {
     const historyForAPI = conversationHistory
       .slice(-10)
       .map((msg) => ({
@@ -135,7 +152,7 @@ export default function ChatPage() {
         content: msg.content,
       }));
 
-    const data = await apiFetch<{ response: string; balance: Balance }>('/api/chat', {
+    const data = await apiFetch<ChatReply>('/api/chat', {
       method: 'POST',
       body: JSON.stringify({
         message: userMessage,
@@ -176,7 +193,7 @@ export default function ChatPage() {
     setAiError('');
 
     try {
-      const { response: aiResponseText, balance: newBalance } = await generateAIResponse(
+      const { response: aiResponseText, balance: newBalance, sources, crisisHelp } = await generateAIResponse(
         userMsg.content,
         messages,
       );
@@ -193,6 +210,8 @@ export default function ChatPage() {
         content: aiResponseText,
         sender: 'ai',
         timestamp: new Date(),
+        sources,
+        crisisHelp,
       };
       setMessages((prev) => [...prev, aiResponse]);
     } catch (error: unknown) {
@@ -428,6 +447,17 @@ export default function ChatPage() {
                     }`}
                   >
                     <p className="text-sm leading-relaxed">{message.content}</p>
+                    {message.crisisHelp && (
+                      <div role="alert" className="mt-3 rounded-xl border border-oe-crisis bg-white px-3 py-2 text-sm">
+                        <p className="text-[#2A2A2A] mb-1">If you are in danger or thinking of ending your life, please reach a person now.</p>
+                        <CrisisLink />
+                      </div>
+                    )}
+                    {message.sources && message.sources.length > 0 && (
+                      <p className="text-xs mt-2 text-[#6B6B6B]">
+                        Drawing on: {message.sources.map((s) => (s.author ? `${s.title} (${s.author})` : s.title)).join('; ')}
+                      </p>
+                    )}
                     <p className={`text-xs mt-1 ${message.sender === 'user' ? 'text-white/70' : 'text-[#6B6B6B]'}`}>
                       {formatTime(message.timestamp)}
                     </p>

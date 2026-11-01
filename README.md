@@ -37,10 +37,12 @@ To make yourself an admin, see [DEPLOYMENT.md §7](DEPLOYMENT.md#7-first-admin-a
 ## Checks
 
 ```bash
+npm run db:test:start   # throwaway Postgres + pgvector in Docker (npm run db:test:stop when done)
 npm test          # shared pricing tests, plus API tests when TEST_DATABASE_URL is set
 npm run lint
 npm run type-check
 npm run build
+npm run review:companion -w @openear/api   # real AI replies to 30 test conversations, for a professional to review
 ```
 
 The API tests **wipe** the database in `TEST_DATABASE_URL`, and refuse to run unless its name contains `test`.
