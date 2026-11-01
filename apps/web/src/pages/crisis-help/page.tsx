@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/feature/Navbar';
+import SiteFooter from '../../components/feature/SiteFooter';
 import { useSEO } from '../../utils/seo';
 
 /*
@@ -31,23 +32,28 @@ export default function CrisisHelpPage() {
     <div className="min-h-screen bg-oe-bg text-oe-ink">
       <Navbar />
 
-      <main className="oe-route max-w-3xl mx-auto px-5 md:px-8 pt-28 md:pt-36 pb-20">
-        <h1 className="font-heading text-3xl md:text-4xl font-bold mb-4">If you&rsquo;re in crisis, you deserve help right now</h1>
-        <p className="text-body-lg text-oe-muted mb-10">
-          Open Ear offers emotional support. It isn&rsquo;t an emergency or crisis service. If you are in danger, or
+      <main className="oe-route mx-auto max-w-3xl px-5 pb-20 pt-28 md:px-8">
+        <p className="inline-flex items-center gap-1.5 rounded-full bg-oe-crisis-tint px-3 py-1 text-xs font-medium uppercase tracking-wide text-oe-crisis">
+          <i className="ri-alarm-warning-line" aria-hidden="true" /> Crisis help
+        </p>
+        <h1 className="mt-4 text-4xl font-bold md:text-5xl">If you&rsquo;re in crisis, you deserve help right now</h1>
+        <p className="mt-3 max-w-2xl text-lg text-oe-muted">
+          Open Ear is a place to talk and be heard. It isn&rsquo;t an emergency or crisis service. If you are in danger, or
           thinking about harming yourself or someone else, please contact one of these now.
         </p>
 
-        <section aria-labelledby="emergency-heading" className="bg-white rounded-oe-md border-2 border-oe-crisis p-6 md:p-8 mb-6">
-          <h2 id="emergency-heading" className="font-heading text-xl font-semibold mb-4 flex items-center gap-2">
-            <i className="ri-alarm-warning-line text-oe-crisis" aria-hidden="true" />
+        <section aria-labelledby="emergency-heading" className="mt-10 rounded-3xl border-2 border-oe-crisis bg-white p-6 md:p-8">
+          <h2 id="emergency-heading" className="flex items-center gap-3 text-2xl font-semibold">
+            <span aria-hidden="true" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-oe-crisis-tint text-oe-crisis">
+              <i className="ri-alarm-warning-line" />
+            </span>
             In immediate danger? Call your local emergency number
           </h2>
-          <ul className="space-y-3">
+          <ul className="mt-6 space-y-3">
             {EMERGENCY_NUMBERS.map((item) => (
-              <li key={item.region} className="flex items-center justify-between gap-4 text-body">
-                <span className="text-oe-muted">{item.region}</span>
-                <a href={`tel:${item.number}`} className="oe-btn rounded-oe-sm bg-oe-crisis px-5 py-2 font-bold text-white">
+              <li key={item.region} className="flex items-center justify-between gap-4 rounded-2xl bg-oe-crisis-tint px-4 py-3 text-body">
+                <span>{item.region}</span>
+                <a href={`tel:${item.number}`} className="oe-btn rounded-full bg-oe-crisis px-6 py-2.5 font-bold text-white">
                   {item.number}
                 </a>
               </li>
@@ -55,11 +61,16 @@ export default function CrisisHelpPage() {
           </ul>
         </section>
 
-        <section aria-labelledby="helplines-heading" className="bg-white rounded-oe-md border border-oe-line p-6 md:p-8 mb-6">
-          <h2 id="helplines-heading" className="font-heading text-xl font-semibold mb-4">Talk to a crisis helpline</h2>
-          <ul className="space-y-4 mb-5">
+        <section aria-labelledby="helplines-heading" className="mt-6 rounded-3xl border border-oe-line bg-white p-6 md:p-8">
+          <h2 id="helplines-heading" className="flex items-center gap-3 text-2xl font-semibold">
+            <span aria-hidden="true" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-oe-primary-soft text-oe-primary-deep">
+              <i className="ri-phone-line" />
+            </span>
+            Talk to a crisis helpline
+          </h2>
+          <ul className="mt-6 space-y-3">
             {HELPLINES.map((line) => (
-              <li key={line.name} className="text-body">
+              <li key={line.name} className="rounded-2xl bg-oe-surface-low px-4 py-3 text-body">
                 <span className="block font-semibold">{line.name}</span>
                 <span className="text-oe-muted">
                   {line.region} &middot; {line.contact}
@@ -67,7 +78,7 @@ export default function CrisisHelpPage() {
               </li>
             ))}
           </ul>
-          <p className="text-body text-oe-muted">
+          <p className="mt-5 text-body text-oe-muted">
             Somewhere else? Find a free, confidential helpline in your country at{' '}
             <a href="https://findahelpline.com" target="_blank" rel="noopener noreferrer" className="oe-link font-semibold text-oe-primary">
               findahelpline.com
@@ -76,7 +87,7 @@ export default function CrisisHelpPage() {
           </p>
         </section>
 
-        <p className="text-body text-oe-muted">
+        <p className="mt-6 rounded-3xl border border-oe-line bg-oe-surface p-6 text-body text-oe-muted">
           When you&rsquo;re safe and would like someone to talk to,{' '}
           <Link to="/" className="oe-link font-semibold text-oe-primary">
             Open Ear is here
@@ -84,6 +95,8 @@ export default function CrisisHelpPage() {
           .
         </p>
       </main>
+
+      <SiteFooter />
     </div>
   );
 }

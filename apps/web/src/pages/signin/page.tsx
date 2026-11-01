@@ -2,10 +2,16 @@
 import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useSEO } from '../../utils/seo';
 import Navbar from '../../components/feature/Navbar';
+import SiteFooter from '../../components/feature/SiteFooter';
 import GoogleSignInButton from '../../components/feature/GoogleSignInButton';
 import { googleSignInAvailable } from '../../lib/googleIdentity';
 import { useAuth } from '../../contexts/AuthContext';
 import { ApiError } from '../../lib/api';
+
+const inputClass =
+  'mt-2 w-full rounded-xl border border-oe-line bg-oe-surface-low px-4 py-3 focus:border-oe-primary focus:outline-none focus:ring-2 focus:ring-oe-primary/30';
+const primaryButton =
+  'oe-btn inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-oe-primary px-6 py-3 font-semibold text-white hover:bg-oe-primary-hover disabled:cursor-not-allowed disabled:opacity-50';
 
 function normalizeEmail(value: string) {
   return value.trim().toLowerCase();
@@ -21,8 +27,8 @@ function safeReturnPath(state: unknown): string | null {
 export default function SignInPage() {
   // SEO Configuration - noindex for auth pages
   useSEO({
-    title: 'Sign In - Open Ear',
-    description: 'Sign in to your Open Ear account to access emotional support services.',
+    title: 'Sign in | Open Ear',
+    description: 'Sign in to Open Ear to talk with a trained Listener whenever you need to be heard.',
     keywords: 'sign in, login, account access',
     canonical: '/signin',
   });
@@ -163,106 +169,91 @@ export default function SignInPage() {
     }
   };
 
+
+  const messages = (
+    <>
+      {error && (
+        <p role="alert" className="mt-6 flex items-start gap-2 rounded-2xl bg-oe-crisis-tint px-5 py-3 text-sm text-oe-crisis">
+          <i className="ri-error-warning-line mt-0.5" aria-hidden="true" />
+          <span>{error}</span>
+        </p>
+      )}
+      {success && (
+        <p role="status" className="mt-6 flex items-start gap-2 rounded-2xl bg-oe-primary-tint px-5 py-3 text-sm text-oe-ink">
+          <i className="ri-checkbox-circle-line mt-0.5 text-oe-primary" aria-hidden="true" />
+          <span>{success}</span>
+        </p>
+      )}
+    </>
+  );
+
   // Code entry screen
   if (codeSent) {
     return (
-      <div className="min-h-screen bg-oe-bg">
+      <div className="min-h-screen bg-oe-bg text-oe-ink">
         <Navbar />
-        <div className="pt-24 pb-16 flex items-center justify-center px-4">
-          <div className="w-full max-w-sm">
-          {/* Logo */}
-          <div className="text-center mb-5">
-            <Link to="/" className="inline-block">
-              <h1 className="text-2xl font-bold text-oe-primary">
-                Open Ear
-              </h1>
-            </Link>
+        <main className="oe-route mx-auto max-w-md px-5 pb-20 pt-28 md:px-8">
+          <div className="text-center">
+            <span aria-hidden="true" className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-oe-primary-soft text-2xl text-oe-primary-deep">
+              <i className="ri-mail-check-line" />
+            </span>
+            <h1 className="mt-4 text-3xl font-bold md:text-4xl">Check your email.</h1>
+            <p className="mt-3 text-oe-muted">
+              We sent a code to <span className="font-semibold text-oe-ink">{email}</span>
+            </p>
           </div>
 
-          {/* Verification Card */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 text-center">
-            <div className="w-16 h-16 bg-forest-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i className="ri-shield-check-fill text-3xl text-forest-600"></i>
-            </div>
-            
-            <h2 className="text-xl font-bold text-oe-ink mb-2">
-              Enter verification code
-            </h2>
-            
-            <p className="text-sm text-oe-muted mb-2">
-              We sent a code to:
-            </p>
-            
-            <p className="text-sm font-semibold text-oe-primary mb-5">
-              {email}
-            </p>
-
-            <form onSubmit={verifyCode} className="space-y-3">
-              <div className="text-left">
-                <label className="block text-xs font-semibold text-oe-ink mb-1.5">
+          <section className="mt-8 rounded-3xl border border-oe-line bg-white p-6 md:p-8">
+            <form onSubmit={verifyCode} className="space-y-4">
+              <div>
+                <label htmlFor="verify-code" className="block text-sm font-medium">
                   Verification code
                 </label>
                 <input
+                  id="verify-code"
                   type="text"
                   inputMode="numeric"
                   autoComplete="one-time-code"
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-oe-surface border border-transparent rounded-lg focus:border-oe-primary focus:bg-white transition-all outline-none text-sm text-center tracking-widest"
+                  className={`${inputClass} text-center text-lg tracking-[0.4em]`}
                   placeholder="123456"
                   required
                 />
               </div>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-2.5 bg-oe-primary text-white rounded-lg font-semibold text-sm hover:bg-oe-primary-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
-              >
+              <button type="submit" disabled={loading} className={primaryButton}>
                 {loading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <i className="ri-loader-4-line animate-spin"></i>
-                    Verifying...
-                  </span>
+                  <>
+                    <i className="ri-loader-4-line animate-spin" aria-hidden="true" /> Checking…
+                  </>
                 ) : (
-                  'Verify & Continue'
+                  'Verify and continue'
                 )}
               </button>
             </form>
 
-            {/* Error/Success Messages */}
-            {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-red-700 text-xs">{error}</p>
-              </div>
-            )}
+            {messages}
 
-            {success && (
-              <div className="mb-4 p-3 bg-forest-50 border border-forest-200 rounded-lg">
-                <p className="text-forest-700 text-xs">{success}</p>
-              </div>
-            )}
-            
-            <div className="space-y-3">
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <button
+                type="button"
                 onClick={handleResendCode}
                 disabled={resendingCode}
-                className="w-full py-2.5 bg-white border-2 border-oe-primary text-oe-primary rounded-lg font-semibold text-sm hover:bg-oe-primary-tint transition-all disabled:opacity-50 whitespace-nowrap cursor-pointer"
+                className="inline-flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-oe-surface px-5 py-2.5 font-medium text-oe-ink disabled:opacity-50"
               >
                 {resendingCode ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <i className="ri-loader-4-line animate-spin"></i>
-                    Sending...
-                  </span>
+                  <>
+                    <i className="ri-loader-4-line animate-spin" aria-hidden="true" /> Sending…
+                  </>
                 ) : (
                   <>
-                    <i className="ri-refresh-line mr-2"></i>
-                    Resend Code
+                    <i className="ri-refresh-line" aria-hidden="true" /> Send a new code
                   </>
                 )}
               </button>
-              
               <button
+                type="button"
                 onClick={() => {
                   setCodeSent(false);
                   setIsSignUp(false);
@@ -270,86 +261,46 @@ export default function SignInPage() {
                   setSuccess('');
                   setCode('');
                 }}
-                className="w-full py-2.5 bg-oe-primary text-white rounded-lg font-semibold text-sm hover:bg-oe-primary-hover transition-all whitespace-nowrap cursor-pointer"
+                className="inline-flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-full border border-oe-line bg-white px-5 py-2.5 font-medium text-oe-ink"
               >
-                Back
+                <i className="ri-arrow-left-line" aria-hidden="true" /> Back
               </button>
             </div>
-            
-            <p className="text-xs text-oe-muted mt-5">
-              Didnâ€™t receive the code? Check spam, or resend it.
-            </p>
-          </div>
+          </section>
 
-          {/* Back to Home */}
-          <div className="mt-4 text-center">
-            <Link to="/" className="text-xs text-oe-primary hover:underline flex items-center justify-center gap-1 cursor-pointer">
-              <i className="ri-arrow-left-line text-sm"></i>
-              Back to Home
-            </Link>
-          </div>
-        </div>
-      </div>
+          <p className="mt-5 text-center text-sm text-oe-muted">Didn&rsquo;t get it? Check your spam folder, or send a new code.</p>
+        </main>
+        <SiteFooter />
       </div>
     );
   }
 
-
   return (
-    <div className="min-h-screen bg-oe-bg">
+    <div className="min-h-screen bg-oe-bg text-oe-ink">
       <Navbar />
-      <div className="pt-24 pb-16 flex items-center justify-center px-4">
-        <div className="w-full max-w-sm">
-        {/* Logo */}
-        <div className="text-center mb-5">
-          <Link to="/" className="inline-block">
-            <h1 className="text-2xl font-bold text-oe-primary">
-              Open Ear
-            </h1>
-          </Link>
-          <p className="text-sm text-oe-muted mt-1">
-            {isSignUp ? 'Create your account' : 'Welcome back'}
+      <main className="oe-route mx-auto max-w-md px-5 pb-20 pt-28 md:px-8">
+        <div className="text-center">
+          <p className="inline-flex items-center gap-1.5 rounded-full bg-oe-primary-soft px-3 py-1 text-xs font-medium uppercase tracking-wide text-oe-primary-deep">
+            <i className={isSignUp ? 'ri-user-add-line' : 'ri-user-line'} aria-hidden="true" />
+            {isSignUp ? 'Create an account' : 'Sign in'}
+          </p>
+          <h1 className="mt-4 text-3xl font-bold md:text-4xl">{isSignUp ? 'Welcome to Open Ear.' : 'Welcome back.'}</h1>
+          <p className="mt-3 text-oe-muted">
+            {isSignUp
+              ? 'An account lets you talk with a Listener whenever you need someone to hear you.'
+              : 'Sign in to talk with a Listener or pick up where you left off.'}
           </p>
         </div>
 
-        {/* Main Card */}
-        <div className="bg-white rounded-2xl shadow-lg p-6">
-          {/* Header */}
-          <div className="mb-5">
-            <div className="w-10 h-10 bg-oe-primary/10 rounded-xl flex items-center justify-center mx-auto mb-3">
-              <i className={`${isSignUp ? 'ri-user-add-fill' : 'ri-user-fill'} text-xl text-oe-primary`}></i>
-            </div>
-            <h2 className="text-lg font-bold text-oe-ink text-center">
-              {isSignUp ? 'Create Account' : 'Sign In'}
-            </h2>
-            <p className="text-xs text-oe-muted text-center mt-1">
-              {isSignUp ? 'Join Open Ear and start your journey' : 'Continue your journey with Open Ear'}
-            </p>
-          </div>
-
-          {/* Error/Success Messages */}
-          {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
-              <i className="ri-error-warning-fill text-red-500 text-base mt-0.5"></i>
-              <p className="text-red-700 text-xs">{error}</p>
-            </div>
-          )}
-
-          {success && (
-            <div className="mb-4 p-3 bg-forest-50 border border-forest-200 rounded-lg flex items-start gap-2">
-              <i className="ri-checkbox-circle-fill text-forest-500 text-base mt-0.5"></i>
-              <p className="text-forest-700 text-xs">{success}</p>
-            </div>
-          )}
-
+        <section className="mt-8 rounded-3xl border border-oe-line bg-white p-6 md:p-8">
           {googleSignInAvailable && (
-            <div className="mb-4">
+            <div className="mb-6">
               <GoogleSignInButton
                 text={isSignUp ? 'signup_with' : 'signin_with'}
                 onCredential={(credential) => void handleGoogle(credential)}
                 onError={setError}
               />
-              <div className="flex items-center gap-3 mt-4" aria-hidden="true">
+              <div className="mt-6 flex items-center gap-3" aria-hidden="true">
                 <span className="h-px flex-1 bg-oe-line" />
                 <span className="text-xs text-oe-muted">or with email</span>
                 <span className="h-px flex-1 bg-oe-line" />
@@ -357,170 +308,140 @@ export default function SignInPage() {
             </div>
           )}
 
-          {/* Form */}
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-3"
-          >
+          <form onSubmit={handleSubmit} className="space-y-4">
             {isSignUp && (
               <div>
-                <label className="block text-xs font-semibold text-oe-ink mb-1.5">
-                  Full Name
+                <label htmlFor="signin-name" className="block text-sm font-medium">
+                  Your name
                 </label>
-                <div className="relative">
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 flex items-center justify-center">
-                    <i className="ri-user-fill text-sm text-oe-muted"></i>
-                  </div>
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2.5 bg-oe-surface border border-transparent rounded-lg focus:border-oe-primary focus:bg-white transition-all outline-none text-sm"
-                    placeholder="Enter your full name"
-                    required={isSignUp}
-                  />
-                </div>
+                <input
+                  id="signin-name"
+                  type="text"
+                  autoComplete="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className={inputClass}
+                  placeholder="Your full name"
+                  required={isSignUp}
+                />
+                <p className="mt-1.5 text-xs text-oe-muted">Listeners never see this. You choose a separate name before each Conversation.</p>
               </div>
             )}
 
             <div>
-              <label className="block text-xs font-semibold text-oe-ink mb-1.5">
-                Email Address
+              <label htmlFor="signin-email" className="block text-sm font-medium">
+                Email
               </label>
-              <div className="relative">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 flex items-center justify-center">
-                  <i className="ri-mail-fill text-sm text-oe-muted"></i>
-                </div>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2.5 bg-oe-surface border border-transparent rounded-lg focus:border-oe-primary focus:bg-white transition-all outline-none text-sm"
-                  placeholder="your@email.com"
-                  required
-                />
-              </div>
+              <input
+                id="signin-email"
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={inputClass}
+                placeholder="you@example.com"
+                required
+              />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-oe-ink mb-1.5">
-                Password
-              </label>
-              <div className="relative">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 flex items-center justify-center">
-                  <i className="ri-lock-fill text-sm text-oe-muted"></i>
-                </div>
+              <div className="flex items-center justify-between">
+                <label htmlFor="signin-password" className="block text-sm font-medium">
+                  Password
+                </label>
+                {!isSignUp && (
+                  <Link to="/forgot-password" className="text-sm font-medium text-oe-primary hover:underline">
+                    Forgot password?
+                  </Link>
+                )}
+              </div>
+              <input
+                id="signin-password"
+                type="password"
+                autoComplete={isSignUp ? 'new-password' : 'current-password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={inputClass}
+                placeholder={isSignUp ? 'At least 6 characters' : 'Your password'}
+                required
+              />
+            </div>
+
+            {isSignUp && (
+              <div>
+                <label htmlFor="signin-confirm" className="block text-sm font-medium">
+                  Confirm password
+                </label>
                 <input
+                  id="signin-confirm"
                   type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2.5 bg-oe-surface border border-transparent rounded-lg focus:border-oe-primary focus:bg-white transition-all outline-none text-sm"
-                  placeholder={isSignUp ? 'Create a password' : 'Enter your password'}
-                  required
+                  autoComplete="new-password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className={inputClass}
+                  placeholder="Type it again"
+                  required={isSignUp}
                 />
               </div>
-            </div>
-
-            {isSignUp && (
-              <div>
-                <label className="block text-xs font-semibold text-oe-ink mb-1.5">
-                  Confirm Password
-                </label>
-                <div className="relative">
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 flex items-center justify-center">
-                    <i className="ri-lock-fill text-sm text-oe-muted"></i>
-                  </div>
-                  <input
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2.5 bg-oe-surface border border-transparent rounded-lg focus:border-oe-primary focus:bg-white transition-all outline-none text-sm"
-                    placeholder="Confirm your password"
-                    required={isSignUp}
-                  />
-                </div>
-              </div>
             )}
 
-            {!isSignUp && (
-              <div className="flex items-center justify-between text-xs">
-                <label className="flex items-center gap-1.5 cursor-pointer">
-                  <input type="checkbox" className="w-3.5 h-3.5 rounded border-oe-line text-oe-primary focus:ring-oe-primary" />
-                  <span className="text-oe-muted">Remember me</span>
-                </label>
-                <Link to="/forgot-password" className="text-oe-primary font-semibold hover:underline cursor-pointer">
-                  Forgot password?
-                </Link>
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-2.5 bg-oe-primary text-white rounded-lg font-semibold text-sm hover:bg-oe-primary-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
-            >
+            <button type="submit" disabled={loading} className={`${primaryButton} !mt-6`}>
               {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <i className="ri-loader-4-line animate-spin"></i>
-                  {isSignUp ? 'Creating account...' : 'Signing in...'}
-                </span>
+                <>
+                  <i className="ri-loader-4-line animate-spin" aria-hidden="true" />
+                  {isSignUp ? 'Creating your account…' : 'Signing in…'}
+                </>
+              ) : isSignUp ? (
+                'Create account'
               ) : (
-                isSignUp ? 'Create Account' : 'Sign In'
+                'Sign in'
               )}
             </button>
           </form>
 
-          {/* Toggle Sign In/Sign Up */}
-          <div className="mt-4 pt-4 border-t border-oe-line text-center">
-            <p className="text-xs text-oe-muted">
-              {isSignUp ? 'Already have an account?' : "Don't have an account?"}
-              {' '}
-              <button
-                onClick={() => {
-                  setIsSignUp(!isSignUp);
-                  setError('');
-                  setSuccess('');
-                  setName('');
-                  setEmail('');
-                  setPassword('');
-                  setConfirmPassword('');
-                  setCode('');
-                }}
-                className="text-oe-primary font-semibold hover:underline cursor-pointer"
-              >
-                {isSignUp ? 'Sign In' : 'Sign Up'}
-              </button>
-            </p>
+          {messages}
+
+          <div className="mt-6 rounded-2xl bg-oe-surface-low p-4 text-center text-sm text-oe-muted">
+            {isSignUp ? 'Already have an account?' : 'New to Open Ear?'}{' '}
+            <button
+              type="button"
+              onClick={() => {
+                setIsSignUp(!isSignUp);
+                setError('');
+                setSuccess('');
+                setName('');
+                setEmail('');
+                setPassword('');
+                setConfirmPassword('');
+                setCode('');
+              }}
+              className="cursor-pointer font-semibold text-oe-primary hover:underline"
+            >
+              {isSignUp ? 'Sign in' : 'Create an account'}
+            </button>
           </div>
+        </section>
 
-          {/* Back to Home */}
-          <div className="mt-3 text-center">
-            <Link to="/" className="text-xs text-oe-primary hover:underline flex items-center justify-center gap-1 cursor-pointer">
-              <i className="ri-arrow-left-line text-sm"></i>
-              Back to Home
-            </Link>
-          </div>
-        </div>
-
-        {/* Terms & Privacy */}
-        <div className="mt-4 text-center">
-          <p className="text-[10px] text-oe-muted">
-            By continuing, you agree to our{' '}
-            <Link to="/terms" className="text-oe-primary hover:underline cursor-pointer">Terms of Service</Link>
-            {' '}and{' '}
-            <Link to="/privacy" className="text-oe-primary hover:underline cursor-pointer">Privacy Policy</Link>
-          </p>
-        </div>
-
-        {/* Security Badge */}
-        <div className="mt-3 text-center">
-          <p className="text-[10px] text-oe-muted flex items-center justify-center gap-1">
-            <i className="ri-shield-check-fill text-sm text-oe-primary"></i>
-            Your data is secure and encrypted
-          </p>
-        </div>
-        </div>
-      </div>
+        <p className="mt-6 text-center text-xs text-oe-muted">
+          By continuing, you agree to our{' '}
+          <Link to="/terms" className="text-oe-primary hover:underline">
+            Terms
+          </Link>{' '}
+          and{' '}
+          <Link to="/privacy" className="text-oe-primary hover:underline">
+            Privacy Policy
+          </Link>
+          .
+        </p>
+        <p className="mt-3 text-center text-xs text-oe-muted">
+          Not ready to sign in?{' '}
+          <Link to="/check-in" className="text-oe-primary hover:underline">
+            Try the check-in
+          </Link>
+          , no account needed.
+        </p>
+      </main>
+      <SiteFooter />
     </div>
   );
 }
