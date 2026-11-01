@@ -14,7 +14,9 @@
     "lint": "npm run lint -w @openear/web",
     "type-check": "npm run type-check --workspaces --if-present",
     "db:migrate": "npm run db:migrate -w @openear/api",
-    "test": "npm run test --workspaces --if-present"
+    "test": "npm run test --workspaces --if-present",
+    "db:test:start": "docker run -d --rm --name openear-test-pg -p 55433:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=openear_test --tmpfs /var/lib/postgresql/data pgvector/pgvector:pg17",
+    "db:test:stop": "docker stop openear-test-pg"
   },
   "engines": {
     "node": ">=20"
