@@ -15,6 +15,8 @@ export interface AuthUser {
   user_metadata?: { full_name?: string };
   email_confirmed_at?: string | null;
   created_at?: string;
+  /** False for accounts made with Google, which have no password. */
+  has_password?: boolean;
 }
 
 interface AuthContextValue {
@@ -23,6 +25,7 @@ interface AuthContextValue {
   refreshUser: () => Promise<void>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ needsVerification: boolean }>;
   signIn: (email: string, password: string) => Promise<void>;
+  signInWithGoogle: (credential: string) => Promise<void>;
   verifyOtp: (email: string, token: string, type?: 'signup' | 'email') => Promise<void>;
   resendOtp: (email: string) => Promise<void>;
   signOut: () => void;
@@ -75,6 +78,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }>('/api/auth/signin', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
+    });
+    setAccessToken(data.access_token);
+    setUser(data.user);
+  }, []);
+
+  const signInWithGoogle = useCallback(async (credential: string) => {
+    const data = await apiFetch<{ user: AuthUser; access_token: string }>('/api/auth/google', {
+      method: 'POST',
+      body: JSON.stringify({ credential }),
     });
     setAccessToken(data.access_token);
     setUser(data.user);
@@ -140,6 +152,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       refreshUser,
       signUp,
       signIn,
+      signInWithGoogle,
       verifyOtp,
       resendOtp,
       signOut,
@@ -154,6 +167,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       refreshUser,
       signUp,
       signIn,
+      signInWithGoogle,
       verifyOtp,
       resendOtp,
       signOut,

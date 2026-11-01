@@ -14,6 +14,7 @@ import {
   userFromToken,
 } from '../auth.js';
 import { sendPasswordResetEmail, sendVerificationEmail } from '../email.js';
+import { signInWithGoogle } from '../services/google.js';
 import { asyncHandler } from '../middleware.js';
 import { isValidEmail, rateLimit } from '../util.js';
 
@@ -131,6 +132,19 @@ router.post(
       session: { access_token },
       access_token,
     });
+  }),
+);
+
+// Sign in with Google: { credential } is the ID token from Google's button. Creates the account
+// on first use; an existing account with the same email is signed into.
+router.post(
+  '/google',
+  signinIpLimit,
+  asyncHandler(async (req, res) => {
+    if (!config.googleClientId) return res.status(503).json({ error: 'Google sign-in is not available' });
+    const user = await signInWithGoogle(req.body?.credential);
+    const access_token = signToken(user);
+    res.json({ user: publicUser(user), session: { access_token }, access_token });
   }),
 );
 

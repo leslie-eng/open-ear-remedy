@@ -48,6 +48,9 @@ services:
         sync: false
       - key: S3_BUCKET
         sync: false
+      # Sign in with Google: the OAuth client ID (public; same value as VITE_GOOGLE_CLIENT_ID on Vercel)
+      - key: GOOGLE_CLIENT_ID
+        sync: false
       # Email, payments, AI chat
       - key: RESEND_API_KEY
         sync: false
