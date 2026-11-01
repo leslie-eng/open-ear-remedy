@@ -287,7 +287,7 @@ export default function TermsPage() {
               Governing Law
             </h2>
             <p className="text-body text-oe-muted leading-relaxed">
-              These Terms of Service shall be governed by and construed in accordance with the laws of Finland, without regard to its conflict of law provisions. Any disputes arising from these terms or your use of the services shall be resolved in the courts of Finland.
+              These Terms of Service shall be governed by and construed in accordance with the laws of Kenya, without regard to its conflict of law provisions. Any disputes arising from these terms or your use of the services shall be resolved in the courts of Kenya.
             </p>
           </div>
 

@@ -11,7 +11,7 @@ export default function PrivacyPage() {
     canonical: '/privacy',
   });
 
-  const lastUpdated = 'January 15, 2025';
+  const lastUpdated = '1 November 2026';
 
   return (
     <div className="min-h-screen bg-oe-bg text-oe-ink">
@@ -22,7 +22,7 @@ export default function PrivacyPage() {
           <i className="ri-shield-check-line" aria-hidden="true" /> Your privacy
         </p>
         <h1 className="mt-4 text-4xl font-bold md:text-5xl">Privacy Policy</h1>
-        <p className="mt-3 max-w-2xl text-lg text-oe-muted">We are committed to protecting your privacy and ensuring the security of your personal information.</p>
+        <p className="mt-3 max-w-2xl text-lg text-oe-muted">What we collect, why, who helps us run Open Ear, and the choices you have.</p>
         <p className="mt-2 text-sm text-oe-muted">Last updated: {lastUpdated}</p>
 
         <div className="mt-10 rounded-3xl border border-oe-line bg-white p-6 md:p-10">
@@ -36,7 +36,7 @@ export default function PrivacyPage() {
               Introduction
             </h2>
             <p className="text-body text-oe-muted leading-relaxed">
-              Open Ear ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our emotional support services, including our website, mobile applications, and call/chat services (collectively, the "Services").
+              Open Ear ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our emotional support services, including our website and the calls, text chats, AI chat and bookings on it (collectively, the "Services"). We follow Kenya's Data Protection Act, 2019.
             </p>
           </div>
 
@@ -55,11 +55,14 @@ export default function PrivacyPage() {
             </p>
             <ul className="space-y-2 mb-6">
               {[
-                'Email address and password for account creation',
+                'Email address, and a password (stored only as a secure hash) or your Google account ID if you sign in with Google',
+                'The display name you choose for Listeners (optional) and a phone number if you add one to your profile (optional)',
                 'Your M-Pesa phone number and receipt number when you pay (shown only to you and our admins)',
                 'Payment confirmations from Safaricom M-Pesa (we never see your M-Pesa PIN)',
                 'Bookings you make and their history',
-                'Communication preferences and settings',
+                'Your credits, Monthly Pass and ebook orders',
+                'Mood tracker entries and their notes, if you use the mood tracker',
+                'Your choices, such as whether Listeners may keep notes',
               ].map((item, index) => (
                 <li key={index} className="flex items-start gap-3 text-body text-oe-muted">
                   <i className="ri-checkbox-circle-line text-oe-primary mt-0.5" aria-hidden="true" />
@@ -70,14 +73,13 @@ export default function PrivacyPage() {
 
             <h3 className="mb-3 mt-6 font-sans text-lg font-semibold">Usage Information</h3>
             <p className="text-body text-oe-muted leading-relaxed mb-4">
-              We automatically collect certain information when you use our Services:
+              When you use our Services:
             </p>
             <ul className="space-y-2">
               {[
-                'Device information (browser type, operating system)',
-                'IP address and general location data',
-                'Service usage patterns and visit length',
-                'Call and chat metadata (duration, timestamps)',
+                'We record when each call or text chat started and ended, how long it lasted and what it cost',
+                'We use your IP address briefly to stop abuse (for example, too many sign-in attempts); we do not store it',
+                'Our hosting providers keep short-lived server logs, which include IP addresses',
               ].map((item, index) => (
                 <li key={index} className="flex items-start gap-3 text-body text-oe-muted">
                   <i className="ri-checkbox-circle-line text-oe-primary mt-0.5" aria-hidden="true" />
@@ -89,13 +91,22 @@ export default function PrivacyPage() {
             <h3 className="mb-3 mt-6 font-sans text-lg font-semibold">Conversations and Listener notes</h3>
             <p className="text-body text-oe-muted leading-relaxed mb-3">
               Calls and text chats with Listeners are never recorded, and what you type in a text chat is never
-              saved. AI chat messages are not stored either.
+              saved. AI chat messages are not stored either; they are sent to our AI provider only to write a reply.
             </p>
             <p className="text-body text-oe-muted leading-relaxed">
               After a conversation, a Listener may keep a brief private note so the next Listener does not need to ask
               you to repeat your story. Only Listeners you talk to and Open Ear admins can read notes; Listeners only
               ever see the display name you choose. Notes are deleted after 12 months. You can turn notes off (which
               also deletes existing ones) or delete them at any time from your profile.
+            </p>
+          </div>
+
+          {/* Kept on your device */}
+          <div className="mb-10 rounded-2xl bg-oe-surface-low p-5">
+            <h3 className="mb-2 font-sans text-lg font-semibold">Kept only on your device</h3>
+            <p className="text-body text-oe-muted leading-relaxed">
+              Your check-in answers and anything you write in the journaling box stay in your browser and are never sent
+              to us. Your browser also keeps you signed in. You can clear these at any time from your browser settings.
             </p>
           </div>
 
@@ -113,10 +124,10 @@ export default function PrivacyPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
                 { icon: 'ri-customer-service-2-line', text: 'Provide and maintain our emotional support services' },
-                { icon: 'ri-user-settings-line', text: 'Personalize your experience and preferences' },
+                { icon: 'ri-user-settings-line', text: 'Remember your settings and choices' },
                 { icon: 'ri-secure-payment-line', text: 'Process payments and manage your account' },
                 { icon: 'ri-mail-send-line', text: 'Send booking reminders and notifications' },
-                { icon: 'ri-line-chart-line', text: 'Improve our services and develop new features' },
+                { icon: 'ri-line-chart-line', text: 'Understand overall use (counts and totals) to improve the service' },
                 { icon: 'ri-shield-check-line', text: 'Ensure security and prevent fraud' },
               ].map((item, index) => (
                 <div key={index} className="flex items-start gap-3 rounded-2xl bg-oe-surface-low p-4">
@@ -136,16 +147,15 @@ export default function PrivacyPage() {
               Data Security
             </h2>
             <p className="text-body text-oe-muted leading-relaxed mb-4">
-              We implement industry-standard security measures to protect your personal information:
+              How we protect your information:
             </p>
             <div className="rounded-2xl bg-oe-primary-tint p-6">
               <ul className="space-y-3">
                 {[
-                  'Encrypted connections between your device and our servers',
-                  'Secure data storage with regular backups',
-                  'Regular security audits and vulnerability assessments',
-                  'Strict access controls and employee training',
-                  'Compliance with industry security standards',
+                  'Encrypted (HTTPS) connections between your device and our servers',
+                  'Call audio is encrypted in transit and never recorded',
+                  'Passwords are stored only as secure hashes, never in plain text',
+                  'Only Open Ear admins can see account and payment records',
                 ].map((item, index) => (
                   <li key={index} className="flex items-start gap-3 text-body text-oe-ink">
                     <i className="ri-shield-star-line text-oe-primary mt-0.5" aria-hidden="true" />
@@ -169,7 +179,7 @@ export default function PrivacyPage() {
             </p>
             <ul className="space-y-3">
               {[
-                { title: 'Service Providers', desc: 'Third-party vendors who assist in providing our services (e.g., Cloudflare for call audio relay, Neon for data and file storage, Safaricom M-Pesa for payments, OpenRouter for AI chat)' },
+                { title: 'Service Providers', desc: 'Third-party vendors who assist in providing our services (Render and Vercel for hosting, Neon for data and file storage, Cloudflare for call audio relay, Safaricom M-Pesa for payments, OpenRouter for AI chat replies, Resend for emails, and Google if you sign in with Google)' },
                 { title: 'Legal Requirements', desc: 'When required by law or to protect our rights and safety' },
                 { title: 'Business Transfers', desc: 'In connection with a merger, acquisition, or sale of assets' },
                 { title: 'With Your Consent', desc: 'When you explicitly authorize us to share your information' },
@@ -195,10 +205,10 @@ export default function PrivacyPage() {
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
-                { icon: 'ri-eye-line', title: 'Access', desc: 'Request a copy of your data' },
-                { icon: 'ri-edit-line', title: 'Correction', desc: 'Update inaccurate information' },
-                { icon: 'ri-delete-bin-line', title: 'Deletion', desc: 'Request data removal' },
-                { icon: 'ri-download-line', title: 'Portability', desc: 'Export your data' },
+                { icon: 'ri-eye-line', title: 'Access', desc: 'Ask us for a copy of your data' },
+                { icon: 'ri-edit-line', title: 'Correction', desc: 'Change your details in your profile, or ask us to' },
+                { icon: 'ri-delete-bin-line', title: 'Deletion', desc: 'Delete your account from your profile at any time' },
+                { icon: 'ri-chat-off-line', title: 'Listener notes', desc: 'Turn notes off or delete them from your profile' },
               ].map((item, index) => (
                 <div key={index} className="rounded-2xl border border-oe-line p-4 transition-colors hover:border-oe-primary/30">
                   <div aria-hidden="true" className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-oe-primary-soft text-oe-primary-deep">
@@ -220,7 +230,7 @@ export default function PrivacyPage() {
               Cookies & Tracking
             </h2>
             <p className="text-body text-oe-muted leading-relaxed">
-              We use cookies and similar tracking technologies to enhance your experience, analyze usage patterns, and personalize content. You can manage your cookie preferences through your browser settings. Essential cookies are required for the basic functionality of our Services.
+              We don&rsquo;t use advertising or analytics cookies, and we don&rsquo;t track you across other websites. Your browser&rsquo;s local storage keeps you signed in and holds anything kept only on your device (see above).
             </p>
           </div>
 
@@ -246,7 +256,7 @@ export default function PrivacyPage() {
               Changes to This Policy
             </h2>
             <p className="text-body text-oe-muted leading-relaxed">
-              We may update this Privacy Policy from time to time. We will notify you of any material changes by posting the new policy on this page and updating the "Last updated" date. We encourage you to review this policy periodically.
+              We may update this Privacy Policy from time to time. When we do, we will post the new policy on this page and update the &ldquo;Last updated&rdquo; date.
             </p>
           </div>
 

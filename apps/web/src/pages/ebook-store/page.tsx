@@ -15,7 +15,6 @@ export default function EbookStorePage() {
 
   const categories = [
     { id: 'all', name: 'All Categories' },
-    { id: 'clothing', name: 'Clothing' },
     { id: 'ebooks', name: 'Ebooks' }
   ];
 

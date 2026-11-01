@@ -36,7 +36,6 @@ export default function EbookManagementPage() {
   const [formData, setFormData] = useState(emptyForm);
 
   const categories = [
-    { id: 'clothing', name: 'Clothing' },
     { id: 'ebooks', name: 'Ebooks' }
   ];
 
