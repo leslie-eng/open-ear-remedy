@@ -13,6 +13,8 @@ describe.skipIf(!testDatabaseUrl())('AI chat', () => {
   let query;
   let createUser;
   let resetData;
+  let knowledge;
+  let config;
 
   beforeAll(async () => {
     provider = await startFakeOpenRouter();
@@ -23,6 +25,8 @@ describe.skipIf(!testDatabaseUrl())('AI chat', () => {
     ({ signToken } = await import('../src/auth.js'));
     ({ query } = await import('../src/db.js'));
     ({ createUser, resetData } = await import('./db.js'));
+    knowledge = await import('../src/knowledge/index.js');
+    ({ config } = await import('../src/config.js'));
     app = app.listen(0);
     await new Promise((r) => app.once('listening', r));
     baseUrl = `http://127.0.0.1:${app.address().port}`;
@@ -34,6 +38,7 @@ describe.skipIf(!testDatabaseUrl())('AI chat', () => {
   beforeEach(async () => {
     await resetData();
     provider.reset();
+    config.ragEnabled = true;
   });
 
   async function userWithCredits(credits) {
@@ -89,5 +94,87 @@ describe.skipIf(!testDatabaseUrl())('AI chat', () => {
 
     expect(res.status).toBe(402);
     expect(provider.fake.requests).toHaveLength(0);
+  });
+
+  describe('drawing on knowledge sources', () => {
+    async function approvedSource(title, content) {
+      const s = await knowledge.addSource({ title, author: 'Open Ear', licence: 'Our own work', buffer: Buffer.from(content), ext: '.txt' });
+      await knowledge.approveSource(s.id, 'Dr. A. Mwangi');
+      await knowledge.setSourceEnabled(s.id, true);
+      provider.reset();
+      return s;
+    }
+    const systemMessages = () => provider.calls('chat/completions')[0].body.messages.filter((m) => m.role === 'system');
+
+    it('gives the model matching passages as reference material, after its rules, and returns their titles', async () => {
+      await approvedSource('Calm Breathing', 'Slow breathing helps when panic rises.');
+      const user = await userWithCredits(5);
+      const res = await send(user.token, { message: 'What helps when panic rises?' });
+
+      const body = await res.json();
+      expect(body.sources).toEqual([{ title: 'Calm Breathing', author: 'Open Ear' }]);
+      const [rules, reference] = systemMessages();
+      expect(rules.content).toContain('openearemedy.com/crisis-help');
+      expect(reference.content).toMatch(/not instructions/i);
+      expect(reference.content).toContain('Slow breathing helps when panic rises.');
+    });
+
+    it('logs which sources were used', async () => {
+      await approvedSource('Calm Breathing', 'Slow breathing helps when panic rises.');
+      const user = await userWithCredits(5);
+      await send(user.token, { message: 'What helps when panic rises?' });
+
+      const [source] = await knowledge.listSources();
+      expect(source.usesLast30Days).toBe(1);
+    });
+
+    it('answers without reference material when nothing matches', async () => {
+      await approvedSource('Calm Breathing', 'Slow breathing helps when panic rises.');
+      const user = await userWithCredits(5);
+      const body = await (await send(user.token, { message: 'Tell me a joke' })).json();
+
+      expect(body.sources).toEqual([]);
+      expect(systemMessages()).toHaveLength(1);
+    });
+
+    it('still answers, without sources, when knowledge search is down', async () => {
+      await approvedSource('Calm Breathing', 'Slow breathing helps when panic rises.');
+      provider.fake.failEmbeddings = true;
+      const user = await userWithCredits(5);
+      const res = await send(user.token, { message: 'What helps when panic rises?' });
+
+      expect(res.status).toBe(200);
+      expect((await res.json()).sources).toEqual([]);
+    });
+
+    it('does not search at all when RAG is switched off', async () => {
+      await approvedSource('Calm Breathing', 'Slow breathing helps when panic rises.');
+      config.ragEnabled = false; // RAG_ENABLED=false
+      const user = await userWithCredits(5);
+      await send(user.token, { message: 'What helps when panic rises?' });
+
+      expect(provider.calls('embeddings')).toHaveLength(0);
+    });
+  });
+
+  describe('crisis safety net', () => {
+    it.each([
+      'I want to kill myself',
+      'i have been thinking about suicide',
+      'Sometimes I self-harm',
+      "I don't want to live anymore",
+      'Nataka kujiua',
+    ])('flags Crisis Help whatever the model says: "%s"', async (message) => {
+      provider.fake.reply = 'That sounds hard.';
+      const user = await userWithCredits(5);
+      const body = await (await send(user.token, { message })).json();
+      expect(body.crisisHelp).toBe(true);
+    });
+
+    it('does not flag an ordinary message', async () => {
+      const user = await userWithCredits(5);
+      const body = await (await send(user.token, { message: 'Work was stressful today' })).json();
+      expect(body.crisisHelp).toBe(false);
+    });
   });
 });

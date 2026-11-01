@@ -18,17 +18,18 @@ export function fakeEmbedding(text) {
 
 /**
  * Stands in for OpenRouter's chat and embeddings APIs. Records every request.
- * Set `reply` to change the chat answer, or `fail` to make every call return 500.
+ * Set `reply` to change the chat answer, `fail` to make every call return 500, or
+ * `failEmbeddings` to fail only the embeddings calls.
  */
 export async function startFakeOpenRouter() {
-  const fake = { requests: [], reply: 'I hear you.', fail: false };
+  const fake = { requests: [], reply: 'I hear you.', fail: false, failEmbeddings: false };
   const server = http.createServer((req, res) => {
     let body = '';
     req.on('data', (c) => (body += c));
     req.on('end', () => {
       const parsed = JSON.parse(body);
       fake.requests.push({ url: req.url, auth: req.headers.authorization, body: parsed });
-      if (fake.fail) {
+      if (fake.fail || (fake.failEmbeddings && req.url.endsWith('/embeddings'))) {
         res.writeHead(500, { 'Content-Type': 'application/json' }).end('{"error":{"message":"upstream down"}}');
         return;
       }
@@ -51,6 +52,7 @@ export async function startFakeOpenRouter() {
     reset() {
       fake.requests = [];
       fake.fail = false;
+      fake.failEmbeddings = false;
       fake.reply = 'I hear you.';
     },
     close: () => server.close(),
